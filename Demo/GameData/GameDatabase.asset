@@ -1,0 +1,111 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 446bd54be72e9c14a9d92aae35e50af7, type: 3}
+  m_Name: GameDatabase
+  m_EditorClassIdentifier: 
+  playerCharacterEntities:
+  - {fileID: 1731703745014105592, guid: af635b07bf4c1d04a951854b7f20e9a6, type: 3}
+  - {fileID: 4600389645916854778, guid: dbbbb88c1116c8e46a3cb8193bdf0b41, type: 3}
+  monsterCharacterEntities:
+  - {fileID: 38391445727622635, guid: a9d74f8338f7e0847a5522ea12dc886a, type: 3}
+  - {fileID: 6739458657869765345, guid: 9d5cd8f7398ce6649be765df263966ab, type: 3}
+  - {fileID: 5568610301313701246, guid: 0b65a430ea1f6384b9e44dcf336f562c, type: 3}
+  - {fileID: 3991679857097899636, guid: ef707c563d3e2d54a8c464a4a25cc40a, type: 3}
+  - {fileID: 6641323854697508692, guid: 73a218552e7390c41a863468bf08abb1, type: 3}
+  - {fileID: 603400556100368069, guid: d940c1b01524e9f45a7662a15c040aaf, type: 3}
+  vehicleEntities: []
+  otherNetworkObjects: []
+  attributes: []
+  currencies: []
+  damageElements: []
+  items:
+  - {fileID: 11400000, guid: 0d815ca4a4e7a1c43862b6a3f326766d, type: 2}
+  - {fileID: 11400000, guid: ed38eef67ac1e044d9ee747094a4a564, type: 2}
+  - {fileID: 11400000, guid: 396430d765e6b9f47ba2fc09c8816390, type: 2}
+  - {fileID: 11400000, guid: eb295913795f8fb438ed0d6b03300b41, type: 2}
+  - {fileID: 11400000, guid: 2d2fba5c8e4e7af499a64facb2e71ec4, type: 2}
+  - {fileID: 11400000, guid: b868faca66b10f64f928d706a27073b8, type: 2}
+  - {fileID: 11400000, guid: 4446a510a2b006f4399e4d9524f3b4d2, type: 2}
+  - {fileID: 11400000, guid: ee454af807813aa49921de1c3b57e1c3, type: 2}
+  - {fileID: 11400000, guid: 75dcf5b5679365f4c818b7eb3ca6230e, type: 2}
+  - {fileID: 11400000, guid: 0b6da418e549e9f47b1fcc94efeef626, type: 2}
+  - {fileID: 11400000, guid: eeb42147283139542a5c49c06f0ea902, type: 2}
+  - {fileID: 11400000, guid: 15d926d4af6cd75428afb9722f6054b3, type: 2}
+  - {fileID: 11400000, guid: 34a7184280bba49478543799e69e1c4a, type: 2}
+  - {fileID: 11400000, guid: 66f9f2fcfeb30384f944a836117f7f86, type: 2}
+  - {fileID: 11400000, guid: 697557d485a62d740a5e2886201d61c6, type: 2}
+  - {fileID: 11400000, guid: 52c137c596b8c2e4ba9469f658634166, type: 2}
+  - {fileID: 11400000, guid: b701675b35ea42f4194a590400250d20, type: 2}
+  - {fileID: 11400000, guid: 5767d4b87d9f409458cc5cb2c40f66a6, type: 2}
+  - {fileID: 11400000, guid: 10505f1f8ff03eb41a80e87d3a205ee4, type: 2}
+  - {fileID: 11400000, guid: 4813f8d8ebdc81349b469905ed698457, type: 2}
+  - {fileID: 11400000, guid: 492f07d69ea13664fb73939fb672edf0, type: 2}
+  - {fileID: 11400000, guid: 348cb42ed88cc6944ac65a7e25a47d88, type: 2}
+  - {fileID: 11400000, guid: 611669dad31abdc4496e44599be9bf46, type: 2}
+  - {fileID: 11400000, guid: c583cfc16a4613946bc8415b0ef56ef7, type: 2}
+  - {fileID: 11400000, guid: f23b66f1821b860489ed58417583f22f, type: 2}
+  - {fileID: 11400000, guid: 05381f45add346b4bb3f3b3ae15e884d, type: 2}
+  - {fileID: 11400000, guid: 70969d037b51d7e47a534059009d4cef, type: 2}
+  - {fileID: 11400000, guid: cf214cebb1ab08a4bbc3701a654af722, type: 2}
+  - {fileID: 11400000, guid: 7ff55bb40cbbf2f4792e992e9133824b, type: 2}
+  - {fileID: 11400000, guid: e6c3401888659804daaec5c69c2e7df4, type: 2}
+  - {fileID: 11400000, guid: 240cc4f8c35d3ad45b8fc96242047424, type: 2}
+  - {fileID: 11400000, guid: ea1ae9508220c5741863b85484877b63, type: 2}
+  - {fileID: 11400000, guid: 930d0a16a8f995c42be080b274f6524d, type: 2}
+  - {fileID: 11400000, guid: d86ee534fa79d5f4896338f39c96c98e, type: 2}
+  - {fileID: 11400000, guid: 593531c59904ae9429ca0e409ba9592d, type: 2}
+  - {fileID: 11400000, guid: 29cce220289e28542b58ea44ece46ad3, type: 2}
+  - {fileID: 11400000, guid: 076a495c33d5d384ea996aa60f15664d, type: 2}
+  - {fileID: 11400000, guid: 663674a0c5cdf6b41866c9626a1f9356, type: 2}
+  - {fileID: 11400000, guid: 06863a7dad9d6454b847d0c8eefb8c24, type: 2}
+  - {fileID: 11400000, guid: 0566f3683f50bbf4e9db533a34cf6dfe, type: 2}
+  itemCraftFormulas: []
+  armorTypes:
+  - {fileID: 11400000, guid: 9969858acfd7a854c9c8e46a8ac1ab8e, type: 2}
+  - {fileID: 11400000, guid: ea5ce739fed33154c977094a4c79a08a, type: 2}
+  - {fileID: 11400000, guid: 6728f7a79be021f4c819fd8f1aa153b4, type: 2}
+  - {fileID: 11400000, guid: 2c250a75c4219f941a31fb4a0202d0a1, type: 2}
+  - {fileID: 11400000, guid: 31d480f0f7b3136448654433b6eb96b1, type: 2}
+  - {fileID: 11400000, guid: 31db8d90acbeade4c8fa993964079039, type: 2}
+  weaponTypes:
+  - {fileID: 11400000, guid: 8bf9de9cb5b0fda498255c0b13cb217b, type: 2}
+  - {fileID: 11400000, guid: b863a51d8fe22e3439ec3bf92a6f499f, type: 2}
+  - {fileID: 11400000, guid: fc3e5b2dd1a0ac340bca470db6f480b4, type: 2}
+  - {fileID: 11400000, guid: 1a16eb003d7f19744b981f74a024c702, type: 2}
+  - {fileID: 11400000, guid: b09d47d43c0944d448cfb4ea7d800571, type: 2}
+  ammoTypes: []
+  skills: []
+  playerIcons: []
+  playerFrames: []
+  playerBackgrounds: []
+  playerTitles: []
+  guildSkills: []
+  guildIcons: []
+  statusEffects: []
+  playerCharacters:
+  - {fileID: 11400000, guid: 014b0665320d99e40bfc8c7593785fda, type: 2}
+  - {fileID: 11400000, guid: 07c0c8b92e13f8c45ac1800ad66cb7ee, type: 2}
+  - {fileID: 11400000, guid: d763dabf6ea6b604b939ab857c455b8d, type: 2}
+  playerCharacterEntityMetaDataList: []
+  monsterCharacters:
+  - {fileID: 11400000, guid: 7c0c6f3301553204f84dcd1b5bd6e4f3, type: 2}
+  - {fileID: 11400000, guid: f46089cb6bc9c1740a2647dfde0d6a1b, type: 2}
+  - {fileID: 11400000, guid: 92bb054bbc07f8b4cb5804f3634c19f3, type: 2}
+  harvestables:
+  - {fileID: 11400000, guid: 3d519bf9cce325d4f9ed6595a6f180c0, type: 2}
+  - {fileID: 11400000, guid: 91b81b3077a77e84eaf581c45b48108a, type: 2}
+  - {fileID: 11400000, guid: 83d1f9ae82b6ca948ad0db513dea2591, type: 2}
+  mapInfos:
+  - {fileID: 11400000, guid: 0a5e6a3017686de4386e0acf0947d47b, type: 2}
+  quests:
+  - {fileID: 11400000, guid: 36ad1670a040b7a488dc14e4c664bbde, type: 2}
+  factions: []
