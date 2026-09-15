@@ -59,7 +59,7 @@ MonoBehaviour:
   equipmentModels:
   - equipSocket: Pauldron
     useInstantiatedObject: 0
-    meshPrefab: {fileID: 919132149155446097, guid: 90b4b26e83f301a4f933dfa1ed90094d, type: 3}
+    meshPrefab: {fileID: 919132149155446097, guid: 79e83f8a96611504c9248cfcad3aa8aa, type: 3}
     instantiatedObjectIndex: 0
     priority: 0
     doNotSetupBones: 0

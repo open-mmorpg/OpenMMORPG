@@ -19,7 +19,7 @@ MonoBehaviour:
   defaultDescription: 
   languageSpecificDescriptions: []
   category: 
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 50b032861c4ebde4e9d1ce023b784a78, type: 3}
   iconSettingsInitialized: 0
   iconRotation: {x: 45, y: 90, z: 90}
   iconZoom: 1.4

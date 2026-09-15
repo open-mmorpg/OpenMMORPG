@@ -312,6 +312,7 @@ MonoBehaviour:
   - 1
   spawningMaps:
   - {fileID: 11400000, guid: 0a5e6a3017686de4386e0acf0947d47b, type: 2}
+  - {fileID: 11400000, guid: 2cd775729bb582b42bfa622e9b4f3f5c, type: 2}
   spawningAllocateMaps:
   - mapInfo: {fileID: 11400000, guid: 0a5e6a3017686de4386e0acf0947d47b, type: 2}
     allocateAmount: 0

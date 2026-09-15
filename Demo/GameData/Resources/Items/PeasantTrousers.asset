@@ -59,7 +59,7 @@ MonoBehaviour:
   equipmentModels:
   - equipSocket: Legs
     useInstantiatedObject: 0
-    meshPrefab: {fileID: 919132149155446097, guid: b497ae5f99303e443a21ac3e014f08d5, type: 3}
+    meshPrefab: {fileID: 919132149155446097, guid: 7d3cd3f724330464fad331bf894d7d4f, type: 3}
     instantiatedObjectIndex: 0
     priority: 0
     doNotSetupBones: 0

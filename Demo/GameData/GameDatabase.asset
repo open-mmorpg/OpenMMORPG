@@ -22,6 +22,7 @@ MonoBehaviour:
   - {fileID: 3991679857097899636, guid: ef707c563d3e2d54a8c464a4a25cc40a, type: 3}
   - {fileID: 6641323854697508692, guid: 73a218552e7390c41a863468bf08abb1, type: 3}
   - {fileID: 603400556100368069, guid: d940c1b01524e9f45a7662a15c040aaf, type: 3}
+  - {fileID: 8260714082359717960, guid: 0831e545561964a4ebd6cf9c36676250, type: 3}
   vehicleEntities: []
   otherNetworkObjects: []
   attributes: []
@@ -100,12 +101,14 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 7c0c6f3301553204f84dcd1b5bd6e4f3, type: 2}
   - {fileID: 11400000, guid: f46089cb6bc9c1740a2647dfde0d6a1b, type: 2}
   - {fileID: 11400000, guid: 92bb054bbc07f8b4cb5804f3634c19f3, type: 2}
+  - {fileID: 11400000, guid: 90e186c18a2d34c48a1c79158e075fc1, type: 2}
   harvestables:
   - {fileID: 11400000, guid: 3d519bf9cce325d4f9ed6595a6f180c0, type: 2}
   - {fileID: 11400000, guid: 91b81b3077a77e84eaf581c45b48108a, type: 2}
   - {fileID: 11400000, guid: 83d1f9ae82b6ca948ad0db513dea2591, type: 2}
   mapInfos:
   - {fileID: 11400000, guid: 0a5e6a3017686de4386e0acf0947d47b, type: 2}
+  - {fileID: 11400000, guid: 2cd775729bb582b42bfa622e9b4f3f5c, type: 2}
   quests:
   - {fileID: 11400000, guid: 36ad1670a040b7a488dc14e4c664bbde, type: 2}
   factions: []

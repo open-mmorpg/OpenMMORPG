@@ -19,7 +19,7 @@ MonoBehaviour:
   defaultDescription: 
   languageSpecificDescriptions: []
   category: 
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 30cb9cd58af1a5744baf7dc2aad7ba48, type: 3}
   harvestEffectivenesses:
   - weaponType: {fileID: 11400000, guid: 8bf9de9cb5b0fda498255c0b13cb217b, type: 2}
     damageEffectiveness: 0.6

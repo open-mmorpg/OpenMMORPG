@@ -71,7 +71,7 @@ MonoBehaviour:
   uiSceneGameplayPrefab: {fileID: 114088817493988554, guid: c783690dd0ceae9429e7e68b99319a3e, type: 3}
   uiSceneGameplayMobilePrefab: {fileID: 0}
   uiSceneGameplayConsolePrefab: {fileID: 0}
-  defaultControllerPrefab: {fileID: 7737573418022873237, guid: 08fa92557b0bd23428b28ca98186dfc1, type: 3}
+  defaultControllerPrefab: {fileID: 4613554965108450714, guid: bf412afdec2865348a6c15b705a6ebd2, type: 3}
   serverCharacterPrefab: {fileID: 114427175623056218, guid: a5348c31a4f8f9646b728eb6b0e67c81, type: 3}
   owningCharacterObjects:
   - {fileID: 1555851488130254, guid: c1d487957c02dfb4488f30703a9f1dad, type: 3}
@@ -378,9 +378,9 @@ MonoBehaviour:
   - keyName: CameraRotate
     keyCode: 324
   - keyName: Attack
-    keyCode: 32
+    keyCode: 116
   - keyName: Jump
-    keyCode: 99
+    keyCode: 32
   - keyName: FindEnemy
     keyCode: 9
   - keyName: Reload
@@ -400,7 +400,7 @@ MonoBehaviour:
   - keyName: Dash
     keyCode: 113
   settingsSaveKeyPrefix: SETTING_KEY_BIND
-  inputActionAsset: {fileID: -944628639613478452, guid: b7b0acfa1d32d3f4fb4dd990fef8568c, type: 3}
+  inputActionAsset: {fileID: 0}
 --- !u!114 &5555039954835809266
 MonoBehaviour:
   m_ObjectHideFlags: 0

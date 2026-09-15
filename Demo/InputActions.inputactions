@@ -409,8 +409,8 @@
                 },
                 {
                     "name": "",
-                    "id": "37712aa9-eae3-45b1-94b8-b237633e0a51",
-                    "path": "<Keyboard>/space",
+                    "id": "a7c1d2e3-4b5f-4c6d-8e9f-0a1b2c3d4e5f",
+                    "path": "<Keyboard>/t",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -432,7 +432,7 @@
                 {
                     "name": "",
                     "id": "fa020867-92d2-449a-9722-9db9725cc79e",
-                    "path": "<Keyboard>/c",
+                    "path": "<Keyboard>/space",
                     "interactions": "",
                     "processors": "",
                     "groups": "",

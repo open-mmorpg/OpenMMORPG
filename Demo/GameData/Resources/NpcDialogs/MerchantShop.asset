@@ -240,6 +240,11 @@ MonoBehaviour:
     amount: 0
     sellPrice: 0
     sellPrices: []
+  - item: {fileID: 11400000, guid: 0b6da418e549e9f47b1fcc94efeef626, type: 2}
+    level: 1
+    amount: 0
+    sellPrice: 0
+    sellPrices: []
   itemCraft:
     craftingItem: {fileID: 0}
     amount: 1

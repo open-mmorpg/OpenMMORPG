@@ -679,7 +679,16 @@ MonoBehaviour:
     recoilRoll: 0
   launchClip: {fileID: 0}
   launchClips: []
-  launchClipSettings: []
+  launchClipSettings:
+  - audioClip: {fileID: 8300000, guid: ed85f55b14f309a4cbcc9b8c6cb4ed15, type: 3}
+    minRandomVolume: 0.85
+    maxRandomVolume: 1
+  - audioClip: {fileID: 8300000, guid: 9740d31a5874afd4998028bb748975cf, type: 3}
+    minRandomVolume: 0.85
+    maxRandomVolume: 1
+  - audioClip: {fileID: 8300000, guid: 9740d31a5874afd4998028bb748975cf, type: 3}
+    minRandomVolume: 0.85
+    maxRandomVolume: 1
   reloadClip: {fileID: 0}
   reloadClips: []
   reloadClipSettings: []
@@ -689,7 +698,7 @@ MonoBehaviour:
   emptyClip: {fileID: 0}
   emptyClips: []
   emptyClipSettings: []
-  fireType: 2
+  fireType: 0
   rateOfFire: 0
   reloadDuration: 0
   maxAmmoEachReload: 0

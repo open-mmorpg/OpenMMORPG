@@ -24,7 +24,7 @@ MonoBehaviour:
   stats:
     baseStats:
       hp: 45
-      hpRecovery: 1
+      hpRecovery: 0.050000012
       hpLeechRate: 0
       mp: 0
       mpRecovery: 0
@@ -77,7 +77,7 @@ MonoBehaviour:
       sellItemPriceRate: 0
     statsIncreaseEachLevel:
       hp: 14
-      hpRecovery: 0
+      hpRecovery: -0.14
       hpLeechRate: 0
       mp: 0
       mpRecovery: 0
@@ -687,22 +687,22 @@ MonoBehaviour:
   moveSpeedRateWhileAttacking: 0
   randomExp:
     baseAmount:
-      min: 0
-      max: 0
+      min: 14
+      max: 18
     amountIncreaseEachLevel:
-      min: 0
-      max: 0
+      min: 3.5
+      max: 3.5
     rateIncreaseEachLevel:
       min: 0
       max: 0
     amountIncreaseEachLevelByLevels: []
   randomGold:
     baseAmount:
-      min: 0
-      max: 0
+      min: 4
+      max: 8
     amountIncreaseEachLevel:
-      min: 0
-      max: 0
+      min: 1
+      max: 1
     rateIncreaseEachLevel:
       min: 0
       max: 0

@@ -20,7 +20,7 @@ MonoBehaviour:
     goes down.
   languageSpecificDescriptions: []
   category: 
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: f3a77a94cf779184f8892590f73b9380, type: 3}
   iconSettingsInitialized: 0
   iconRotation: {x: 45, y: 90, z: 90}
   iconZoom: 1.4

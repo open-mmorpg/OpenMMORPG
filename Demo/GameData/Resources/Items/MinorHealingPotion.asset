@@ -19,7 +19,7 @@ MonoBehaviour:
   defaultDescription: Restores a little health at once.
   languageSpecificDescriptions: []
   category: 
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 5d068609dd572ba4eb99a3d84231c5ad, type: 3}
   iconSettingsInitialized: 0
   iconRotation: {x: 45, y: 90, z: 90}
   iconZoom: 1.4

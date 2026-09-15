@@ -101,7 +101,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   targetCamera: {fileID: 20186615803325660}
   target: {fileID: 0}
-  targetOffset: {x: 0, y: 0.75, z: 0}
+  targetOffset: {x: 0, y: 1.2, z: 0}
   updateCameraOnUpdate: 0
   updateCameraOnLateUpdate: 1
   updateCameraOnFixedUpdate: 0
@@ -110,7 +110,7 @@ MonoBehaviour:
   xRotation: 4
   yRotation: -332.30157
   useTargetYRotation: 0
-  zoomDistance: 5.5
+  zoomDistance: 6
   zoomByAspectRatio: 0
   zoomByAspectRatioSettings:
   - width: 16
@@ -129,12 +129,12 @@ MonoBehaviour:
     height: 4
     zoomDistance: 7
   enableWallHitSpring: 1
-  minDistanceToPerformWallHitSpring: 1
-  wallHitSpringPushForwardDistance: 0.5
-  wallHitSpringRadius: 0.5
+  minDistanceToPerformWallHitSpring: 0.25
+  wallHitSpringPushForwardDistance: 0.2
+  wallHitSpringRadius: 0.3
   wallHitLayerMask:
     serializedVersion: 2
-    m_Bits: 24577
+    m_Bits: 4292895181
   wallHitQueryTriggerInteraction: 1
   _targetPosition: {x: 0, y: 0.75, z: 0}
   _targetUp: {x: 0, y: 1, z: 0}
@@ -162,11 +162,11 @@ MonoBehaviour:
   rotationSpeedScale: 1
   limitZoomDistance: 1
   minZoomDistance: 2
-  maxZoomDistance: 10
+  maxZoomDistance: 14
   smoothZoom: 0
   zoomDeacceleration: 10
-  startZoomDistance: 3
-  zoomSpeed: 500
+  startZoomDistance: 6
+  zoomSpeed: 10
   zoomSpeedScale: 1
   enableAimAssist: 0
   enableAimAssistX: 1
@@ -239,7 +239,6 @@ MonoBehaviour:
   m_ScreenCoordScaleBias: {x: 0, y: 0, z: 0, w: 0}
   m_RequiresDepthTexture: 0
   m_RequiresColorTexture: 0
-  m_Version: 2
   m_TaaSettings:
     m_Quality: 3
     m_FrameInfluence: 0.1
@@ -247,6 +246,7 @@ MonoBehaviour:
     m_MipBias: 0
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
+  m_Version: 2
 --- !u!1 &1875850924656240
 GameObject:
   m_ObjectHideFlags: 0
@@ -392,7 +392,6 @@ MonoBehaviour:
   m_ScreenCoordScaleBias: {x: 0, y: 0, z: 0, w: 0}
   m_RequiresDepthTexture: 0
   m_RequiresColorTexture: 0
-  m_Version: 2
   m_TaaSettings:
     m_Quality: 3
     m_FrameInfluence: 0.1
@@ -400,3 +399,4 @@ MonoBehaviour:
     m_MipBias: 0
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
+  m_Version: 2

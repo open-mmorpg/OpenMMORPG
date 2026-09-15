@@ -21,10 +21,15 @@ MonoBehaviour:
   staminaDecreasePerSeconds: 5
   moveSpeedRateWhileOverweight: 0.05
   moveSpeedRateWhileSprinting: 1.5
+  moveSpeedIncrementWhileSprinting: 0
   moveSpeedRateWhileWalking: 0.5
+  moveSpeedIncrementWhileWalking: 0
   moveSpeedRateWhileCrouching: 0.35
+  moveSpeedIncrementWhileCrouching: 0
   moveSpeedRateWhileCrawling: 0.15
-  moveSpeedRateWhileSwimming: 0.1
+  moveSpeedIncrementWhileCrawling: 0
+  moveSpeedRateWhileSwimming: 0.8
+  moveSpeedIncrementWhileSwimming: 0
   hungryWhenFoodLowerThan: 40
   thirstyWhenWaterLowerThan: 40
   foodDecreasePerSeconds: 0
@@ -79,6 +84,8 @@ MonoBehaviour:
   monsterTitleColorChangeLevel: 5
   monsterHighLevelTitleColor: {r: 1, g: 0, b: 0, a: 1}
   monsterLowLevelTitleColor: {r: 0, g: 1, b: 1, a: 1}
+  taxByItemPriceRate: 0.05
+  calculateTaxByStackedItems: 0
   minLevelToTurnPkOn: 10
   pkPointEachKills: 10
   hoursBeforeTurnPkOff: 48

@@ -19,7 +19,7 @@ MonoBehaviour:
   defaultDescription: Sharp and salty. Keeps the legs going.
   languageSpecificDescriptions: []
   category: 
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: e021cb1af3a18374a959532abe6092dc, type: 3}
   iconSettingsInitialized: 0
   iconRotation: {x: 45, y: 90, z: 90}
   iconZoom: 1.4
