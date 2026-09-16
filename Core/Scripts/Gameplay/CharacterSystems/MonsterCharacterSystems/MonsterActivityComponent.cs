@@ -143,9 +143,18 @@ namespace MultiplayerARPG
             }
         }
 
+        /// <summary>
+        /// Whether anyone is watching this monster; its activity is skipped while nobody is. Override to keep a monster
+        /// active for observers that are not network subscribers of this server.
+        /// </summary>
+        protected virtual bool IsWatched()
+        {
+            return Entity.Identity.CountSubscribers() > 0;
+        }
+
         public virtual void ManagedUpdate()
         {
-            if (!Entity.IsServer || Entity.Identity.CountSubscribers() == 0 || CharacterDatabase == null)
+            if (!Entity.IsServer || !IsWatched() || CharacterDatabase == null)
                 return;
 
             if (Entity.IsDead())
