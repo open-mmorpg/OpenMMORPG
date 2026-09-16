@@ -125,6 +125,10 @@ namespace MultiplayerARPG
         public override void OnSetOwnerClient(bool isOwnerClient)
         {
             NavPaths = null;
+            // A re-owned entity must not keep applying the previous owner's last accepted position (same fix as
+            // BuiltInEntityMovementFunctions3D).
+            _acceptedPositionTimestamp = 0;
+            _isServerWaitingTeleportConfirm = false;
         }
 
         public virtual void StopMove()
