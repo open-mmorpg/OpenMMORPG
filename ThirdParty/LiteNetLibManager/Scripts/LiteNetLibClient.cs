@@ -155,7 +155,7 @@ namespace LiteNetLibManager
             // Send request to server, so connection id will not being used
             SendMessage(0, DeliveryMethod.ReliableUnordered, s_Writer);
             // Wait for response
-            do { await UniTask.Delay(100); } while (!done);
+            await UniTask.WaitUntil(() => done); // frame-granular: the 100 ms poll put a floor under every awaited request
             // Return response data
             return responseData;
         }
