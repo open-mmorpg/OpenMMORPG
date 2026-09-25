@@ -1,5 +1,5 @@
 {
-  "_comment": "Unity packages the kit compiles against. Embedded into the exported .unitypackage so importing it adds them to the project. Keep in step with the installer's package.json.",
+  "_comment": "Unity packages the kit compiles against. Embedded into the exported .unitypackage so importing it adds them to the project. Keep in step with the installer's package.json. Never add a render pipeline here: the kit is pipeline agnostic and must not force URP or HDRP on a project.",
   "dependencies": {
     "com.unity.addressables": "2.9.1",
     "com.unity.burst": "1.8.30",
@@ -10,10 +10,6 @@
     "com.unity.modules.subsystems": "1.0.0",
     "com.unity.nuget.mono-cecil": "1.11.6",
     "com.unity.nuget.newtonsoft-json": "3.2.2",
-    "com.unity.render-pipelines.core": "17.3.0",
-    "com.unity.render-pipelines.universal": "17.3.0",
-    "com.unity.render-pipelines.universal-config": "17.0.3",
-    "com.unity.scriptablebuildpipeline": "2.6.1",
-    "com.unity.shadergraph": "17.3.0"
+    "com.unity.scriptablebuildpipeline": "2.6.1"
   }
 }

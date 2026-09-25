@@ -58,5 +58,6 @@ in case, and a `ThirdParty` component missing from `THIRD-PARTY-NOTICES.md`.
 
 `check_package.py` inspects a built archive: everything under `Assets/OpenMMORPG`, no
 build tooling or CI config inside, the licence, notices, project settings archive and
-settings menu item all present, and URP among the embedded dependencies. The release
+settings menu item all present, and no render pipeline among the embedded
+dependencies, so the kit stays usable under URP, HDRP and Built-in. The release
 workflow runs the same script, so a tag build cannot pass looser rules than a push.
