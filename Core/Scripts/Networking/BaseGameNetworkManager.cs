@@ -107,6 +107,8 @@ namespace MultiplayerARPG
         protected readonly ConcurrentDictionary<uint, UITextKeys> _clientReadyRequestResponseMessages = new ConcurrentDictionary<uint, UITextKeys>();
         protected readonly ConcurrentDictionary<uint, IEntityMovementDataHandler> _entityMovementDataHandlers = new ConcurrentDictionary<uint, IEntityMovementDataHandler>();
         public ConcurrentDictionary<uint, IEntityMovementDataHandler> EntityMovementDataHandlers => _entityMovementDataHandlers;
+        // The handlers this tick's send pass wrote; their one-shot flags are consumed after its last player
+        protected readonly EntityMovementServerStateFlagsPass _serverStateFlagsPass = new EntityMovementServerStateFlagsPass();
 
         protected override void Awake()
         {
@@ -671,6 +673,8 @@ namespace MultiplayerARPG
 
             int tempLastPosition;
 
+            // One-shot flags reach every player, then are consumed once
+            _serverStateFlagsPass.Begin();
             foreach (KeyValuePair<long, LiteNetLibPlayer> playerKvp in Players)
             {
                 if (playerKvp.Key == ClientConnectionId)
@@ -702,6 +706,7 @@ namespace MultiplayerARPG
 
                     if (!dataHandler.WriteServerState(writeTimestamp, EntityMovementDataBuffers.StateDataWriter, out bool shouldSendReliably))
                         continue;
+                    _serverStateFlagsPass.Record(dataHandler);
                     // Increase data writing counter
                     if (shouldSendReliably)
                     {
@@ -763,6 +768,7 @@ namespace MultiplayerARPG
                     }
                 }
             }
+            _serverStateFlagsPass.ConsumeAll();
         }
         internal void SendServerEntityMovementStateJob(long writeTimestamp)
         {
@@ -783,6 +789,8 @@ namespace MultiplayerARPG
             NativeList<MovementResult> movementEnttitiesDataResults;
             NativeHashMap<uint, byte> ModesResults;
 
+            // One-shot flags reach every player, then are consumed once
+            _serverStateFlagsPass.Begin();
             foreach (LiteNetLibPlayer player in Players.Values)
             {
                 //if (player.ConnectionId == ClientConnectionId)
@@ -829,6 +837,7 @@ namespace MultiplayerARPG
                         continue;
 
                     MovementData movementData = dataHandler.CreateMovementData(out List<EntityMovementForceApplier> forceAppliers);
+                    _serverStateFlagsPass.Record(dataHandler);
                     movementDatas[objectId] = movementData;
                     forceApplyers[objectId] = forceAppliers;
                 }
@@ -942,6 +951,7 @@ namespace MultiplayerARPG
 #endif
                 }
             }
+            _serverStateFlagsPass.ConsumeAll();
         }
 
         public virtual void InitPrefabs()
