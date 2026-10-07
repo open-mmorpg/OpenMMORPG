@@ -62,5 +62,5 @@ $ git subtree pull --prefix=ThirdParty/AudioManager audm upstream
 ### Releasing
 
 1. Merge develop into master and tag the release (for example `v1.0.0`).
-2. Rebuild `OpenMMORPG.unitypackage` and `OpenMMORPG_Settings.unitypackage`, bump the version in `package.json`, and commit them to the [installer repository](https://github.com/open-mmorpg/open-mmorpg-installer).
-3. Update the version in `Resources/BuildInfo.asset`.
+2. Pushing the tag runs the [Asset Store package workflow](.github/workflows/asset-store-package.yml), which builds `OpenMMORPG.unitypackage` and attaches it to a GitHub release. Upload that archive to the Asset Store with Unity's Asset Store Tools. See [Tools~/README.md](Tools~/README.md) for details, including rebuilding `OpenMMORPG_Settings.unitypackage` when the project settings change.
+3. Set the same version in **Project Settings > Player > Version**, which is what a build reports as `Application.version`.

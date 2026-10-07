@@ -13,7 +13,7 @@ usage:
 --deps embeds the "dependencies" of a UPM package.json as a Package Manager
 manifest (a packagemanagermanifest/asset entry, the same thing Unity's own
 exporter writes). Unity then adds those packages to the project when the
-archive is imported, so the kit compiles even without the installer package.
+archive is imported, so the kit compiles in a fresh project.
 """
 import gzip, io, json, os, re, sys, tarfile, time
 

@@ -6,10 +6,8 @@ someone's project:
   * every entry lands under Assets/OpenMMORPG, so an import cannot scatter files
   * build tooling and CI config never ship to customers
   * the licence and third-party notices are present, as review requires
-  * the project settings and the menu item that imports them travel with the kit,
-    since Asset Store users have no installer package
-  * the Package Manager manifest is embedded, and it pulls in no render pipeline,
-    so the kit works in a URP, HDRP or Built-in project alike
+  * the project settings and the menu item that imports them travel with the kit
+  * the Package Manager manifest is embedded, including URP, which the kit needs
 
 usage: check_package.py <archive.unitypackage>
 """
@@ -20,9 +18,6 @@ import tarfile
 
 PREFIX = "Assets/OpenMMORPG/"
 MIN_ENTRIES = 2000
-
-# Importing the kit must never switch or add a render pipeline.
-RENDER_PIPELINE_PREFIXES = ("com.unity.render-pipelines.", "com.unity.shadergraph")
 
 REQUIRED = [
     ("THIRD-PARTY-NOTICES.md", "the third-party notices Asset Store review requires"),
@@ -73,9 +68,8 @@ def main():
     else:
         deps = manifest.get("dependencies", {})
         print(f"embedded {len(deps)} package dependencies")
-        pipelines = [k for k in deps if k.startswith(RENDER_PIPELINE_PREFIXES)]
-        if pipelines:
-            failures.append(f"render pipeline package(s) embedded, but the kit must stay pipeline agnostic: {pipelines}")
+        if "com.unity.render-pipelines.universal" not in deps:
+            failures.append("the kit needs URP, but it is not in the embedded dependencies")
 
     if failures:
         print("\nFAILED")
