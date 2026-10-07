@@ -49,25 +49,6 @@ jobs:
       - name: Verify the package
         run: python "Tools~/check_package.py" OpenMMORPG.unitypackage
 
-      - name: Warn if the installer declares different dependencies
-        continue-on-error: true
-        run: |
-          curl -sfL -o installer-package.json \
-            https://raw.githubusercontent.com/open-mmorpg/open-mmorpg-installer/master/package.json || exit 0
-          python - <<'EOF'
-          import json
-          kit = json.load(open("Tools~/dependencies.json", encoding="utf-8"))["dependencies"]
-          inst = json.load(open("installer-package.json", encoding="utf-8"))["dependencies"]
-          if kit != inst:
-              only_kit = {k: v for k, v in kit.items() if inst.get(k) != v}
-              only_inst = {k: v for k, v in inst.items() if kit.get(k) != v}
-              print("::warning::kit and installer dependency lists differ")
-              print("  kit:", only_kit)
-              print("  installer:", only_inst)
-          else:
-              print("dependency lists match the installer")
-          EOF
-
       - name: Upload for inspection
         uses: actions/upload-artifact@v4
         with:
@@ -81,7 +62,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ github.ref_name }}
         run: |
-          notes="Import \`OpenMMORPG.unitypackage\` into a Unity 6000.3 project, or install the wizard from https://github.com/open-mmorpg/open-mmorpg-installer.
+          notes="Import \`OpenMMORPG.unitypackage\` into a Unity 6000.3 project, then run Open MMORPG > Install > Import Project Settings.
 
           This archive is the Asset Store build: the complete kit, with its Unity package dependencies embedded so they are added on import."
           if gh release view "$TAG" >/dev/null 2>&1; then
