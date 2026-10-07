@@ -7,7 +7,7 @@ using UnityEngine.AI;
 
 namespace MultiplayerARPG
 {
-    public partial class BuiltInEntityMovementFunctions3D : IEntityMovementDataHandler
+    public partial class BuiltInEntityMovementFunctions3D : IEntityMovementDataHandler, IEntityMovementServerStateFlags
     {
         private const int FORCE_GROUNDED_FRAMES_AFTER_TELEPORT = 3;
         private const float MIN_DISTANCE_TO_SIMULATE_MOVEMENT = 0.01f;
@@ -234,6 +234,10 @@ namespace MultiplayerARPG
         {
             NavPaths = null;
             _simulatingKeyMovement = false;
+            // A re-owned entity must not keep applying the previous owner's last accepted position: it snapped the
+            // entity back to where the old client left it and rejected the new client's first syncs as an invalid timestamp.
+            _acceptedPositionTimestamp = 0;
+            _isServerWaitingTeleportConfirm = false;
         }
 
         public bool CanSimulateMovement()
@@ -1321,10 +1325,8 @@ namespace MultiplayerARPG
             movementData.shouldSendReliably = shouldSendReliably;
             forceAppliers = _movementForceAppliers;
 
-            _sendingJump = false;
-            _sendingDash = false;
-            _isTeleporting = false;
-            _stillMoveAfterTeleport = false;
+            // Called once per receiver, so the one-shot flags stay
+            // set for every receiver of this tick; the send loop consumes them once (ConsumeServerStateFlags)
 
             return movementData;
         }
@@ -1367,11 +1369,19 @@ namespace MultiplayerARPG
             }
 
             Entity.ServerWriteSyncTransform3D(_movementForceAppliers, writer);
+            // Called once per receiver, so the one-shot flags stay
+            // set for every receiver of this tick; the send loop consumes them once (ConsumeServerStateFlags)
+            return true;
+        }
+
+        // IEntityMovementServerStateFlags. The owner's teleport
+        // confirm (_isServerWaitingTeleportConfirm, _isClientConfirmingTeleport) is not a one-shot flag.
+        public void ConsumeServerStateFlags()
+        {
             _sendingJump = false;
             _sendingDash = false;
             _isTeleporting = false;
             _stillMoveAfterTeleport = false;
-            return true;
         }
 
         public void ReadClientStateAtServer(long peerTimestamp, NetDataReader reader)
@@ -1387,9 +1397,30 @@ namespace MultiplayerARPG
             }
         }
 
-        public async void ReadServerStateAtClient(long peerTimestamp, NetDataReader reader)
+        public void ReadServerStateAtClient(long peerTimestamp, NetDataReader reader)
         {
+            // Every byte is read here, synchronously, so a read error reaches
+            // the kit's catch (BaseGameNetworkManager.ReadServerEntityState). The apply may await the teleport
+            // preparer, so it runs apart and logs its own exceptions: this reader was async void, whose exceptions
+            // never reached that catch.
             reader.ClientReadSyncTransformMessage3D(out MovementState movementState, out ExtraMovementState extraMovementState, out Vector3 position, out float yAngle, out List<EntityMovementForceApplier> movementForceAppliers);
+            ApplyServerStateAtClientAndForget(peerTimestamp, movementState, extraMovementState, position, yAngle, movementForceAppliers);
+        }
+
+        private async void ApplyServerStateAtClientAndForget(long peerTimestamp, MovementState movementState, ExtraMovementState extraMovementState, Vector3 position, float yAngle, List<EntityMovementForceApplier> movementForceAppliers)
+        {
+            try
+            {
+                await ApplyServerStateAtClient(peerTimestamp, movementState, extraMovementState, position, yAngle, movementForceAppliers);
+            }
+            catch (System.Exception ex)
+            {
+                Logging.LogException(nameof(BuiltInEntityMovementFunctions3D), ex);
+            }
+        }
+
+        private async UniTask ApplyServerStateAtClient(long peerTimestamp, MovementState movementState, ExtraMovementState extraMovementState, Vector3 position, float yAngle, List<EntityMovementForceApplier> movementForceAppliers)
+        {
             if (IsServer)
             {
                 // Don't read and apply transform, because it was done at server
@@ -1656,6 +1687,12 @@ namespace MultiplayerARPG
                 _isClientConfirmingTeleport = true;
             _lastTeleportFrame = Time.frameCount;
             _previousPosition = EntityTransform.position;
+            // Restart interpolation at the destination, as the
+            // snap in ReadServerStateAtClient does. Otherwise UpdateInterpolate drags a remote copy back to its last
+            // pre-teleport state, and the server checks (and, while dead, clamps) the owner's confirmation against it.
+            _startInterpPosition = position;
+            _endInterpPosition = position;
+            _interpElapsedTime = 0f;
         }
 
         public bool CanPredictMovement()
