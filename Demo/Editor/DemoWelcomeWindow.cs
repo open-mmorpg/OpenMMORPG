@@ -18,6 +18,39 @@ namespace MultiplayerARPG.Demo.EditorTools
     /// starts a build on its own. `Open MMORPG > Demo > Welcome` brings the window back.
     /// </summary>
     [InitializeOnLoad]
+    internal static class DemoWelcomeLauncher
+    {
+        static DemoWelcomeLauncher()
+        {
+            // Not a delayCall: a fresh project goes through several domain reloads while its
+            // packages resolve and its scripts compile, and a call queued before the last of them
+            // is lost. Wait until the editor has settled instead.
+            EditorApplication.update += ShowWhenSettled;
+        }
+
+        private static void ShowWhenSettled()
+        {
+            if (EditorApplication.isCompiling || EditorApplication.isUpdating || EditorApplication.isPlayingOrWillChangePlaymode)
+                return;
+            EditorApplication.update -= ShowWhenSettled;
+            if (Application.isBatchMode || EditorPrefs.GetBool(DemoWelcomeWindow.ShownKey))
+                return;
+            EditorPrefs.SetBool(DemoWelcomeWindow.ShownKey, true);
+            DemoWelcomeWindow.Open();
+        }
+    }
+
+    /// <summary>
+    /// Shown once, the first time a project opens with the demo in it: the four steps between
+    /// importing the kit and walking around the island, the one that is easy to miss being the
+    /// map server. The demo runs the kit's MMO flow, where each map is hosted by a separate
+    /// process the map spawner launches - a build of this project at <c>builds/OpenMMORPG.exe</c>
+    /// beside <c>Assets</c> - so pressing Play gets as far as character select and no further
+    /// until that build exists.
+    ///
+    /// Every button acts only when pressed. Nothing here opens a web page, changes a setting or
+    /// starts a build on its own. `Open MMORPG > Demo > Welcome` brings the window back.
+    /// </summary>
     public class DemoWelcomeWindow : EditorWindow
     {
         private const string DocumentationUrl = "https://open-mmorpg.github.io/documentation/";
@@ -29,27 +62,35 @@ namespace MultiplayerARPG.Demo.EditorTools
         private const string ClientProfilePath = DemoDir + "/Build Profiles/Demo Client.asset";
         private const string FirstScenePath = DemoDir + "/Scenes/00Init.unity";
         private const string ReadmePath = "Assets/OpenMMORPG/README.md";
+        private const string LogoPath = DemoDir + "/Textures/OpenMMORPG-title.png";
+        private const string FallbackLogoPath = "Assets/OpenMMORPG/Resources/OpenMMORPG.png";
 
         /// <summary>Where the map spawner looks for the map server, relative to the project folder.</summary>
         private const string ServerBuildPath = "builds/OpenMMORPG.exe";
 
         private Vector2 _scroll;
+        [System.NonSerialized]
+        private Texture2D _logoTexture;
 
-        static DemoWelcomeWindow()
+        private Texture2D LogoTexture
         {
-            if (Application.isBatchMode || EditorPrefs.GetBool(ShownKey))
-                return;
-            // Not a delayCall: a fresh project goes through several domain reloads while its
-            // packages resolve and its scripts compile, and a call queued before the last of them
-            // is lost. Wait until the editor has settled instead.
-            EditorApplication.update += ShowWhenSettled;
+            get
+            {
+                if (_logoTexture == null)
+                {
+                    _logoTexture = AssetDatabase.LoadAssetAtPath<Texture2D>(LogoPath);
+                    if (_logoTexture == null)
+                        _logoTexture = AssetDatabase.LoadAssetAtPath<Texture2D>(FallbackLogoPath);
+                }
+                return _logoTexture;
+            }
         }
 
         /// <summary>
         /// EditorPrefs are per machine, not per project, so the key carries the project's path:
         /// a flag shared by every project would show the window in the first and never again.
         /// </summary>
-        private static string ShownKey
+        internal static string ShownKey
         {
             get { return "OpenMMORPG.DemoWelcomeShown." + StableHash(Application.dataPath).ToString("X8"); }
         }
@@ -63,24 +104,13 @@ namespace MultiplayerARPG.Demo.EditorTools
             return hash;
         }
 
-        private static void ShowWhenSettled()
-        {
-            if (EditorApplication.isCompiling || EditorApplication.isUpdating || EditorApplication.isPlayingOrWillChangePlaymode)
-                return;
-            EditorApplication.update -= ShowWhenSettled;
-            if (EditorPrefs.GetBool(ShownKey))
-                return;
-            EditorPrefs.SetBool(ShownKey, true);
-            Open();
-        }
-
         [MenuItem("Open MMORPG/Demo/Welcome", false, 0)]
         public static void Open()
         {
             var window = GetWindow<DemoWelcomeWindow>(true, "Welcome to Open MMORPG", true);
-            window.minSize = new Vector2(560f, 600f);
+            window.minSize = new Vector2(560f, 620f);
             Rect main = EditorGUIUtility.GetMainWindowPosition();
-            window.position = new Rect(main.x + (main.width - 560f) * 0.5f, main.y + (main.height - 660f) * 0.5f, 560f, 660f);
+            window.position = new Rect(main.x + (main.width - 560f) * 0.5f, main.y + (main.height - 680f) * 0.5f, 560f, 680f);
         }
 
         private void OnGUI()
@@ -90,7 +120,28 @@ namespace MultiplayerARPG.Demo.EditorTools
 
             _scroll = EditorGUILayout.BeginScrollView(_scroll);
             GUILayout.Space(8);
-            GUILayout.Label("Welcome to Open MMORPG", new GUIStyle(EditorStyles.boldLabel) { fontSize = 16 });
+
+            Texture2D logo = LogoTexture;
+            if (logo != null)
+            {
+                float maxWidth = 380f;
+                float availableWidth = Mathf.Max(200f, EditorGUIUtility.currentViewWidth - 40f);
+                float drawWidth = Mathf.Min(maxWidth, availableWidth);
+                float drawHeight = drawWidth * ((float)logo.height / logo.width);
+
+                EditorGUILayout.BeginHorizontal();
+                GUILayout.FlexibleSpace();
+                Rect logoRect = GUILayoutUtility.GetRect(drawWidth, drawHeight, GUILayout.Width(drawWidth), GUILayout.Height(drawHeight));
+                GUI.DrawTexture(logoRect, logo, ScaleMode.ScaleToFit, true);
+                GUILayout.FlexibleSpace();
+                EditorGUILayout.EndHorizontal();
+
+                GUILayout.Space(8);
+            }
+            else
+            {
+                GUILayout.Label("Welcome to Open MMORPG", new GUIStyle(EditorStyles.boldLabel) { fontSize = 16 });
+            }
             GUILayout.Label(
                 "The demo is a small island and a dungeon running on the kit's MMO servers. Four steps get " +
                 "you from here to playing it. The third is the one people miss: each map is hosted by a " +
