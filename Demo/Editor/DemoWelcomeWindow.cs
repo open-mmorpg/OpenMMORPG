@@ -33,9 +33,9 @@ namespace MultiplayerARPG.Demo.EditorTools
             if (EditorApplication.isCompiling || EditorApplication.isUpdating || EditorApplication.isPlayingOrWillChangePlaymode)
                 return;
             EditorApplication.update -= ShowWhenSettled;
-            if (Application.isBatchMode || EditorPrefs.GetBool(DemoWelcomeWindow.ShownKey))
+            if (Application.isBatchMode || DemoWelcomeWindow.IsShown)
                 return;
-            EditorPrefs.SetBool(DemoWelcomeWindow.ShownKey, true);
+            DemoWelcomeWindow.IsShown = true;
             DemoWelcomeWindow.Open();
         }
     }
@@ -64,6 +64,7 @@ namespace MultiplayerARPG.Demo.EditorTools
         private const string ReadmePath = "Assets/OpenMMORPG/README.md";
         private const string LogoPath = DemoDir + "/Textures/OpenMMORPG-title.png";
         private const string FallbackLogoPath = "Assets/OpenMMORPG/Resources/OpenMMORPG.png";
+        private const string ShownConfigKey = "OpenMMORPG.DemoWelcomeShown";
 
         /// <summary>Where the map spawner looks for the map server, relative to the project folder.</summary>
         private const string ServerBuildPath = "builds/OpenMMORPG.exe";
@@ -87,21 +88,13 @@ namespace MultiplayerARPG.Demo.EditorTools
         }
 
         /// <summary>
-        /// EditorPrefs are per machine, not per project, so the key carries the project's path:
-        /// a flag shared by every project would show the window in the first and never again.
+        /// Tracked per project in UserSettings (ignored by git). Unlike machine-global EditorPrefs,
+        /// this ensures recreating a fresh project at the same folder path still shows the welcome window.
         /// </summary>
-        internal static string ShownKey
+        internal static bool IsShown
         {
-            get { return "OpenMMORPG.DemoWelcomeShown." + StableHash(Application.dataPath).ToString("X8"); }
-        }
-
-        /// <summary>FNV-1a. `string.GetHashCode` is not guaranteed to be the same from one editor session to the next.</summary>
-        private static uint StableHash(string text)
-        {
-            uint hash = 2166136261;
-            foreach (char c in text)
-                hash = (hash ^ c) * 16777619;
-            return hash;
+            get { return EditorUserSettings.GetConfigValue(ShownConfigKey) == "true"; }
+            set { EditorUserSettings.SetConfigValue(ShownConfigKey, value ? "true" : "false"); }
         }
 
         [MenuItem("Open MMORPG/Demo/Welcome", false, 0)]
