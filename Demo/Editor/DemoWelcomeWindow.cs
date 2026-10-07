@@ -155,16 +155,18 @@ namespace MultiplayerARPG.Demo.EditorTools
                 UseDemoPipeline();
 
             Step(heading, wrap, "3. Build the map server",
-                "Needs the <b>Windows Dedicated Server Build Support</b> module (Unity Hub > Installs > " +
-                "Add modules). Then in File > Build Profiles: select <b>Demo Map Server</b>, Switch " +
-                "Profile, Build, and save it as <b>" + ServerBuildPath + "</b> in the project folder, " +
-                "beside Assets. Switch back to <b>Demo Client</b> afterwards: while the server profile is " +
-                "active the editor compiles as a server and Play will not work.\n\n" +
+                "The demo runs as an MMO cluster where maps run as separate server processes. " +
+                "Click <b>Build Demo Map Server</b> below to automatically compile the demo map server to " +
+                "<b>" + ServerBuildPath + "</b> without having to switch build profiles manually.\n\n" +
                 "Rebuild it after changing any scene, entity or game data the server uses.");
             bool built = File.Exists(Path.Combine(Path.GetDirectoryName(Application.dataPath), ServerBuildPath));
             EditorGUILayout.HelpBox(built ? "Map server found at " + ServerBuildPath + "."
                                           : "No map server at " + ServerBuildPath + " yet.",
                                     built ? MessageType.Info : MessageType.Warning);
+            if (GUILayout.Button(built ? "Rebuild Demo Map Server" : "Build Demo Map Server", GUILayout.Height(28)))
+            {
+                DemoBuildTools.BuildDemoMapServer();
+            }
             EditorGUILayout.BeginHorizontal();
             if (GUILayout.Button("Open Build Profiles", GUILayout.Height(24)))
                 EditorApplication.ExecuteMenuItem("File/Build Profiles");
