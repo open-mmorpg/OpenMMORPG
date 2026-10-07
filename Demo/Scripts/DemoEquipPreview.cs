@@ -1,3 +1,4 @@
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 namespace MultiplayerARPG.Demo
@@ -16,16 +17,26 @@ namespace MultiplayerARPG.Demo
     /// The spawned model is marked `DontSave`, so previewing does not dirty the scene or
     /// leave stray objects behind in a build.
     ///
-    /// This only mirrors the *rigid prop* path — a socket, a mesh and a transform, which is
-    /// all weapons and shields use. Armour is skinned and gets its bones rebound instead, so
-    /// it is not previewed here; the demo's NPC models have their outfits grafted in already
-    /// (see `DemoCharacterBuilder`).
+    /// **Both kinds of equipment work, and they are not the same mechanism.** A weapon or a
+    /// shield is a rigid prop: a socket, a mesh and a transform, and the offsets above are
+    /// all there is to tune. Armour is skinned — it has no meaningful transform of its own,
+    /// it is placed entirely by bones, and wearing it means rebinding those bones to this
+    /// character's skeleton and switching off the bare body part it covers. The offsets do
+    /// nothing to a garment, and the inspector says so rather than inviting you to drag one
+    /// about.
+    ///
+    /// **One component holds one item, so a character wearing two takes two of them.** The
+    /// demo's equipment uses exactly two weapon sockets — `RightHand` for the swords, the
+    /// axe and the staves, `LeftHand` for the bows and the shield — and a sword-and-board
+    /// grip can only be judged with both of them on at once. Each instance owns its
+    /// own spawned model and its own offsets, so they do not interfere; pointing two at the
+    /// same socket is the only way to make them fight, and that is the operator's business.
+    /// `DemoWeaponGripCapture` already saves every preview in the scene in one go.
     /// </summary>
     [ExecuteAlways]
-    [DisallowMultipleComponent]
     public class DemoEquipPreview : MonoBehaviour
     {
-        [Tooltip("Weapon or shield to show. Its own equipSocket and offsets are used, exactly as at runtime.")]
+        [Tooltip("Weapon, shield or armour to show. Its own equipSocket is used, exactly as at runtime.")]
         public BaseEquipmentItem item;
 
         [Tooltip("Use the offsets below instead of the item's stored ones, so they can be nudged live.")]
@@ -42,6 +53,8 @@ namespace MultiplayerARPG.Demo
         public bool equipped = true;
 
         private GameObject _spawned;
+        /// <summary>The bare part a worn garment is covering, to be switched back on.</summary>
+        private GameObject _hidden;
         private bool _shownEquipped;
 
         /// <summary>The live preview object, or null when nothing is equipped.</summary>
@@ -116,7 +129,10 @@ namespace MultiplayerARPG.Demo
         /// </summary>
         private bool CaptureDrag()
         {
-            if (_spawned == null)
+            // A garment has nothing to drag: it is drawn from the skeleton, and "capturing"
+            // the zeroed transform it hangs under would write a meaningless grip into an
+            // armour item.
+            if (_spawned == null || IsWearingSkinned)
                 return false;
 
             Transform t = _spawned.transform;
@@ -169,6 +185,12 @@ namespace MultiplayerARPG.Demo
             if (model == null || model.MeshPrefab == null)
                 return;
 
+            if (IsSkinned(model.MeshPrefab))
+            {
+                Wear(model);
+                return;
+            }
+
             Transform socket = FindSocket(model.equipSocket);
             if (socket == null)
             {
@@ -197,8 +219,141 @@ namespace MultiplayerARPG.Demo
             _spawned.transform.localScale = localScale;
         }
 
+        /// <summary>Whether what is currently shown is a garment rather than a prop.</summary>
+        public bool IsWearingSkinned { get; private set; }
+
+        /// <summary>Armour and clothing are skinned; weapons and shields are not.</summary>
+        public static bool IsSkinned(GameObject meshPrefab)
+        {
+            return meshPrefab != null && meshPrefab.GetComponentInChildren<SkinnedMeshRenderer>(true) != null;
+        }
+
+        /// <summary>
+        /// Puts a garment on the way `EquipmentModelBonesSetupByBoneNamesManager` does at
+        /// runtime: match every bone the garment was skinned to against a bone of the same
+        /// name on this character, then switch off the bare part it covers.
+        ///
+        /// The kit's own manager cannot be borrowed for it — it reads
+        /// `GameInstance.Singleton` and the container's runtime bone cache, neither of which
+        /// exists in the editor — so the mapping is done here off the same source that
+        /// manager uses, the model's own skinned mesh renderer.
+        ///
+        /// The garment is parented to the model root rather than to a socket, which is not
+        /// cosmetic: a skinned mesh is drawn entirely from its bones, and all its parent
+        /// decides is what switching that parent off would hide. It is also what
+        /// `DemoCharacterBuilder.GraftModel` does for the outfits baked into the NPCs.
+        /// </summary>
+        private void Wear(EquipmentModel model)
+        {
+            BaseCharacterModel character = GetComponentInChildren<BaseCharacterModel>(true);
+            SkinnedMeshRenderer reference = Reference(character);
+            if (reference == null)
+            {
+                Debug.LogWarning($"[{nameof(DemoEquipPreview)}] \"{name}\" has no skinned mesh to take a " +
+                                 $"skeleton from, so \"{item.name}\" cannot be fitted.", this);
+                return;
+            }
+
+            var skeleton = new Dictionary<string, Transform>();
+            foreach (Transform bone in reference.bones)
+            {
+                if (bone != null)
+                    skeleton[bone.name] = bone;
+            }
+
+            _spawned = Instantiate(model.MeshPrefab, character.transform);
+            _spawned.name = $"~Preview_{item.name}";
+            _spawned.hideFlags = HideFlags.DontSave;
+            IsWearingSkinned = true;
+            // the garment's own transform means nothing once it is on a skeleton, but an
+            // inherited offset or scale would still be applied on top of the skinning
+            _spawned.transform.localPosition = Vector3.zero;
+            _spawned.transform.localRotation = Quaternion.identity;
+            _spawned.transform.localScale = Vector3.one;
+
+            foreach (SkinnedMeshRenderer renderer in _spawned.GetComponentsInChildren<SkinnedMeshRenderer>(true))
+            {
+                Rebind(renderer, skeleton, reference.rootBone);
+                // These bodies are cut from a T-pose, so a garment's bind bounds are a thin
+                // slab up at shoulder height; animate an arm down and a close camera culls
+                // the whole renderer. DemoCharacterBuilder.WidenBounds does this to the body
+                // parts for the same reason, and borrowing the body's bounds keeps the
+                // garment in step with whatever figure that used.
+                renderer.localBounds = reference.localBounds;
+            }
+
+            Hide(character, model.equipSocket);
+        }
+
+        /// <summary>
+        /// The renderer whose bone list is this character's skeleton. The model names one,
+        /// and it is the same one the kit's bones setup would use; anything else skinned will
+        /// do as a fallback, since every part of these characters shares one skeleton.
+        /// </summary>
+        private SkinnedMeshRenderer Reference(BaseCharacterModel character)
+        {
+            var withSkin = character as IModelWithSkinnedMeshRenderer;
+            if (withSkin != null && withSkin.SkinnedMeshRenderer != null &&
+                withSkin.SkinnedMeshRenderer.bones != null && withSkin.SkinnedMeshRenderer.bones.Length > 0)
+                return withSkin.SkinnedMeshRenderer;
+
+            foreach (SkinnedMeshRenderer candidate in GetComponentsInChildren<SkinnedMeshRenderer>(true))
+            {
+                if (candidate.bones != null && candidate.bones.Length > 0 &&
+                    !candidate.name.StartsWith("~Preview_"))
+                    return candidate;
+            }
+            return null;
+        }
+
+        private void Rebind(SkinnedMeshRenderer renderer, Dictionary<string, Transform> skeleton, Transform rootBone)
+        {
+            Transform[] rebound = renderer.bones;
+            for (int i = 0; i < rebound.Length; ++i)
+            {
+                if (rebound[i] == null)
+                    continue;
+                Transform match;
+                if (skeleton.TryGetValue(rebound[i].name, out match))
+                    rebound[i] = match;
+                else
+                    Debug.LogWarning($"[{nameof(DemoEquipPreview)}] \"{item.name}\" is skinned to a bone named " +
+                                     $"\"{rebound[i].name}\", which \"{name}\" has not got — the garment will be " +
+                                     "torn wherever that bone holds it.", this);
+            }
+            renderer.bones = rebound;
+            if (rootBone != null)
+                renderer.rootBone = rootBone;
+        }
+
+        /// <summary>
+        /// Switches off whatever the container for this socket says the garment replaces —
+        /// the bare chest under a tunic, the hair under a hood. `EquipmentContainer` already
+        /// holds that decision as its `defaultModel`, and this is the same thing the kit does
+        /// with it.
+        /// </summary>
+        private void Hide(BaseCharacterModel character, string equipSocket)
+        {
+            if (character == null || character.EquipmentContainers == null)
+                return;
+            foreach (EquipmentContainer container in character.EquipmentContainers)
+            {
+                if (container.equipSocket != equipSocket || container.defaultModel == null)
+                    continue;
+                _hidden = container.defaultModel;
+                _hidden.SetActive(false);
+                return;
+            }
+        }
+
         private void Clear()
         {
+            if (_hidden != null)
+            {
+                _hidden.SetActive(true);
+                _hidden = null;
+            }
+            IsWearingSkinned = false;
             if (_spawned == null)
                 return;
             if (Application.isPlaying)
@@ -209,18 +364,28 @@ namespace MultiplayerARPG.Demo
         }
 
         /// <summary>
-        /// Finds the socket by name rather than by reading `equipmentContainers`, which is
-        /// protected on `BaseCharacterModel` and has no public accessor. That is safe here
-        /// because `DemoCharacterBuilder.CreateSocket` names each socket GameObject after the
-        /// very `equipSocket` string the item asks for, so the two cannot drift apart — but it
-        /// does mean this only works on characters that builder produced.
+        /// The socket a rigid prop hangs on. Read off the model's own `EquipmentContainers`,
+        /// which is what the kit looks it up in, with a search by object name as the fallback
+        /// for a character whose containers have not been built.
         /// </summary>
         private Transform FindSocket(string equipSocket)
         {
             if (string.IsNullOrEmpty(equipSocket))
                 return null;
-            if (GetComponentInChildren<BaseCharacterModel>(true) == null)
+
+            BaseCharacterModel character = GetComponentInChildren<BaseCharacterModel>(true);
+            if (character == null)
                 return null;
+
+            if (character.EquipmentContainers != null)
+            {
+                foreach (EquipmentContainer container in character.EquipmentContainers)
+                {
+                    if (container.equipSocket == equipSocket && container.transform != null)
+                        return container.transform;
+                }
+            }
+
             foreach (Transform candidate in GetComponentsInChildren<Transform>(true))
             {
                 if (candidate.name == equipSocket)
@@ -279,6 +444,13 @@ namespace MultiplayerARPG.Demo
             {
                 Debug.LogWarning($"[{nameof(DemoEquipPreview)}] \"{item.name}\" has no equipment model " +
                                  $"at index {modelIndex}, nothing to save.", this);
+                return;
+            }
+            if (IsSkinned(item.EquipmentModels[modelIndex].MeshPrefab))
+            {
+                Debug.LogWarning($"[{nameof(DemoEquipPreview)}] \"{item.name}\" is skinned. Armour is placed by " +
+                                 "its bones, so it has no grip to save; writing one would only put a number in " +
+                                 "the item that nothing reads.", this);
                 return;
             }
 

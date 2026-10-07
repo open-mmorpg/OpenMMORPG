@@ -21,8 +21,9 @@ MonoBehaviour:
   category: 
   icon: {fileID: 21300000, guid: 95341144488cce04bbefe23884bba74b, type: 3}
   iconSettingsInitialized: 1
-  iconRotation: {x: 0, y: 0, z: -35}
+  iconRotation: {x: -55, y: 90, z: -90}
   iconZoom: 1.2880944
+  iconHalf: 2
   iconLightingSettings:
     useSceneLighting: 0
     exposureEV: 0
@@ -44,13 +45,16 @@ MonoBehaviour:
   noSlotUsage: 0
   maxStack: 1
   overrideAmmoCapacity: 0
-  itemRefine: {fileID: 0}
+  itemRefine: {fileID: 11400000, guid: bee07034ae0ce0f49958f89f9474e58a, type: 2}
   lockDuration: 0
   expireDurationUnit: 2
   expireDuration: 0
   dropModel: {fileID: 0}
   dismantleReturnGold: 0
-  dismantleReturnItems: []
+  dismantleReturnItems:
+  - item: {fileID: 11400000, guid: b2dfdb17ca25331428a559776362d287, type: 2}
+    level: 0
+    amount: 2
   dismantleReturnCurrencies: []
   restrictDealing: 0
   restrictDropping: 0
@@ -59,7 +63,7 @@ MonoBehaviour:
   equipmentModels:
   - equipSocket: Arms
     useInstantiatedObject: 0
-    meshPrefab: {fileID: 919132149155446097, guid: 11d82ba86abb2bf41a7a2fa6cc48ac2f, type: 3}
+    meshPrefab: {fileID: 919132149155446097, guid: 2e0ba04aaa992984ab7a983c6fab47ae, type: 3}
     instantiatedObjectIndex: 0
     priority: 0
     doNotSetupBones: 0
@@ -76,8 +80,8 @@ MonoBehaviour:
     availableFactions: []
     level: 0
     attributeAmounts: []
-  equipmentSet: {fileID: 0}
-  maxDurability: 0
+  equipmentSet: {fileID: 11400000, guid: ec7985d543015e14e9cac2228eb45e51, type: 2}
+  maxDurability: 46
   destroyIfBroken: 0
   availableSocketEnhancerTypes: 
   maxSocket: 0
@@ -604,7 +608,7 @@ MonoBehaviour:
     randomDamageAmountRates: []
     randomSkillLevels: []
   armorAmount:
-    damageElement: {fileID: 0}
+    damageElement: {fileID: 11400000, guid: db2cf3e9d6bd9d945b5580aa2f9837df, type: 2}
     amount:
       baseAmount: 3
       amountIncreaseEachLevel: 0.6

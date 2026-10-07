@@ -205,10 +205,10 @@ MonoBehaviour:
     currencyAmounts: []
     itemAmounts: []
   quest: {fileID: 11400000, guid: 36ad1670a040b7a488dc14e4c664bbde, type: 2}
-  questAcceptedDialog: {fileID: 11400000, guid: 5fc876dcc8481d74092a5c565580a49f, type: 2}
-  questDeclinedDialog: {fileID: 11400000, guid: 15d03fa7eb93946489d5d8c3c0ada208, type: 2}
+  questAcceptedDialog: {fileID: 11400000, guid: 5d5675027d0bbac4a9c051f0a7591188, type: 2}
+  questDeclinedDialog: {fileID: 11400000, guid: a8f1d5bbc5353af47be269cc955b50b8, type: 2}
   questAbandonedDialog: {fileID: 0}
-  questCompletedDialog: {fileID: 11400000, guid: 5be701f712ceaf44f872f50a003115a0, type: 2}
+  questCompletedDialog: {fileID: 11400000, guid: 0c74e9626c1e66e45a224b0b615dc157, type: 2}
   sellItems: []
   itemCraft:
     craftingItem: {fileID: 0}

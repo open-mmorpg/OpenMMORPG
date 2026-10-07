@@ -22,7 +22,8 @@ MonoBehaviour:
   icon: {fileID: 21300000, guid: 4ec65fe33a6c9a94fa0df3bf5c6f697f, type: 3}
   iconSettingsInitialized: 1
   iconRotation: {x: 0, y: 0, z: -35}
-  iconZoom: 1.3179004
+  iconZoom: 1.484483
+  iconHalf: 0
   iconLightingSettings:
     useSceneLighting: 0
     exposureEV: 0
@@ -44,13 +45,16 @@ MonoBehaviour:
   noSlotUsage: 0
   maxStack: 1
   overrideAmmoCapacity: 0
-  itemRefine: {fileID: 0}
+  itemRefine: {fileID: 11400000, guid: cf3a4003d4adf914c931954c0be40d44, type: 2}
   lockDuration: 0
   expireDurationUnit: 2
   expireDuration: 0
   dropModel: {fileID: 0}
   dismantleReturnGold: 0
-  dismantleReturnItems: []
+  dismantleReturnItems:
+  - item: {fileID: 11400000, guid: 9bed9a16985b66343bbbcd35db39e60e, type: 2}
+    level: 0
+    amount: 2
   dismantleReturnCurrencies: []
   restrictDealing: 0
   restrictDropping: 0
@@ -64,7 +68,7 @@ MonoBehaviour:
     priority: 0
     doNotSetupBones: 1
     equipmentModelBonesSetupManager: {fileID: 0}
-    localPosition: {x: -0.023, y: -0.0587, z: 0.0152}
+    localPosition: {x: 0, y: 0, z: 0}
     localEulerAngles: {x: 0, y: 80, z: 0}
     doNotChangeScale: 0
     localScale: {x: 1, y: 1, z: 1}
@@ -72,14 +76,15 @@ MonoBehaviour:
     specificSheathEquipWeaponSet: 0
   requirement:
     availableClass: {fileID: 0}
-    availableClasses: []
+    availableClasses:
+    - {fileID: 11400000, guid: 014b0665320d99e40bfc8c7593785fda, type: 2}
     availableFactions: []
     level: 0
     attributeAmounts: []
   equipmentSet: {fileID: 0}
-  maxDurability: 0
+  maxDurability: 180
   destroyIfBroken: 0
-  availableSocketEnhancerTypes: 
+  availableSocketEnhancerTypes: 0000
   maxSocket: 0
   increaseStats:
     baseStats:
@@ -604,13 +609,26 @@ MonoBehaviour:
     randomDamageAmountRates: []
     randomSkillLevels: []
   offHandEquipmentModels: []
-  sheathModels: []
+  sheathModels:
+  - equipSocket: SheathBack
+    useInstantiatedObject: 0
+    meshPrefab: {fileID: 7783749022638204817, guid: 50ba1ba745b36104bb96a8c72db9806e, type: 3}
+    instantiatedObjectIndex: 0
+    priority: 0
+    doNotSetupBones: 1
+    equipmentModelBonesSetupManager: {fileID: 0}
+    localPosition: {x: -0.04, y: -0.12, z: 0.01}
+    localEulerAngles: {x: -0, y: 0, z: 205}
+    doNotChangeScale: 0
+    localScale: {x: 1, y: 1, z: 1}
+    useSpecificSheathEquipWeaponSet: 0
+    specificSheathEquipWeaponSet: 0
   offHandSheathModels: []
   weaponType: {fileID: 11400000, guid: 1a16eb003d7f19744b981f74a024c702, type: 2}
   createWeaponType: 0
   doRecoilingAsAttackAnimation: 0
   damageAmount:
-    damageElement: {fileID: 0}
+    damageElement: {fileID: 11400000, guid: db2cf3e9d6bd9d945b5580aa2f9837df, type: 2}
     amount:
       baseAmount:
         min: 12
@@ -624,8 +642,8 @@ MonoBehaviour:
       amountIncreaseEachLevelByLevels: []
   harvestDamageAmount:
     baseAmount:
-      min: 0
-      max: 0
+      min: 10
+      max: 10
     amountIncreaseEachLevel:
       min: 0
       max: 0

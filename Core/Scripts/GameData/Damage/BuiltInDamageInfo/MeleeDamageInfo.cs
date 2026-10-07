@@ -100,12 +100,12 @@ namespace MultiplayerARPG
             HashSet<uint> hitObjects = new HashSet<uint>();
 #if !UNITY_SERVER
             bool isPlayImpactEffects = isClient && impactEffects != null;
+            string tempTag;
 #endif
             DamageableHitBox tempDamageableHitBox;
             GameObject tempGameObject;
             Object tempCollider;
             bool tempIsTrigger;
-            string tempTag;
             DamageableHitBox tempDamageTakenTarget = null;
             DamageableEntity tempSelectedTarget = null;
             bool hasSelectedTarget = hitOnlySelectedTarget && attacker.TryGetTargetEntity(out tempSelectedTarget);

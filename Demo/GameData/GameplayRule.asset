@@ -9,7 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: befe87f74d372b343a1e4474763c11e6, type: 3}
+  m_Script: {fileID: 11500000, guid: 60aad83e01f8818438cb773e7d4e9717, type: 3}
   m_Name: GameplayRule
   m_EditorClassIdentifier: 
   increaseStatPointEachLevel: 5
@@ -24,7 +24,7 @@ MonoBehaviour:
   moveSpeedIncrementWhileSprinting: 0
   moveSpeedRateWhileWalking: 0.5
   moveSpeedIncrementWhileWalking: 0
-  moveSpeedRateWhileCrouching: 0.35
+  moveSpeedRateWhileCrouching: 0.25875
   moveSpeedIncrementWhileCrouching: 0
   moveSpeedRateWhileCrawling: 0.15
   moveSpeedIncrementWhileCrawling: 0
@@ -110,3 +110,20 @@ MonoBehaviour:
     itemDecreaseMax: 3
     goldReductionRate: 0
     expReductionRate: 0
+  rageClasses:
+  - {fileID: 11400000, guid: 014b0665320d99e40bfc8c7593785fda, type: 2}
+  focusClasses:
+  - {fileID: 11400000, guid: 07c0c8b92e13f8c45ac1800ad66cb7ee, type: 2}
+  rageOnHit: 10
+  rageCritMultiplier: 1.5
+  ragePerPercentHpTaken: 1
+  rageDecayPerSecond: 5
+  focusRegenPerSecond: 6
+  combatSeconds: 6
+  hpRegenRateInCombat: 0
+  missPerLevelAbove: 0.05
+  minHitChance: 0.5
+  monsterLineOfSight: 1
+  aggroRange: 15
+  aggroRangePerLevel: 1
+  aggroRangeMin: 4.5

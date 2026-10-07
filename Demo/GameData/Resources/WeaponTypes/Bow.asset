@@ -42,7 +42,7 @@ MonoBehaviour:
     throwableDamageEntity: {fileID: 0}
     customDamageInfo: {fileID: 0}
   effectivenessAttributes: []
-  ammoType: {fileID: 0}
+  ammoType: {fileID: 11400000, guid: a812422d640bb124b86db22d08c471ba, type: 2}
   playableCharacterModelSettings:
     applyWeaponAnimations: 0
     weaponAnimations:

@@ -25,19 +25,25 @@ MonoBehaviour:
     damageEffectiveness: 1
     items:
     - item: {fileID: 11400000, guid: b868faca66b10f64f928d706a27073b8, type: 2}
-      amountPerDamage: 0.14
+      amountPerDamage: 0.1
+      randomWeight: 100
+  - weaponType: {fileID: 11400000, guid: 75690c1b909d21b40bf28be845b75474, type: 2}
+    damageEffectiveness: 1
+    items:
+    - item: {fileID: 11400000, guid: b868faca66b10f64f928d706a27073b8, type: 2}
+      amountPerDamage: 0.1
       randomWeight: 100
   - weaponType: {fileID: 11400000, guid: 1a16eb003d7f19744b981f74a024c702, type: 2}
     damageEffectiveness: 1
     items:
     - item: {fileID: 11400000, guid: b868faca66b10f64f928d706a27073b8, type: 2}
-      amountPerDamage: 0.14
+      amountPerDamage: 0.1
       randomWeight: 100
   - weaponType: {fileID: 11400000, guid: fc3e5b2dd1a0ac340bca470db6f480b4, type: 2}
     damageEffectiveness: 1
     items:
     - item: {fileID: 11400000, guid: b868faca66b10f64f928d706a27073b8, type: 2}
-      amountPerDamage: 0.14
+      amountPerDamage: 0.1
       randomWeight: 100
   skillHarvestEffectivenesses: []
   expPerDamage: 3

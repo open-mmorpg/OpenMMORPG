@@ -1,7 +1,8 @@
 {
-  "_comment": "Unity packages the kit compiles against. Embedded into the exported .unitypackage so importing it adds them to the project. Keep in step with the installer's package.json.",
+  "_comment": "Unity packages the kit compiles against. Embedded into the exported .unitypackage so importing it adds them to the project.",
   "dependencies": {
     "com.unity.addressables": "2.9.1",
+    "com.unity.ai.navigation": "2.0.14",
     "com.unity.burst": "1.8.30",
     "com.unity.collections": "2.6.8",
     "com.unity.editorcoroutines": "1.1.0",
@@ -14,6 +15,7 @@
     "com.unity.render-pipelines.universal": "17.3.0",
     "com.unity.render-pipelines.universal-config": "17.0.3",
     "com.unity.scriptablebuildpipeline": "2.6.1",
-    "com.unity.shadergraph": "17.3.0"
+    "com.unity.shadergraph": "17.3.0",
+    "com.unity.ugui": "2.0.0"
   }
 }

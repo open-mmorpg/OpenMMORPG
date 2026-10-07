@@ -13,8 +13,7 @@ python "Tools~/build_unitypackage.py" kit . Assets/OpenMMORPG OpenMMORPG.unitypa
 
 `dependencies.json` lists the Unity packages the kit compiles against. The builder
 embeds them in the archive as a Package Manager manifest, so importing the package
-adds them to the project. The installer declares the same list in its own
-`package.json`; the workflow warns when the two drift apart.
+adds them to the project.
 
 ## Cutting a release
 
@@ -36,8 +35,7 @@ python "Tools~/build_unitypackage.py" settings "Tools~/ProjectSettings" "Tools/I
 ```
 
 That archive travels inside the kit, and `Open MMORPG > Install > Import Project
-Settings` imports it, so people who install from the Asset Store get the option
-without the installer package. Keep project specific values out of
+Settings` imports it. Keep project specific values out of
 `ProjectSettings.asset`, namely `productName`, `cloudProjectId`, `organizationId`,
 `projectName`, `metroPackageName` and `metroApplicationDescription`.
 

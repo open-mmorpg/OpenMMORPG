@@ -23,6 +23,7 @@ MonoBehaviour:
   iconSettingsInitialized: 1
   iconRotation: {x: 0, y: 90, z: 0}
   iconZoom: 1.3844862
+  iconHalf: 0
   iconLightingSettings:
     useSceneLighting: 0
     exposureEV: 0
@@ -44,13 +45,16 @@ MonoBehaviour:
   noSlotUsage: 0
   maxStack: 1
   overrideAmmoCapacity: 0
-  itemRefine: {fileID: 0}
+  itemRefine: {fileID: 11400000, guid: cf3a4003d4adf914c931954c0be40d44, type: 2}
   lockDuration: 0
   expireDurationUnit: 2
   expireDuration: 0
   dropModel: {fileID: 0}
   dismantleReturnGold: 0
-  dismantleReturnItems: []
+  dismantleReturnItems:
+  - item: {fileID: 11400000, guid: 593531c59904ae9429ca0e409ba9592d, type: 2}
+    level: 0
+    amount: 3
   dismantleReturnCurrencies: []
   restrictDealing: 0
   restrictDropping: 0
@@ -64,20 +68,21 @@ MonoBehaviour:
     priority: 0
     doNotSetupBones: 1
     equipmentModelBonesSetupManager: {fileID: 0}
-    localPosition: {x: 0, y: 0, z: 0}
-    localEulerAngles: {x: 0, y: 70, z: 0}
+    localPosition: {x: -0.01930633, y: -0.044532135, z: 0.06931949}
+    localEulerAngles: {x: 338.62146, y: 17.004976, z: 5.0625324}
     doNotChangeScale: 0
     localScale: {x: 1, y: 1, z: 1}
     useSpecificSheathEquipWeaponSet: 0
     specificSheathEquipWeaponSet: 0
   requirement:
     availableClass: {fileID: 0}
-    availableClasses: []
+    availableClasses:
+    - {fileID: 11400000, guid: 014b0665320d99e40bfc8c7593785fda, type: 2}
     availableFactions: []
     level: 0
     attributeAmounts: []
   equipmentSet: {fileID: 0}
-  maxDurability: 0
+  maxDurability: 150
   destroyIfBroken: 0
   availableSocketEnhancerTypes: 
   maxSocket: 0
@@ -604,10 +609,23 @@ MonoBehaviour:
     randomDamageAmountRates: []
     randomSkillLevels: []
   armorAmount:
-    damageElement: {fileID: 0}
+    damageElement: {fileID: 11400000, guid: db2cf3e9d6bd9d945b5580aa2f9837df, type: 2}
     amount:
       baseAmount: 6
       amountIncreaseEachLevel: 1.2
       rateIncreaseEachLevel: 0
       amountIncreaseEachLevelByLevels: []
-  sheathModels: []
+  sheathModels:
+  - equipSocket: SheathBack
+    useInstantiatedObject: 0
+    meshPrefab: {fileID: 7839500050994199884, guid: 6f35d69b51611bd4fa315c2303637572, type: 3}
+    instantiatedObjectIndex: 0
+    priority: 0
+    doNotSetupBones: 1
+    equipmentModelBonesSetupManager: {fileID: 0}
+    localPosition: {x: 0.08, y: -0.55, z: 0.01}
+    localEulerAngles: {x: 0, y: 270, z: 0}
+    doNotChangeScale: 0
+    localScale: {x: 1, y: 1, z: 1}
+    useSpecificSheathEquipWeaponSet: 0
+    specificSheathEquipWeaponSet: 0

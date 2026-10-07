@@ -22,7 +22,8 @@ MonoBehaviour:
   icon: {fileID: 21300000, guid: c75d39a9278c7f74e9b615b5b9db8f0c, type: 3}
   iconSettingsInitialized: 1
   iconRotation: {x: 0, y: 0, z: -35}
-  iconZoom: 1.3046794
+  iconZoom: 1.3282958
+  iconHalf: 0
   iconLightingSettings:
     useSceneLighting: 0
     exposureEV: 0
@@ -44,13 +45,16 @@ MonoBehaviour:
   noSlotUsage: 0
   maxStack: 1
   overrideAmmoCapacity: 0
-  itemRefine: {fileID: 0}
+  itemRefine: {fileID: 11400000, guid: cf3a4003d4adf914c931954c0be40d44, type: 2}
   lockDuration: 0
   expireDurationUnit: 2
   expireDuration: 0
   dropModel: {fileID: 0}
   dismantleReturnGold: 0
-  dismantleReturnItems: []
+  dismantleReturnItems:
+  - item: {fileID: 11400000, guid: 593531c59904ae9429ca0e409ba9592d, type: 2}
+    level: 0
+    amount: 4
   dismantleReturnCurrencies: []
   restrictDealing: 0
   restrictDropping: 0
@@ -64,22 +68,36 @@ MonoBehaviour:
     priority: 0
     doNotSetupBones: 1
     equipmentModelBonesSetupManager: {fileID: 0}
-    localPosition: {x: 0, y: 0, z: 0}
-    localEulerAngles: {x: 0, y: 0, z: 0}
+    localPosition: {x: -0.0142, y: -0.0309, z: 0.0873}
+    localEulerAngles: {x: 12.474, y: 79.6, z: 3.744}
+    doNotChangeScale: 0
+    localScale: {x: 1, y: 1, z: 1}
+    useSpecificSheathEquipWeaponSet: 0
+    specificSheathEquipWeaponSet: 0
+  - equipSocket: SheathBack
+    useInstantiatedObject: 0
+    meshPrefab: {fileID: 1470546202809840476, guid: a2f08ab3483b1b14db67c7930dfc1dfb, type: 3}
+    instantiatedObjectIndex: 0
+    priority: 0
+    doNotSetupBones: 1
+    equipmentModelBonesSetupManager: {fileID: 0}
+    localPosition: {x: 0.08, y: -0.2, z: 0.011}
+    localEulerAngles: {x: 356.46884, y: 358.11972, z: 28.057964}
     doNotChangeScale: 0
     localScale: {x: 1, y: 1, z: 1}
     useSpecificSheathEquipWeaponSet: 0
     specificSheathEquipWeaponSet: 0
   requirement:
     availableClass: {fileID: 0}
-    availableClasses: []
+    availableClasses:
+    - {fileID: 11400000, guid: 07c0c8b92e13f8c45ac1800ad66cb7ee, type: 2}
     availableFactions: []
     level: 0
     attributeAmounts: []
   equipmentSet: {fileID: 0}
-  maxDurability: 0
+  maxDurability: 185
   destroyIfBroken: 0
-  availableSocketEnhancerTypes: 
+  availableSocketEnhancerTypes: 0000
   maxSocket: 0
   increaseStats:
     baseStats:
@@ -604,28 +622,54 @@ MonoBehaviour:
     randomDamageAmountRates: []
     randomSkillLevels: []
   offHandEquipmentModels: []
-  sheathModels: []
+  sheathModels:
+  - equipSocket: SheathBackLeft
+    useInstantiatedObject: 0
+    meshPrefab: {fileID: 4112531239855661145, guid: f9a8faa8d5904e34f957069bfa89fbfe, type: 3}
+    instantiatedObjectIndex: 0
+    priority: 0
+    doNotSetupBones: 1
+    equipmentModelBonesSetupManager: {fileID: 0}
+    localPosition: {x: -0.15, y: -0.38, z: 0.08}
+    localEulerAngles: {x: -0, y: 0, z: 155}
+    doNotChangeScale: 0
+    localScale: {x: 1, y: 1, z: 1}
+    useSpecificSheathEquipWeaponSet: 0
+    specificSheathEquipWeaponSet: 0
+  - equipSocket: SheathBack
+    useInstantiatedObject: 0
+    meshPrefab: {fileID: 1470546202809840476, guid: a2f08ab3483b1b14db67c7930dfc1dfb, type: 3}
+    instantiatedObjectIndex: 0
+    priority: 0
+    doNotSetupBones: 1
+    equipmentModelBonesSetupManager: {fileID: 0}
+    localPosition: {x: 0.08, y: -0.2, z: 0.011}
+    localEulerAngles: {x: 356.46884, y: 358.11972, z: 28.057964}
+    doNotChangeScale: 0
+    localScale: {x: 1, y: 1, z: 1}
+    useSpecificSheathEquipWeaponSet: 0
+    specificSheathEquipWeaponSet: 0
   offHandSheathModels: []
   weaponType: {fileID: 11400000, guid: b863a51d8fe22e3439ec3bf92a6f499f, type: 2}
   createWeaponType: 0
   doRecoilingAsAttackAnimation: 0
   damageAmount:
-    damageElement: {fileID: 0}
+    damageElement: {fileID: 11400000, guid: db2cf3e9d6bd9d945b5580aa2f9837df, type: 2}
     amount:
       baseAmount:
-        min: 13
-        max: 19
+        min: 9
+        max: 14
       amountIncreaseEachLevel:
-        min: 4.5499997
-        max: 6.65
+        min: 3.1499999
+        max: 4.9
       rateIncreaseEachLevel:
         min: 0
         max: 0
       amountIncreaseEachLevelByLevels: []
   harvestDamageAmount:
     baseAmount:
-      min: 0
-      max: 0
+      min: 10
+      max: 10
     amountIncreaseEachLevel:
       min: 0
       max: 0

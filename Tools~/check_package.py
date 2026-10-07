@@ -6,8 +6,7 @@ someone's project:
   * every entry lands under Assets/OpenMMORPG, so an import cannot scatter files
   * build tooling and CI config never ship to customers
   * the licence and third-party notices are present, as review requires
-  * the project settings and the menu item that imports them travel with the kit,
-    since Asset Store users have no installer package
+  * the project settings and the menu item that imports them travel with the kit
   * the Package Manager manifest is embedded, including URP, which the kit needs
 
 usage: check_package.py <archive.unitypackage>

@@ -23,6 +23,7 @@ MonoBehaviour:
   iconSettingsInitialized: 1
   iconRotation: {x: 0, y: -25, z: 0}
   iconZoom: 1.4426987
+  iconHalf: 0
   iconLightingSettings:
     useSceneLighting: 0
     exposureEV: 0
@@ -44,13 +45,16 @@ MonoBehaviour:
   noSlotUsage: 0
   maxStack: 1
   overrideAmmoCapacity: 0
-  itemRefine: {fileID: 0}
+  itemRefine: {fileID: 11400000, guid: bee07034ae0ce0f49958f89f9474e58a, type: 2}
   lockDuration: 0
   expireDurationUnit: 2
   expireDuration: 0
   dropModel: {fileID: 0}
   dismantleReturnGold: 0
-  dismantleReturnItems: []
+  dismantleReturnItems:
+  - item: {fileID: 11400000, guid: b2dfdb17ca25331428a559776362d287, type: 2}
+    level: 0
+    amount: 1
   dismantleReturnCurrencies: []
   restrictDealing: 0
   restrictDropping: 0
@@ -59,7 +63,7 @@ MonoBehaviour:
   equipmentModels:
   - equipSocket: Feet
     useInstantiatedObject: 0
-    meshPrefab: {fileID: 919132149155446097, guid: 4e1391d1e461a714eb1c91834da0529e, type: 3}
+    meshPrefab: {fileID: 919132149155446097, guid: c64d4c5e9f092b04cad16572cacc55dd, type: 3}
     instantiatedObjectIndex: 0
     priority: 0
     doNotSetupBones: 0
@@ -77,7 +81,7 @@ MonoBehaviour:
     level: 0
     attributeAmounts: []
   equipmentSet: {fileID: 0}
-  maxDurability: 0
+  maxDurability: 42
   destroyIfBroken: 0
   availableSocketEnhancerTypes: 
   maxSocket: 0
@@ -604,7 +608,7 @@ MonoBehaviour:
     randomDamageAmountRates: []
     randomSkillLevels: []
   armorAmount:
-    damageElement: {fileID: 0}
+    damageElement: {fileID: 11400000, guid: db2cf3e9d6bd9d945b5580aa2f9837df, type: 2}
     amount:
       baseAmount: 1
       amountIncreaseEachLevel: 0.2

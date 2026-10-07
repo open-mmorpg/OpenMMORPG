@@ -20,14 +20,14 @@ MonoBehaviour:
       rotation: {x: 0, y: 146.74564, z: 0}
       warpPortalType: 0
       warpToMapInfo: {fileID: 11400000, guid: 2cd775729bb582b42bfa622e9b4f3f5c, type: 2}
-      warpToPosition: {x: 2, y: 3.05, z: -7.6}
+      warpToPosition: {x: 3, y: 3.05, z: -7.6}
       warpOverrideRotation: 1
       warpToRotation: {x: 0, y: 0, z: 0}
       warpPointsByCondition: []
   - mapInfo: {fileID: 11400000, guid: 2cd775729bb582b42bfa622e9b4f3f5c, type: 2}
     warpPortals:
     - entityPrefab: {fileID: 965102318666332476, guid: 307cdcf393550d24c9e6f0075646deef, type: 3}
-      position: {x: 2, y: 3, z: -9.05}
+      position: {x: 2, y: 3, z: -11.05}
       rotation: {x: 0, y: 0, z: 0}
       warpPortalType: 0
       warpToMapInfo: {fileID: 11400000, guid: 0a5e6a3017686de4386e0acf0947d47b, type: 2}

@@ -47,6 +47,9 @@ Material:
     - _Shore: 1
     - _SparkleStrength: 1.1
     - _SunDiffuse: 0.25
+    - _WarpLength: 3.2
+    - _WarpSpeed: 0.12
+    - _WarpStrength: 0.2
     - _WaveHeading: 35
     - _WaveHeight: 0.18
     - _WaveLength: 13

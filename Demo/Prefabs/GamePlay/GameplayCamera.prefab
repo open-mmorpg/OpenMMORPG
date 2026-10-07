@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 114548782499701980}
   - component: {fileID: 114185086765178122}
   - component: {fileID: 6986880318784837643}
+  - component: {fileID: 5586887315378756074}
   m_Layer: 0
   m_Name: GameplayCamera
   m_TagString: MainCamera
@@ -134,7 +135,7 @@ MonoBehaviour:
   wallHitSpringRadius: 0.3
   wallHitLayerMask:
     serializedVersion: 2
-    m_Bits: 4292895181
+    m_Bits: 24901
   wallHitQueryTriggerInteraction: 1
   _targetPosition: {x: 0, y: 0.75, z: 0}
   _targetUp: {x: 0, y: 1, z: 0}
@@ -163,11 +164,11 @@ MonoBehaviour:
   limitZoomDistance: 1
   minZoomDistance: 2
   maxZoomDistance: 14
-  smoothZoom: 0
+  smoothZoom: 1
   zoomDeacceleration: 10
   startZoomDistance: 6
   zoomSpeed: 10
-  zoomSpeedScale: 1
+  zoomSpeedScale: 0.1
   enableAimAssist: 0
   enableAimAssistX: 1
   enableAimAssistY: 1
@@ -247,6 +248,25 @@ MonoBehaviour:
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
   m_Version: 2
+--- !u!114 &5586887315378756074
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1278824955568960}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 55e0be49c7e8d974d8be9f9b6ce1d757, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MultiplayerARPG.UnderwaterCameraEffect
+  waterColor: {r: 0.055, g: 0.29, b: 0.34, a: 1}
+  visibility: 22
+  fogStart: 0.5
+  blendSpeed: 5
+  overlayMaterial: {fileID: 2100000, guid: 87ff6b41c5fd21843923becf5a870674, type: 2}
+  underwaterLoop: {fileID: 8300000, guid: 5df3e8ef8c2f8d847a4c376a8e0060ee, type: 3}
+  loopVolume: 0.8
 --- !u!1 &1875850924656240
 GameObject:
   m_ObjectHideFlags: 0

@@ -23,6 +23,7 @@ MonoBehaviour:
   iconSettingsInitialized: 1
   iconRotation: {x: 0, y: -35, z: 0}
   iconZoom: 1.356142
+  iconHalf: 0
   iconLightingSettings:
     useSceneLighting: 0
     exposureEV: 0
@@ -44,13 +45,16 @@ MonoBehaviour:
   noSlotUsage: 0
   maxStack: 1
   overrideAmmoCapacity: 0
-  itemRefine: {fileID: 0}
+  itemRefine: {fileID: 11400000, guid: cf3a4003d4adf914c931954c0be40d44, type: 2}
   lockDuration: 0
   expireDurationUnit: 2
   expireDuration: 0
   dropModel: {fileID: 0}
   dismantleReturnGold: 0
-  dismantleReturnItems: []
+  dismantleReturnItems:
+  - item: {fileID: 11400000, guid: 9bed9a16985b66343bbbcd35db39e60e, type: 2}
+    level: 0
+    amount: 1
   dismantleReturnCurrencies: []
   restrictDealing: 0
   restrictDropping: 0
@@ -59,7 +63,7 @@ MonoBehaviour:
   equipmentModels:
   - equipSocket: Pauldron
     useInstantiatedObject: 0
-    meshPrefab: {fileID: 919132149155446097, guid: 757236574181e5348ba2e92f1159847e, type: 3}
+    meshPrefab: {fileID: 919132149155446097, guid: b0a6deb3d513cbe4da22dc86589dd951, type: 3}
     instantiatedObjectIndex: 0
     priority: 0
     doNotSetupBones: 0
@@ -72,12 +76,13 @@ MonoBehaviour:
     specificSheathEquipWeaponSet: 0
   requirement:
     availableClass: {fileID: 0}
-    availableClasses: []
+    availableClasses:
+    - {fileID: 11400000, guid: 014b0665320d99e40bfc8c7593785fda, type: 2}
     availableFactions: []
     level: 0
     attributeAmounts: []
-  equipmentSet: {fileID: 0}
-  maxDurability: 0
+  equipmentSet: {fileID: 11400000, guid: 6dcd7cd1348bfd04096eccbc812fa4bd, type: 2}
+  maxDurability: 50
   destroyIfBroken: 0
   availableSocketEnhancerTypes: 
   maxSocket: 0
@@ -604,7 +609,7 @@ MonoBehaviour:
     randomDamageAmountRates: []
     randomSkillLevels: []
   armorAmount:
-    damageElement: {fileID: 0}
+    damageElement: {fileID: 11400000, guid: db2cf3e9d6bd9d945b5580aa2f9837df, type: 2}
     amount:
       baseAmount: 5
       amountIncreaseEachLevel: 1

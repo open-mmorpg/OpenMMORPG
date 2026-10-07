@@ -160,7 +160,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   dbPath: ./mmorpgtemplate.sqlite3
-  editorDbPath: C:\Projects\OpenMMORPG\builds\mmorpgtemplate.sqlite3
+  editorDbPath: ./mmorpgtemplate.sqlite3
 --- !u!1 &1650234716345238
 GameObject:
   m_ObjectHideFlags: 0
@@ -317,7 +317,7 @@ MonoBehaviour:
   - mapInfo: {fileID: 11400000, guid: 0a5e6a3017686de4386e0acf0947d47b, type: 2}
     allocateAmount: 0
   isOverrideExePath: 1
-  overrideExePath: C:\Projects\OpenMMORPG\builds\OpenMMORPG.exe
+  overrideExePath: ./builds/OpenMMORPG.exe
   editorNotSpawnInBatchMode: 1
 --- !u!1 &1834896065226248
 GameObject:

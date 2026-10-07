@@ -25,13 +25,7 @@ MonoBehaviour:
     damageEffectiveness: 1
     items:
     - item: {fileID: 11400000, guid: 593531c59904ae9429ca0e409ba9592d, type: 2}
-      amountPerDamage: 0.09
-      randomWeight: 100
-  - weaponType: {fileID: 11400000, guid: 1a16eb003d7f19744b981f74a024c702, type: 2}
-    damageEffectiveness: 0.35
-    items:
-    - item: {fileID: 11400000, guid: 593531c59904ae9429ca0e409ba9592d, type: 2}
-      amountPerDamage: 0.04
+      amountPerDamage: 0.2
       randomWeight: 100
   skillHarvestEffectivenesses: []
   expPerDamage: 1

@@ -100,7 +100,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4a95b355ccf15504e98ea54751a0af1d, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MultiplayerARPG.Demo.DemoDungeonGate
+  m_EditorClassIdentifier: Assembly-CSharp::MultiplayerARPG.DeferredWarpPortalEntity
   _behaviourIndex: 0
   entityTitle: 
   entityTitles: []

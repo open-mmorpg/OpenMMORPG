@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 1748050817070203575}
   - component: {fileID: 1930955310650062299}
   - component: {fileID: 1927935938930306323}
+  - component: {fileID: 4323438378101125267}
   m_Layer: 5
   m_Name: UIQuestTask-Tiny
   m_TagString: Untagged
@@ -30,9 +31,9 @@ RectTransform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -60,27 +61,46 @@ MonoBehaviour:
   onHide:
     m_PersistentCalls:
       m_Calls: []
+  onShowWithObject:
+    m_PersistentCalls:
+      m_Calls: []
+  onHideWithObject:
+    m_PersistentCalls:
+      m_Calls: []
   objectSelected: {fileID: 0}
+  clones: []
   selectionManager: {fileID: 0}
   updateUIRepeatRate: 0.5
   formatKeyTaskKillMonster:
+    useCustomValue: 0
     localeKey: 108
     customKey: 
+    customValue: 
   formatKeyTaskKillMonsterComplete:
+    useCustomValue: 0
     localeKey: 110
     customKey: 
+    customValue: 
   formatKeyTaskCollectItem:
+    useCustomValue: 0
     localeKey: 109
     customKey: 
+    customValue: 
   formatKeyTaskCollectItemComplete:
+    useCustomValue: 0
     localeKey: 111
     customKey: 
+    customValue: 
   formatKeyTaskTalkToNpc:
+    useCustomValue: 0
     localeKey: 225
     customKey: 
+    customValue: 
   formatKeyTaskTalkToNpcComplete:
+    useCustomValue: 0
     localeKey: 226
     customKey: 
+    customValue: 
   uiTextTaskDescription: {fileID: 1927935938930306323}
 --- !u!222 &1748050817070203575
 CanvasRenderer:
@@ -105,6 +125,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -136,3 +157,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   unityText: {fileID: 1930955310650062299}
+  textMeshText: {fileID: 0}
+--- !u!114 &4323438378101125267
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1968538886778662075}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e19747de3f5aca642ab2be37e372fb86, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Outline
+  m_EffectColor: {r: 0, g: 0, b: 0, a: 0.85}
+  m_EffectDistance: {x: 1, y: 1}
+  m_UseGraphicAlpha: 1

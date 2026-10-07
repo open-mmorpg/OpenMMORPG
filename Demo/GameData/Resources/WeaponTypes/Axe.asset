@@ -26,7 +26,7 @@ MonoBehaviour:
   damageInfo:
     damageType: 0
     hitOnlySelectedTarget: 0
-    startAttackDistance: 0.5
+    startAttackDistance: 1.8700001
     hitDistance: 2.2
     hitFov: 80
     originOffsets: 1

@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 6669097495377388566}
   - component: {fileID: 7363200007636597861}
   - component: {fileID: 1641921936057834390}
+  - component: {fileID: 6476694807610583144}
   m_Layer: 0
   m_Name: TwistedTree_1
   m_TagString: Untagged
@@ -115,3 +116,22 @@ CapsuleCollider:
   m_Height: 16.725496
   m_Direction: 1
   m_Center: {x: 0, y: 8.362748, z: 0}
+--- !u!205 &6476694807610583144
+LODGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 656396593587128401}
+  serializedVersion: 2
+  m_LocalReferencePoint: {x: -4.5836363, y: 8.161273, z: -0.95209694}
+  m_Size: 16.725496
+  m_FadeMode: 0
+  m_AnimateCrossFading: 0
+  m_LastLODIsBillboard: 0
+  m_LODs:
+  - screenRelativeHeight: 0
+    fadeTransitionWidth: 0
+    renderers:
+    - renderer: {fileID: 7363200007636597861}
+  m_Enabled: 1

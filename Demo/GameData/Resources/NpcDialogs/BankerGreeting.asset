@@ -207,6 +207,12 @@ MonoBehaviour:
     showConditions: []
     isCloseMenu: 0
     dialog: {fileID: 11400000, guid: fde3d2cdea41566458eb0f644125968d, type: 2}
+  - title: My company's chest
+    titles: []
+    icon: {fileID: 0}
+    showConditions: []
+    isCloseMenu: 0
+    dialog: {fileID: 11400000, guid: 5704fc5cbc8a31941b7b6a48ff566506, type: 2}
   - title: Not today
     titles: []
     icon: {fileID: 0}

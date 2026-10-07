@@ -395,14 +395,14 @@ GameObject:
   m_Component:
   - component: {fileID: 7767196107390787781}
   - component: {fileID: 5568610301313701246}
-  - component: {fileID: 714457366505430976}
+  - component: {fileID: 8189437293498503799}
   - component: {fileID: 8173058382559833021}
   - component: {fileID: 1056588818559075940}
   - component: {fileID: 2805434178402299110}
   - component: {fileID: 4327594431268744183}
   - component: {fileID: 3943018340084023271}
   - component: {fileID: 5109409879679855311}
-  - component: {fileID: 1094275725338743356}
+  - component: {fileID: 1527136951359136020}
   - component: {fileID: 8314533435808694954}
   - component: {fileID: 8650920592498648254}
   - component: {fileID: 6140553269974847924}
@@ -450,7 +450,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _behaviourIndex: 0
-  entityTitle: Enemy
+  entityTitle: 
   entityTitles: []
   syncTitle:
     _behaviour: {fileID: 0}
@@ -651,12 +651,12 @@ MonoBehaviour:
   isOverrideCharacteristic: 0
   overrideCharacteristic: 0
   faction: {fileID: 0}
-  destroyDelay: 2
-  destroyRespawnDelay: 5
+  destroyDelay: 30
+  destroyRespawnDelay: 90
   onSpawned:
     m_PersistentCalls:
       m_Calls: []
---- !u!114 &714457366505430976
+--- !u!114 &8189437293498503799
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -665,7 +665,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 8103532262041155577}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 206f96628ab738241a8b2ff24cd7e7f6, type: 3}
+  m_Script: {fileID: 11500000, guid: c9717c78edbab32438187b4ccd6d8013, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   turnSmoothSpeed: 10
@@ -675,7 +675,7 @@ MonoBehaviour:
   maxDistanceFromSpawnPoint: 50
   findEnemyDelayMin: 1
   findEnemyDelayMax: 1
-  followTargetDuration: 5
+  followTargetDuration: 15
   turnToEnemySpeed: 800
   miniStunDuration: 0
   isAttackBuilding: 1
@@ -684,6 +684,9 @@ MonoBehaviour:
   switchTargetDelay: 3
   stateWhileAggressive: 0
   stateWhileWander: 2
+  eyeHeight: 1.5
+  targetHeight: 1
+  hearingRange: 3
 --- !u!114 &8173058382559833021
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -802,7 +805,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _behaviourIndex: 0
---- !u!114 &1094275725338743356
+--- !u!114 &1527136951359136020
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -811,10 +814,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 8103532262041155577}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7e7ae6d49d900d44f9ee7b5e151f5a38, type: 3}
+  m_Script: {fileID: 11500000, guid: 8e8d3267501f5264ab5114a4145a5d23, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _behaviourIndex: 0
+  interruptChance: 0.35
 --- !u!114 &8314533435808694954
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -839,7 +843,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 99a250dc50d53944b80c6628ab2509d5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NightBlade.CharacterModelManager
-  mainTpsModel: {fileID: 4191735865405678330}
+  mainTpsModel: {fileID: 1485541237716227980}
   fpsModelPrefab: {fileID: 0}
   fpsModelPositionOffsets: {x: 0, y: 0, z: 0}
   fpsModelRotationOffsets: {x: 0, y: 0, z: 0}
@@ -1014,7 +1018,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6737fa654bc9f3f44b65dea301686ec7, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MultiplayerARPG.Demo.DemoHurtSoundComponent
+  m_EditorClassIdentifier: Assembly-CSharp::MultiplayerARPG.CharacterHurtSoundComponent
   clips:
   - {fileID: 8300000, guid: 546a33cf22e303142959bc023125feed, type: 3}
   - {fileID: 8300000, guid: 1943f605f3a6a6c45b42aed379b9c1d4, type: 3}
@@ -1023,7 +1027,7 @@ MonoBehaviour:
   cooldown: 0.35
   minPitch: 0.95
   maxPitch: 1.05
-  volume: 1
+  volume: 0.45
 --- !u!114 &7014204227800555548
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1096,7 +1100,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
-    m_AddedGameObjects: []
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: 6457383373714922360, guid: f0c0660362337ff42827fa0dc3c2e63a, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3740671786738189025}
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f0c0660362337ff42827fa0dc3c2e63a, type: 3}
 --- !u!4 &280604831314872522 stripped
@@ -1104,14 +1111,81 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 7613826019098078237, guid: f0c0660362337ff42827fa0dc3c2e63a, type: 3}
   m_PrefabInstance: {fileID: 7659874163527492823}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &4191735865405678330 stripped
+--- !u!114 &1485541237716227980 stripped
 MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 5792015566335804973, guid: f0c0660362337ff42827fa0dc3c2e63a, type: 3}
+  m_CorrespondingSourceObject: {fileID: 9138055523373593435, guid: f0c0660362337ff42827fa0dc3c2e63a, type: 3}
   m_PrefabInstance: {fileID: 7659874163527492823}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5d001d904d2d27d46a89e978fbf5e85b, type: 3}
+  m_Script: {fileID: 11500000, guid: 07350a417f6b8f8448b8cbaa847ba456, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MultiplayerARPG.GameData.Model.Playables.PlayableCharacterModel
+  m_EditorClassIdentifier: Assembly-CSharp::MultiplayerARPG.SeatAwarePlayableCharacterModel
+--- !u!4 &3733603941984059311 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6457383373714922360, guid: f0c0660362337ff42827fa0dc3c2e63a, type: 3}
+  m_PrefabInstance: {fileID: 7659874163527492823}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &8579786021596229408
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 3733603941984059311}
+    m_Modifications:
+    - target: {fileID: 4969736233879203265, guid: 50ba1ba745b36104bb96a8c72db9806e, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4969736233879203265, guid: 50ba1ba745b36104bb96a8c72db9806e, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4969736233879203265, guid: 50ba1ba745b36104bb96a8c72db9806e, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4969736233879203265, guid: 50ba1ba745b36104bb96a8c72db9806e, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.7660445
+      objectReference: {fileID: 0}
+    - target: {fileID: 4969736233879203265, guid: 50ba1ba745b36104bb96a8c72db9806e, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4969736233879203265, guid: 50ba1ba745b36104bb96a8c72db9806e, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0.64278764
+      objectReference: {fileID: 0}
+    - target: {fileID: 4969736233879203265, guid: 50ba1ba745b36104bb96a8c72db9806e, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4969736233879203265, guid: 50ba1ba745b36104bb96a8c72db9806e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4969736233879203265, guid: 50ba1ba745b36104bb96a8c72db9806e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4969736233879203265, guid: 50ba1ba745b36104bb96a8c72db9806e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7783749022638204817, guid: 50ba1ba745b36104bb96a8c72db9806e, type: 3}
+      propertyPath: m_Name
+      value: Longsword
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 50ba1ba745b36104bb96a8c72db9806e, type: 3}
+--- !u!4 &3740671786738189025 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4969736233879203265, guid: 50ba1ba745b36104bb96a8c72db9806e, type: 3}
+  m_PrefabInstance: {fileID: 8579786021596229408}
+  m_PrefabAsset: {fileID: 0}

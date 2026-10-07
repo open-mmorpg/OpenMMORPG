@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 5027929586389014136}
   - component: {fileID: 3127693173342437944}
   - component: {fileID: 4616835330924577321}
+  - component: {fileID: 5941834241200823794}
   m_Layer: 0
   m_Name: DeadTree_5
   m_TagString: Untagged
@@ -114,3 +115,22 @@ CapsuleCollider:
   m_Height: 16.437382
   m_Direction: 1
   m_Center: {x: 0, y: 8.218691, z: 0}
+--- !u!205 &5941834241200823794
+LODGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1455204289691443755}
+  serializedVersion: 2
+  m_LocalReferencePoint: {x: -0.20766449, y: 7.8831367, z: -0.59059715}
+  m_Size: 16.437382
+  m_FadeMode: 0
+  m_AnimateCrossFading: 0
+  m_LastLODIsBillboard: 0
+  m_LODs:
+  - screenRelativeHeight: 0
+    fadeTransitionWidth: 0
+    renderers:
+    - renderer: {fileID: 3127693173342437944}
+  m_Enabled: 1

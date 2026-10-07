@@ -13,23 +13,15 @@ MonoBehaviour:
   m_Name: WeaponGripOverrides
   m_EditorClassIdentifier: Assembly-CSharp::MultiplayerARPG.Demo.DemoWeaponGripOverrides
   entries:
-  - itemName: IronLongsword
-    localPosition: {x: -0.023, y: -0.0587, z: 0.0152}
-    localEulerAngles: {x: -0, y: 80, z: 0}
-    localScale: {x: 1, y: 1, z: 1}
-  - itemName: IronShortsword
-    localPosition: {x: -0.0237, y: 0.2473, z: 0.019}
-    localEulerAngles: {x: -0, y: 80, z: 0}
-    localScale: {x: 1, y: 1, z: 1}
-  - itemName: BanditAxe
-    localPosition: {x: 0.0128, y: -0.128, z: -0.009}
-    localEulerAngles: {x: 0.00008041198, y: 217.81879, z: 0.00007086484}
-    localScale: {x: 1, y: 1, z: 1}
   - itemName: ApprenticeStaff
-    localPosition: {x: 0.0128, y: -0.128, z: -0.009}
+    localPosition: {x: -0.023, y: -0.119, z: 0.02}
     localEulerAngles: {x: 0.00008041198, y: 217.81879, z: 0.00007086484}
     localScale: {x: 1, y: 1, z: 1}
   - itemName: HuntingBow
     localPosition: {x: -0.014198182, y: -0.030853353, z: 0.087311216}
     localEulerAngles: {x: 12.473892, y: 79.59994, z: 3.7444391}
+    localScale: {x: 1, y: 1, z: 1}
+  - itemName: PaintedRoundShield
+    localPosition: {x: -0.01930633, y: -0.044532135, z: 0.06931949}
+    localEulerAngles: {x: 338.62146, y: 17.004976, z: 5.0625324}
     localScale: {x: 1, y: 1, z: 1}

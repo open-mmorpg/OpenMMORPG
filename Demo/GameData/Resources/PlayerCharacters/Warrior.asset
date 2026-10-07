@@ -19,14 +19,14 @@ MonoBehaviour:
   defaultDescription: Fights up close and can afford to be hit while doing it.
   languageSpecificDescriptions: []
   category: 
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 5ffa652860056d948bdec70eff6cabd7, type: 3}
   expTable: {fileID: 0}
   stats:
     baseStats:
       hp: 150
       hpRecovery: 2
       hpLeechRate: 0
-      mp: 30
+      mp: 100
       mpRecovery: 2
       mpLeechRate: 0
       stamina: 100
@@ -37,7 +37,7 @@ MonoBehaviour:
       accuracy: 0
       evasion: 0
       criRate: 0.05
-      criDmgRate: 0
+      criDmgRate: 1.5
       blockRate: 0
       blockDmgRate: 0
       moveSpeed: 4
@@ -74,12 +74,12 @@ MonoBehaviour:
       decreaseWaterDecreation: 0
       decreaseStaminaDecreation: 0
       buyItemPriceRate: 0
-      sellItemPriceRate: 0
+      sellItemPriceRate: -0.75
     statsIncreaseEachLevel:
       hp: 30
       hpRecovery: 0.4
       hpLeechRate: 0
-      mp: 5
+      mp: 0
       mpRecovery: 0
       mpLeechRate: 0
       stamina: 6
@@ -182,7 +182,25 @@ MonoBehaviour:
       buyItemPriceRate: 0
       sellItemPriceRate: 0
     statsIncreaseEachLevelByLevels: []
-  attributes: []
+  attributes:
+  - attribute: {fileID: 11400000, guid: 995f86739e2aece49aaca1ec67a4e664, type: 2}
+    amount:
+      baseAmount: 5
+      amountIncreaseEachLevel: 2
+      rateIncreaseEachLevel: 0
+      amountIncreaseEachLevelByLevels: []
+  - attribute: {fileID: 11400000, guid: de3752f03389c6648803d16eb25d93b5, type: 2}
+    amount:
+      baseAmount: 4
+      amountIncreaseEachLevel: 1.5
+      rateIncreaseEachLevel: 0
+      amountIncreaseEachLevelByLevels: []
+  - attribute: {fileID: 11400000, guid: 3308e4db38750b341a095fbfa1fa95dc, type: 2}
+    amount:
+      baseAmount: 2
+      amountIncreaseEachLevel: 0.5
+      rateIncreaseEachLevel: 0
+      amountIncreaseEachLevelByLevels: []
   resistances: []
   armors: []
   statusEffectResistances: []
@@ -190,7 +208,56 @@ MonoBehaviour:
   enemyStatusEffectsWhenAttacking: []
   selfStatusEffectsWhenAttacked: []
   enemyStatusEffectsWhenAttacked: []
-  skills: []
+  skills:
+  - skill: {fileID: 11400000, guid: 20b867d0187aa55458948a252c809496, type: 2}
+    level: 0
+    skillLevel:
+      baseAmount: 1
+      amountIncreaseEachLevel: 0
+      rateIncreaseEachLevel: 0
+      amountIncreaseEachLevelByLevels: []
+  - skill: {fileID: 11400000, guid: 79069291765b1f0478dcd5dad1bb48be, type: 2}
+    level: 0
+    skillLevel:
+      baseAmount: 1
+      amountIncreaseEachLevel: 0
+      rateIncreaseEachLevel: 0
+      amountIncreaseEachLevelByLevels: []
+  - skill: {fileID: 11400000, guid: fff359a2a875f9d448d2e065ac7240b0, type: 2}
+    level: 0
+    skillLevel:
+      baseAmount: 0
+      amountIncreaseEachLevel: 0
+      rateIncreaseEachLevel: 0
+      amountIncreaseEachLevelByLevels: []
+  - skill: {fileID: 11400000, guid: 8a52dfe6ec98d984f80bfd37b55fbb40, type: 2}
+    level: 0
+    skillLevel:
+      baseAmount: 0
+      amountIncreaseEachLevel: 0
+      rateIncreaseEachLevel: 0
+      amountIncreaseEachLevelByLevels: []
+  - skill: {fileID: 11400000, guid: 8d369ec918ae8cd4d815ff8c7cbc2d1e, type: 2}
+    level: 0
+    skillLevel:
+      baseAmount: 0
+      amountIncreaseEachLevel: 0
+      rateIncreaseEachLevel: 0
+      amountIncreaseEachLevelByLevels: []
+  - skill: {fileID: 11400000, guid: 20b27485c67d9c64097b505513fbd2af, type: 2}
+    level: 0
+    skillLevel:
+      baseAmount: 0
+      amountIncreaseEachLevel: 0
+      rateIncreaseEachLevel: 0
+      amountIncreaseEachLevelByLevels: []
+  - skill: {fileID: 11400000, guid: 1c6e20611bc54884bbce945aa919ff9d, type: 2}
+    level: 0
+    skillLevel:
+      baseAmount: 0
+      amountIncreaseEachLevel: 0
+      rateIncreaseEachLevel: 0
+      amountIncreaseEachLevelByLevels: []
   rightHandEquipItem: {fileID: 11400000, guid: 34a7184280bba49478543799e69e1c4a, type: 2}
   leftHandEquipItem: {fileID: 0}
   armorItems:
@@ -202,6 +269,12 @@ MonoBehaviour:
   - item: {fileID: 11400000, guid: 4813f8d8ebdc81349b469905ed698457, type: 2}
     level: 0
     amount: 5
+  - item: {fileID: 11400000, guid: c5b44435fcd2ef04c933bbefe1539264, type: 2}
+    level: 0
+    amount: 1
+  - item: {fileID: 11400000, guid: 16260e31b7b45484d99f58e932158201, type: 2}
+    level: 0
+    amount: 1
   startMap: {fileID: 11400000, guid: 0a5e6a3017686de4386e0acf0947d47b, type: 2}
   useOverrideStartPosition: 0
   overrideStartPosition: {x: 0, y: 0, z: 0}

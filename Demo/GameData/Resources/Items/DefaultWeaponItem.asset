@@ -19,7 +19,7 @@ MonoBehaviour:
   defaultDescription: 
   languageSpecificDescriptions: []
   category: 
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: c19708341ceedd2428054ba12c70df4e, type: 3}
   iconSettingsInitialized: 1
   iconRotation: {x: 45, y: 90, z: 90}
   iconZoom: 1.4
@@ -82,7 +82,7 @@ MonoBehaviour:
       amountIncreaseEachLevel: 0
       rateIncreaseEachLevel: 0
       amountIncreaseEachLevelByLevels: []
-  weaponType: {fileID: 11400000, guid: e1f9f1925e8c9b14aa98b51238e5a26e, type: 2}
+  weaponType: {fileID: 11400000, guid: b09d47d43c0944d448cfb4ea7d800571, type: 2}
   doRecoilingAsAttackAnimation: 0
   damageAmount:
     damageElement: {fileID: 0}

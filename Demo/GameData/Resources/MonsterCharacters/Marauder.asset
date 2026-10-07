@@ -24,7 +24,7 @@ MonoBehaviour:
   stats:
     baseStats:
       hp: 95
-      hpRecovery: -0.45
+      hpRecovery: 0
       hpLeechRate: 0
       mp: 0
       mpRecovery: 0
@@ -37,7 +37,7 @@ MonoBehaviour:
       accuracy: 0
       evasion: 0
       criRate: 0
-      criDmgRate: 0
+      criDmgRate: 1.5
       blockRate: 0
       blockDmgRate: 0
       moveSpeed: 3.2
@@ -77,7 +77,7 @@ MonoBehaviour:
       sellItemPriceRate: 0
     statsIncreaseEachLevel:
       hp: 26
-      hpRecovery: -0.26
+      hpRecovery: 0
       hpLeechRate: 0
       mp: 0
       mpRecovery: 0
@@ -191,7 +191,7 @@ MonoBehaviour:
   selfStatusEffectsWhenAttacked: []
   enemyStatusEffectsWhenAttacked: []
   defaultLevel: 1
-  characteristic: 0
+  characteristic: 1
   allyId: 0
   reputation: 0
   wanderMoveSpeed: 1
@@ -656,9 +656,9 @@ MonoBehaviour:
   damageInfo:
     damageType: 0
     hitOnlySelectedTarget: 0
-    startAttackDistance: 0.5
-    hitDistance: 2
-    hitFov: 60
+    startAttackDistance: 1.53
+    hitDistance: 1.8
+    hitFov: 90
     originOffsets: 1
     missileDistance: 10
     missileSpeed: 10
@@ -675,11 +675,11 @@ MonoBehaviour:
     damageElement: {fileID: 0}
     amount:
       baseAmount:
-        min: 0
-        max: 0
+        min: 7
+        max: 12
       amountIncreaseEachLevel:
-        min: 0
-        max: 0
+        min: 3
+        max: 3
       rateIncreaseEachLevel:
         min: 0
         max: 0
@@ -715,7 +715,7 @@ MonoBehaviour:
   randomCurrencies: []
   itemDropManager:
     randomItems:
-    - item: {fileID: 11400000, guid: eb295913795f8fb438ed0d6b03300b41, type: 2}
+    - item: {fileID: 11400000, guid: e90e45bae4177dc43bf5fdad84304dc5, type: 2}
       minLevel: 0
       maxLevel: 1
       minAmount: 1

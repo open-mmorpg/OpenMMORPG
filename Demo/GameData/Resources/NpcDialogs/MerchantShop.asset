@@ -212,38 +212,113 @@ MonoBehaviour:
   sellItems:
   - item: {fileID: 11400000, guid: 4813f8d8ebdc81349b469905ed698457, type: 2}
     level: 1
-    amount: 0
-    sellPrice: 0
+    amount: 1
+    sellPrice: 20
+    sellPrices: []
+  - item: {fileID: 11400000, guid: f3b2b683e39464640b24709a54ff3ec5, type: 2}
+    level: 1
+    amount: 1
+    sellPrice: 25
     sellPrices: []
   - item: {fileID: 11400000, guid: 34a7184280bba49478543799e69e1c4a, type: 2}
     level: 1
-    amount: 0
-    sellPrice: 0
+    amount: 1
+    sellPrice: 60
     sellPrices: []
   - item: {fileID: 11400000, guid: f23b66f1821b860489ed58417583f22f, type: 2}
     level: 1
-    amount: 0
-    sellPrice: 0
+    amount: 1
+    sellPrice: 25
     sellPrices: []
   - item: {fileID: 11400000, guid: c583cfc16a4613946bc8415b0ef56ef7, type: 2}
     level: 1
-    amount: 0
-    sellPrice: 0
+    amount: 1
+    sellPrice: 20
     sellPrices: []
   - item: {fileID: 11400000, guid: 348cb42ed88cc6944ac65a7e25a47d88, type: 2}
     level: 1
-    amount: 0
-    sellPrice: 0
+    amount: 1
+    sellPrice: 12
     sellPrices: []
   - item: {fileID: 11400000, guid: 611669dad31abdc4496e44599be9bf46, type: 2}
     level: 1
-    amount: 0
-    sellPrice: 0
+    amount: 1
+    sellPrice: 15
     sellPrices: []
   - item: {fileID: 11400000, guid: 0b6da418e549e9f47b1fcc94efeef626, type: 2}
     level: 1
-    amount: 0
-    sellPrice: 0
+    amount: 1
+    sellPrice: 250
+    sellPrices: []
+  - item: {fileID: 11400000, guid: 53115aabe1fdd83499f5348f81e1f38c, type: 2}
+    level: 1
+    amount: 1
+    sellPrice: 45
+    sellPrices: []
+  - item: {fileID: 11400000, guid: 79f6e7f1fec15fa49b46f3a9ecaef95f, type: 2}
+    level: 1
+    amount: 1
+    sellPrice: 1
+    sellPrices: []
+  - item: {fileID: 11400000, guid: 0ab43cc011126b340845dd2a04496f02, type: 2}
+    level: 1
+    amount: 1
+    sellPrice: 90
+    sellPrices: []
+  - item: {fileID: 11400000, guid: c5b44435fcd2ef04c933bbefe1539264, type: 2}
+    level: 1
+    amount: 1
+    sellPrice: 30
+    sellPrices: []
+  - item: {fileID: 11400000, guid: 16260e31b7b45484d99f58e932158201, type: 2}
+    level: 1
+    amount: 1
+    sellPrice: 30
+    sellPrices: []
+  - item: {fileID: 11400000, guid: 6edfe3a8da850aa4999a2aa1f6ded002, type: 2}
+    level: 1
+    amount: 1
+    sellPrice: 180
+    sellPrices: []
+  - item: {fileID: 11400000, guid: f6f921941501f7049b54ca8ee4cfcf6b, type: 2}
+    level: 1
+    amount: 1
+    sellPrice: 180
+    sellPrices: []
+  - item: {fileID: 11400000, guid: 92276804cbaf2124fb3cd204b4240b28, type: 2}
+    level: 1
+    amount: 1
+    sellPrice: 220
+    sellPrices: []
+  - item: {fileID: 11400000, guid: a4bc9dbf314c6014aad0eef20c6159ad, type: 2}
+    level: 1
+    amount: 1
+    sellPrice: 300
+    sellPrices: []
+  - item: {fileID: 11400000, guid: de154f787125a7c42a81f11ad7791605, type: 2}
+    level: 1
+    amount: 1
+    sellPrice: 45
+    sellPrices: []
+  - item: {fileID: 11400000, guid: b76ad82fdbf13b04f8726a47b6d027eb, type: 2}
+    level: 1
+    amount: 1
+    sellPrice: 60
+    sellPrices: []
+  - item: {fileID: 11400000, guid: 5335634a26f50074abbb5365569dd1b8, type: 2}
+    level: 1
+    amount: 1
+    sellPrice: 150
+    sellPrices: []
+  - item: {fileID: 11400000, guid: ece911659b2f28c42b0a996b287442cd, type: 2}
+    level: 1
+    amount: 1
+    sellPrice: 250
+    sellPrices: []
+  - item: {fileID: 11400000, guid: 650c2f2f2a6b9104fb4fcd6a687465e6, type: 2}
+    level: 1
+    amount: 1
+    sellPrice: 400
     sellPrices: []
   itemCraft:
     craftingItem: {fileID: 0}

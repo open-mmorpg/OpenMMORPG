@@ -67,7 +67,6 @@ MonoBehaviour:
   onHideWithObject:
     m_PersistentCalls:
       m_Calls: []
-  tutorial: {fileID: 0}
   objectSelected: {fileID: 0}
   clones: []
   selectionManager: {fileID: 0}
@@ -161,7 +160,8 @@ RectTransform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 3921611317572037405}
   m_Father: {fileID: 3176600371053481457}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -197,8 +197,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: f72e834682cb1224d8ee12cc882a9420, type: 3}
-  m_Type: 0
+  m_Sprite: {fileID: 21300000, guid: c9a6a7bf665d9c64390f86b7af9244b9, type: 3}
+  m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -207,6 +207,102 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!1 &400662902402602472
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4193479505593788277}
+  - component: {fileID: 1241686718853190055}
+  - component: {fileID: 6652517222422502938}
+  - component: {fileID: 1946144110573039791}
+  m_Layer: 0
+  m_Name: --DemoFrame
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &4193479505593788277
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 400662902402602472}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7071069456299961943}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 8, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!222 &1241686718853190055
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 400662902402602472}
+  m_CullTransparentMesh: 1
+--- !u!114 &6652517222422502938
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 400662902402602472}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 0
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 21300000, guid: e571d704bfeae2e4188f492226325d29, type: 3}
+  m_Type: 1
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!114 &1946144110573039791
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 400662902402602472}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 306cc8c2b49d7114eaa3623786fc2126, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.LayoutElement
+  m_IgnoreLayout: 1
+  m_MinWidth: -1
+  m_MinHeight: -1
+  m_PreferredWidth: -1
+  m_PreferredHeight: -1
+  m_FlexibleWidth: -1
+  m_FlexibleHeight: -1
+  m_LayoutPriority: 1
 --- !u!1 &464158951966361432
 GameObject:
   m_ObjectHideFlags: 0
@@ -273,7 +369,6 @@ MonoBehaviour:
   onHideWithObject:
     m_PersistentCalls:
       m_Calls: []
-  tutorial: {fileID: 0}
   objectSelected: {fileID: 0}
   clones: []
   selectionManager: {fileID: 0}
@@ -539,7 +634,6 @@ MonoBehaviour:
   onHideWithObject:
     m_PersistentCalls:
       m_Calls: []
-  tutorial: {fileID: 0}
   formatApplyingTargetSelf:
     useCustomValue: 0
     localeKey: 295
@@ -696,7 +790,6 @@ MonoBehaviour:
   onHideWithObject:
     m_PersistentCalls:
       m_Calls: []
-  tutorial: {fileID: 0}
   formatApplyingTargetSelf:
     useCustomValue: 0
     localeKey: 295
@@ -818,6 +911,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 4273757510890361831}
+  - {fileID: 8754271784185668234}
   m_Father: {fileID: 8204757763213598837}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
@@ -846,15 +940,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.8784314, g: 0.8784314, b: 0.8784314, a: 1}
+  m_Color: {r: 0.836, g: 0.842, b: 0.85, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: f72e834682cb1224d8ee12cc882a9420, type: 3}
-  m_Type: 0
+  m_Sprite: {fileID: 21300000, guid: c9a6a7bf665d9c64390f86b7af9244b9, type: 3}
+  m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -951,7 +1045,6 @@ MonoBehaviour:
   onHideWithObject:
     m_PersistentCalls:
       m_Calls: []
-  tutorial: {fileID: 0}
   filterCategories: []
   filterItemTypes: 
   filterSocketEnhancerTypes: 
@@ -1028,7 +1121,6 @@ MonoBehaviour:
   onHideWithObject:
     m_PersistentCalls:
       m_Calls: []
-  tutorial: {fileID: 0}
   objectSelected: {fileID: 0}
   clones: []
   selectionManager: {fileID: 0}
@@ -1384,7 +1476,6 @@ MonoBehaviour:
   onHideWithObject:
     m_PersistentCalls:
       m_Calls: []
-  tutorial: {fileID: 0}
   formatApplyingTargetSelf:
     useCustomValue: 0
     localeKey: 295
@@ -1560,6 +1651,7 @@ RectTransform:
   m_Children:
   - {fileID: 2932047206893380550}
   - {fileID: 3508012690475559562}
+  - {fileID: 5645828349010745198}
   m_Father: {fileID: 7920384436012214464}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -1595,8 +1687,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: f72e834682cb1224d8ee12cc882a9420, type: 3}
-  m_Type: 0
+  m_Sprite: {fileID: 21300000, guid: c9a6a7bf665d9c64390f86b7af9244b9, type: 3}
+  m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -1780,6 +1872,102 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   unityText: {fileID: 4345832060843363765}
   textMeshText: {fileID: 0}
+--- !u!1 &2853095944824289474
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3921611317572037405}
+  - component: {fileID: 6713524311993631813}
+  - component: {fileID: 7712765089222352899}
+  - component: {fileID: 1718252755580316949}
+  m_Layer: 0
+  m_Name: --DemoFrame
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &3921611317572037405
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2853095944824289474}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 9116824619680095647}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!222 &6713524311993631813
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2853095944824289474}
+  m_CullTransparentMesh: 1
+--- !u!114 &7712765089222352899
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2853095944824289474}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 0
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 21300000, guid: e571d704bfeae2e4188f492226325d29, type: 3}
+  m_Type: 1
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!114 &1718252755580316949
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2853095944824289474}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 306cc8c2b49d7114eaa3623786fc2126, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.LayoutElement
+  m_IgnoreLayout: 1
+  m_MinWidth: -1
+  m_MinHeight: -1
+  m_PreferredWidth: -1
+  m_PreferredHeight: -1
+  m_FlexibleWidth: -1
+  m_FlexibleHeight: -1
+  m_LayoutPriority: 1
 --- !u!1 &2906850846165593929
 GameObject:
   m_ObjectHideFlags: 0
@@ -1887,6 +2075,102 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!1 &2913631464305365143
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6985273888011366233}
+  - component: {fileID: 2586448596556714888}
+  - component: {fileID: 7380144663485690251}
+  - component: {fileID: 5090516942850650943}
+  m_Layer: 0
+  m_Name: --DemoFrame
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &6985273888011366233
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2913631464305365143}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2032560072203395436}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 8, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!222 &2586448596556714888
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2913631464305365143}
+  m_CullTransparentMesh: 1
+--- !u!114 &7380144663485690251
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2913631464305365143}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 0
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 21300000, guid: e571d704bfeae2e4188f492226325d29, type: 3}
+  m_Type: 1
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!114 &5090516942850650943
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2913631464305365143}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 306cc8c2b49d7114eaa3623786fc2126, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.LayoutElement
+  m_IgnoreLayout: 1
+  m_MinWidth: -1
+  m_MinHeight: -1
+  m_PreferredWidth: -1
+  m_PreferredHeight: -1
+  m_FlexibleWidth: -1
+  m_FlexibleHeight: -1
+  m_LayoutPriority: 1
 --- !u!1 &3163540879709768671
 GameObject:
   m_ObjectHideFlags: 0
@@ -1953,7 +2237,6 @@ MonoBehaviour:
   onHideWithObject:
     m_PersistentCalls:
       m_Calls: []
-  tutorial: {fileID: 0}
   objectSelected: {fileID: 0}
   clones: []
   selectionManager: {fileID: 0}
@@ -2113,9 +2396,14 @@ MonoBehaviour:
     localeKey: 320
     customKey: 
     customValue: 
-  formatKeyAmmoCapacityStats:
+  formatKeyAmmoCapacityModifierStats:
     useCustomValue: 0
     localeKey: 322
+    customKey: 
+    customValue: 
+  formatKeyAmmoCapacityRateStats:
+    useCustomValue: 0
+    localeKey: 323
     customKey: 
     customValue: 
   formatKeyRecoilModifierStats:
@@ -2123,19 +2411,54 @@ MonoBehaviour:
     localeKey: 345
     customKey: 
     customValue: 
+  formatKeyRecoilYawModifierStats:
+    useCustomValue: 0
+    localeKey: 352
+    customKey: 
+    customValue: 
+  formatKeyRecoilRollModifierStats:
+    useCustomValue: 0
+    localeKey: 356
+    customKey: 
+    customValue: 
   formatKeyRecoilRateStats:
     useCustomValue: 0
     localeKey: 324
     customKey: 
     customValue: 
-  formatKeyRateOfFireStats:
+  formatKeyRecoilYawRateStats:
+    useCustomValue: 0
+    localeKey: 354
+    customKey: 
+    customValue: 
+  formatKeyRecoilRollRateStats:
+    useCustomValue: 0
+    localeKey: 358
+    customKey: 
+    customValue: 
+  formatKeyRateOfFireModifierStats:
     useCustomValue: 0
     localeKey: 326
     customKey: 
     customValue: 
-  formatKeyReloadDurationStats:
+  formatKeyRateOfFireRateStats:
+    useCustomValue: 0
+    localeKey: 327
+    customKey: 
+    customValue: 
+  formatKeyReloadDurationModifierStats:
     useCustomValue: 0
     localeKey: 328
+    customKey: 
+    customValue: 
+  formatKeyReloadDurationRateStats:
+    useCustomValue: 0
+    localeKey: 329
+    customKey: 
+    customValue: 
+  formatKeyFireSpreadRangeModifierStats:
+    useCustomValue: 0
+    localeKey: 366
     customKey: 
     customValue: 
   formatKeyFireSpreadRangeRateStats:
@@ -2143,9 +2466,14 @@ MonoBehaviour:
     localeKey: 330
     customKey: 
     customValue: 
-  formatKeyFireSpreadStats:
+  formatKeyFireSpreadModifierStats:
     useCustomValue: 0
     localeKey: 332
+    customKey: 
+    customValue: 
+  formatKeyFireSpreadRateStats:
+    useCustomValue: 0
+    localeKey: 333
     customKey: 
     customValue: 
   formatKeyDecreaseFoodDecreationStats:
@@ -2328,9 +2656,14 @@ MonoBehaviour:
     localeKey: 321
     customKey: 
     customValue: 
-  formatKeyAmmoCapacityRateStats:
+  formatKeyAmmoCapacityModifierRateStats:
     useCustomValue: 0
     localeKey: 323
+    customKey: 
+    customValue: 
+  formatKeyAmmoCapacityRateRateStats:
+    useCustomValue: 0
+    localeKey: 361
     customKey: 
     customValue: 
   formatKeyRecoilModifierRateStats:
@@ -2338,19 +2671,54 @@ MonoBehaviour:
     localeKey: 346
     customKey: 
     customValue: 
+  formatKeyRecoilYawModifierRateStats:
+    useCustomValue: 0
+    localeKey: 353
+    customKey: 
+    customValue: 
+  formatKeyRecoilRollModifierRateStats:
+    useCustomValue: 0
+    localeKey: 357
+    customKey: 
+    customValue: 
   formatKeyRecoilRateRateStats:
     useCustomValue: 0
     localeKey: 325
     customKey: 
     customValue: 
-  formatKeyRateOfFireRateStats:
+  formatKeyRecoilYawRateRateStats:
+    useCustomValue: 0
+    localeKey: 355
+    customKey: 
+    customValue: 
+  formatKeyRecoilRollRateRateStats:
+    useCustomValue: 0
+    localeKey: 359
+    customKey: 
+    customValue: 
+  formatKeyRateOfFireModifierRateStats:
     useCustomValue: 0
     localeKey: 327
     customKey: 
     customValue: 
-  formatKeyReloadDurationRateStats:
+  formatKeyRateOfFireRateRateStats:
+    useCustomValue: 0
+    localeKey: 363
+    customKey: 
+    customValue: 
+  formatKeyReloadDurationModifierRateStats:
     useCustomValue: 0
     localeKey: 329
+    customKey: 
+    customValue: 
+  formatKeyReloadDurationRateRateStats:
+    useCustomValue: 0
+    localeKey: 365
+    customKey: 
+    customValue: 
+  formatKeyFireSpreadRangeModifierRateStats:
+    useCustomValue: 0
+    localeKey: 367
     customKey: 
     customValue: 
   formatKeyFireSpreadRangeRateRateStats:
@@ -2358,9 +2726,14 @@ MonoBehaviour:
     localeKey: 331
     customKey: 
     customValue: 
-  formatKeyFireSpreadRateStats:
+  formatKeyFireSpreadModifierRateStats:
     useCustomValue: 0
     localeKey: 333
+    customKey: 
+    customValue: 
+  formatKeyFireSpreadRateRateStats:
+    useCustomValue: 0
+    localeKey: 369
     customKey: 
     customValue: 
   formatKeyDecreaseFoodDecreationRateStats:
@@ -2617,6 +2990,102 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   unityText: {fileID: 8611461026157277005}
   textMeshText: {fileID: 0}
+--- !u!1 &3921065526177802695
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4225536902481614708}
+  - component: {fileID: 3230623466937477921}
+  - component: {fileID: 3394673472655485993}
+  - component: {fileID: 2672719890265775988}
+  m_Layer: 0
+  m_Name: --DemoFrame
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &4225536902481614708
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3921065526177802695}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7920384436012214464}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 8, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!222 &3230623466937477921
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3921065526177802695}
+  m_CullTransparentMesh: 1
+--- !u!114 &3394673472655485993
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3921065526177802695}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 0
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 21300000, guid: e571d704bfeae2e4188f492226325d29, type: 3}
+  m_Type: 1
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!114 &2672719890265775988
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3921065526177802695}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 306cc8c2b49d7114eaa3623786fc2126, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.LayoutElement
+  m_IgnoreLayout: 1
+  m_MinWidth: -1
+  m_MinHeight: -1
+  m_PreferredWidth: -1
+  m_PreferredHeight: -1
+  m_FlexibleWidth: -1
+  m_FlexibleHeight: -1
+  m_LayoutPriority: 1
 --- !u!1 &3959335776664639353
 GameObject:
   m_ObjectHideFlags: 0
@@ -2777,7 +3246,6 @@ MonoBehaviour:
   onHideWithObject:
     m_PersistentCalls:
       m_Calls: []
-  tutorial: {fileID: 0}
   objectSelected: {fileID: 0}
   clones: []
   selectionManager: {fileID: 0}
@@ -2937,9 +3405,14 @@ MonoBehaviour:
     localeKey: 320
     customKey: 
     customValue: 
-  formatKeyAmmoCapacityStats:
+  formatKeyAmmoCapacityModifierStats:
     useCustomValue: 0
     localeKey: 322
+    customKey: 
+    customValue: 
+  formatKeyAmmoCapacityRateStats:
+    useCustomValue: 0
+    localeKey: 323
     customKey: 
     customValue: 
   formatKeyRecoilModifierStats:
@@ -2947,19 +3420,54 @@ MonoBehaviour:
     localeKey: 345
     customKey: 
     customValue: 
+  formatKeyRecoilYawModifierStats:
+    useCustomValue: 0
+    localeKey: 352
+    customKey: 
+    customValue: 
+  formatKeyRecoilRollModifierStats:
+    useCustomValue: 0
+    localeKey: 356
+    customKey: 
+    customValue: 
   formatKeyRecoilRateStats:
     useCustomValue: 0
     localeKey: 324
     customKey: 
     customValue: 
-  formatKeyRateOfFireStats:
+  formatKeyRecoilYawRateStats:
+    useCustomValue: 0
+    localeKey: 354
+    customKey: 
+    customValue: 
+  formatKeyRecoilRollRateStats:
+    useCustomValue: 0
+    localeKey: 358
+    customKey: 
+    customValue: 
+  formatKeyRateOfFireModifierStats:
     useCustomValue: 0
     localeKey: 326
     customKey: 
     customValue: 
-  formatKeyReloadDurationStats:
+  formatKeyRateOfFireRateStats:
+    useCustomValue: 0
+    localeKey: 327
+    customKey: 
+    customValue: 
+  formatKeyReloadDurationModifierStats:
     useCustomValue: 0
     localeKey: 328
+    customKey: 
+    customValue: 
+  formatKeyReloadDurationRateStats:
+    useCustomValue: 0
+    localeKey: 329
+    customKey: 
+    customValue: 
+  formatKeyFireSpreadRangeModifierStats:
+    useCustomValue: 0
+    localeKey: 366
     customKey: 
     customValue: 
   formatKeyFireSpreadRangeRateStats:
@@ -2967,9 +3475,14 @@ MonoBehaviour:
     localeKey: 330
     customKey: 
     customValue: 
-  formatKeyFireSpreadStats:
+  formatKeyFireSpreadModifierStats:
     useCustomValue: 0
     localeKey: 332
+    customKey: 
+    customValue: 
+  formatKeyFireSpreadRateStats:
+    useCustomValue: 0
+    localeKey: 333
     customKey: 
     customValue: 
   formatKeyDecreaseFoodDecreationStats:
@@ -3152,9 +3665,14 @@ MonoBehaviour:
     localeKey: 321
     customKey: 
     customValue: 
-  formatKeyAmmoCapacityRateStats:
+  formatKeyAmmoCapacityModifierRateStats:
     useCustomValue: 0
     localeKey: 323
+    customKey: 
+    customValue: 
+  formatKeyAmmoCapacityRateRateStats:
+    useCustomValue: 0
+    localeKey: 361
     customKey: 
     customValue: 
   formatKeyRecoilModifierRateStats:
@@ -3162,19 +3680,54 @@ MonoBehaviour:
     localeKey: 346
     customKey: 
     customValue: 
+  formatKeyRecoilYawModifierRateStats:
+    useCustomValue: 0
+    localeKey: 353
+    customKey: 
+    customValue: 
+  formatKeyRecoilRollModifierRateStats:
+    useCustomValue: 0
+    localeKey: 357
+    customKey: 
+    customValue: 
   formatKeyRecoilRateRateStats:
     useCustomValue: 0
     localeKey: 325
     customKey: 
     customValue: 
-  formatKeyRateOfFireRateStats:
+  formatKeyRecoilYawRateRateStats:
+    useCustomValue: 0
+    localeKey: 355
+    customKey: 
+    customValue: 
+  formatKeyRecoilRollRateRateStats:
+    useCustomValue: 0
+    localeKey: 359
+    customKey: 
+    customValue: 
+  formatKeyRateOfFireModifierRateStats:
     useCustomValue: 0
     localeKey: 327
     customKey: 
     customValue: 
-  formatKeyReloadDurationRateStats:
+  formatKeyRateOfFireRateRateStats:
+    useCustomValue: 0
+    localeKey: 363
+    customKey: 
+    customValue: 
+  formatKeyReloadDurationModifierRateStats:
     useCustomValue: 0
     localeKey: 329
+    customKey: 
+    customValue: 
+  formatKeyReloadDurationRateRateStats:
+    useCustomValue: 0
+    localeKey: 365
+    customKey: 
+    customValue: 
+  formatKeyFireSpreadRangeModifierRateStats:
+    useCustomValue: 0
+    localeKey: 367
     customKey: 
     customValue: 
   formatKeyFireSpreadRangeRateRateStats:
@@ -3182,9 +3735,14 @@ MonoBehaviour:
     localeKey: 331
     customKey: 
     customValue: 
-  formatKeyFireSpreadRateStats:
+  formatKeyFireSpreadModifierRateStats:
     useCustomValue: 0
     localeKey: 333
+    customKey: 
+    customValue: 
+  formatKeyFireSpreadRateRateStats:
+    useCustomValue: 0
+    localeKey: 369
     customKey: 
     customValue: 
   formatKeyDecreaseFoodDecreationRateStats:
@@ -3244,26 +3802,25 @@ MonoBehaviour:
   uiTextFallDamageAbsorbs: {fileID: 0}
   uiTextGravityRate: {fileID: 0}
   uiTextProtectedSlotLimit: {fileID: 0}
-  uiTextAmmoCapacity: {fileID: 0}
+  uiTextAmmoCapacityModifier: {fileID: 0}
+  uiTextAmmoCapacityRate: {fileID: 0}
   uiTextRecoilModifier: {fileID: 0}
+  uiTextRecoilYawModifier: {fileID: 0}
+  uiTextRecoilRollModifier: {fileID: 0}
   uiTextRecoilRate: {fileID: 0}
-  uiTextRateOfFire: {fileID: 0}
-  uiTextReloadDuration: {fileID: 0}
+  uiTextRecoilYawRate: {fileID: 0}
+  uiTextRecoilRollRate: {fileID: 0}
+  uiTextRateOfFireModifier: {fileID: 0}
+  uiTextRateOfFireRate: {fileID: 0}
+  uiTextReloadDurationModifier: {fileID: 0}
+  uiTextReloadDurationRate: {fileID: 0}
+  uiTextFireSpreadRangeModifier: {fileID: 0}
   uiTextFireSpreadRangeRate: {fileID: 0}
-  uiTextFireSpread: {fileID: 0}
-  uiTextNightVision: {fileID: 0}
-  uiTextFlashLight: {fileID: 0}
+  uiTextFireSpreadModifier: {fileID: 0}
+  uiTextFireSpreadRate: {fileID: 0}
   uiTextDecreaseFoodDecreation: {fileID: 0}
   uiTextDecreaseWaterDecreation: {fileID: 0}
   uiTextDecreaseStaminaDecreation: {fileID: 0}
-  uiTextIncreaseDamageType1: {fileID: 0}
-  uiTextIncreaseDamageType2: {fileID: 0}
-  uiTextIncreaseDamageType3: {fileID: 0}
-  uiTextIncreaseDamageType4: {fileID: 0}
-  uiTextAtkSpeedType1: {fileID: 0}
-  uiTextAtkSpeedType2: {fileID: 0}
-  uiTextAtkSpeedType3: {fileID: 0}
-  uiTextAtkSpeedType4: {fileID: 0}
   uiTextBuyItemPriceRate: {fileID: 0}
   uiTextSellItemPriceRate: {fileID: 0}
   displayType: 0
@@ -3396,7 +3953,6 @@ MonoBehaviour:
   onHideWithObject:
     m_PersistentCalls:
       m_Calls: []
-  tutorial: {fileID: 0}
   objectSelected: {fileID: 0}
   clones: []
   selectionManager: {fileID: 0}
@@ -3556,9 +4112,14 @@ MonoBehaviour:
     localeKey: 320
     customKey: 
     customValue: 
-  formatKeyAmmoCapacityStats:
+  formatKeyAmmoCapacityModifierStats:
     useCustomValue: 0
     localeKey: 322
+    customKey: 
+    customValue: 
+  formatKeyAmmoCapacityRateStats:
+    useCustomValue: 0
+    localeKey: 323
     customKey: 
     customValue: 
   formatKeyRecoilModifierStats:
@@ -3566,19 +4127,54 @@ MonoBehaviour:
     localeKey: 345
     customKey: 
     customValue: 
+  formatKeyRecoilYawModifierStats:
+    useCustomValue: 0
+    localeKey: 352
+    customKey: 
+    customValue: 
+  formatKeyRecoilRollModifierStats:
+    useCustomValue: 0
+    localeKey: 356
+    customKey: 
+    customValue: 
   formatKeyRecoilRateStats:
     useCustomValue: 0
     localeKey: 324
     customKey: 
     customValue: 
-  formatKeyRateOfFireStats:
+  formatKeyRecoilYawRateStats:
+    useCustomValue: 0
+    localeKey: 354
+    customKey: 
+    customValue: 
+  formatKeyRecoilRollRateStats:
+    useCustomValue: 0
+    localeKey: 358
+    customKey: 
+    customValue: 
+  formatKeyRateOfFireModifierStats:
     useCustomValue: 0
     localeKey: 326
     customKey: 
     customValue: 
-  formatKeyReloadDurationStats:
+  formatKeyRateOfFireRateStats:
+    useCustomValue: 0
+    localeKey: 327
+    customKey: 
+    customValue: 
+  formatKeyReloadDurationModifierStats:
     useCustomValue: 0
     localeKey: 328
+    customKey: 
+    customValue: 
+  formatKeyReloadDurationRateStats:
+    useCustomValue: 0
+    localeKey: 329
+    customKey: 
+    customValue: 
+  formatKeyFireSpreadRangeModifierStats:
+    useCustomValue: 0
+    localeKey: 366
     customKey: 
     customValue: 
   formatKeyFireSpreadRangeRateStats:
@@ -3586,9 +4182,14 @@ MonoBehaviour:
     localeKey: 330
     customKey: 
     customValue: 
-  formatKeyFireSpreadStats:
+  formatKeyFireSpreadModifierStats:
     useCustomValue: 0
     localeKey: 332
+    customKey: 
+    customValue: 
+  formatKeyFireSpreadRateStats:
+    useCustomValue: 0
+    localeKey: 333
     customKey: 
     customValue: 
   formatKeyDecreaseFoodDecreationStats:
@@ -3771,9 +4372,14 @@ MonoBehaviour:
     localeKey: 321
     customKey: 
     customValue: 
-  formatKeyAmmoCapacityRateStats:
+  formatKeyAmmoCapacityModifierRateStats:
     useCustomValue: 0
     localeKey: 323
+    customKey: 
+    customValue: 
+  formatKeyAmmoCapacityRateRateStats:
+    useCustomValue: 0
+    localeKey: 361
     customKey: 
     customValue: 
   formatKeyRecoilModifierRateStats:
@@ -3781,19 +4387,54 @@ MonoBehaviour:
     localeKey: 346
     customKey: 
     customValue: 
+  formatKeyRecoilYawModifierRateStats:
+    useCustomValue: 0
+    localeKey: 353
+    customKey: 
+    customValue: 
+  formatKeyRecoilRollModifierRateStats:
+    useCustomValue: 0
+    localeKey: 357
+    customKey: 
+    customValue: 
   formatKeyRecoilRateRateStats:
     useCustomValue: 0
     localeKey: 325
     customKey: 
     customValue: 
-  formatKeyRateOfFireRateStats:
+  formatKeyRecoilYawRateRateStats:
+    useCustomValue: 0
+    localeKey: 355
+    customKey: 
+    customValue: 
+  formatKeyRecoilRollRateRateStats:
+    useCustomValue: 0
+    localeKey: 359
+    customKey: 
+    customValue: 
+  formatKeyRateOfFireModifierRateStats:
     useCustomValue: 0
     localeKey: 327
     customKey: 
     customValue: 
-  formatKeyReloadDurationRateStats:
+  formatKeyRateOfFireRateRateStats:
+    useCustomValue: 0
+    localeKey: 363
+    customKey: 
+    customValue: 
+  formatKeyReloadDurationModifierRateStats:
     useCustomValue: 0
     localeKey: 329
+    customKey: 
+    customValue: 
+  formatKeyReloadDurationRateRateStats:
+    useCustomValue: 0
+    localeKey: 365
+    customKey: 
+    customValue: 
+  formatKeyFireSpreadRangeModifierRateStats:
+    useCustomValue: 0
+    localeKey: 367
     customKey: 
     customValue: 
   formatKeyFireSpreadRangeRateRateStats:
@@ -3801,9 +4442,14 @@ MonoBehaviour:
     localeKey: 331
     customKey: 
     customValue: 
-  formatKeyFireSpreadRateStats:
+  formatKeyFireSpreadModifierRateStats:
     useCustomValue: 0
     localeKey: 333
+    customKey: 
+    customValue: 
+  formatKeyFireSpreadRateRateStats:
+    useCustomValue: 0
+    localeKey: 369
     customKey: 
     customValue: 
   formatKeyDecreaseFoodDecreationRateStats:
@@ -3943,6 +4589,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 3176600371053481457}
+  - {fileID: 6985273888011366233}
   m_Father: {fileID: 1117761841422385931}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
@@ -3971,15 +4618,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.87843144, g: 0.87843144, b: 0.87843144, a: 1}
+  m_Color: {r: 0.836, g: 0.842, b: 0.85, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: f72e834682cb1224d8ee12cc882a9420, type: 3}
-  m_Type: 0
+  m_Sprite: {fileID: 21300000, guid: c9a6a7bf665d9c64390f86b7af9244b9, type: 3}
+  m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -4103,7 +4750,6 @@ MonoBehaviour:
   onHideWithObject:
     m_PersistentCalls:
       m_Calls: []
-  tutorial: {fileID: 0}
   objectSelected: {fileID: 0}
   clones: []
   selectionManager: {fileID: 0}
@@ -4262,8 +4908,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 611039964f3f4754b8d13eaca5d77f52, type: 3}
-  m_Type: 0
+  m_Sprite: {fileID: 21300000, guid: c9a6a7bf665d9c64390f86b7af9244b9, type: 3}
+  m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -4348,8 +4994,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: f72e834682cb1224d8ee12cc882a9420, type: 3}
-  m_Type: 0
+  m_Sprite: {fileID: 21300000, guid: c9a6a7bf665d9c64390f86b7af9244b9, type: 3}
+  m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -4436,7 +5082,6 @@ MonoBehaviour:
   onHideWithObject:
     m_PersistentCalls:
       m_Calls: []
-  tutorial: {fileID: 0}
   objectSelected: {fileID: 0}
   clones: []
   selectionManager: {fileID: 0}
@@ -4811,16 +5456,15 @@ MonoBehaviour:
   onHideWithObject:
     m_PersistentCalls:
       m_Calls: []
-  tutorial: {fileID: 0}
   objectSelected: {fileID: 0}
   clones: []
   selectionManager: {fileID: 0}
   updateUIRepeatRate: 0.5
   formatKeySellPrice:
-    useCustomValue: 0
+    useCustomValue: 1
     localeKey: 40
     customKey: 
-    customValue: 
+    customValue: '{0} gold'
   uiCharacterItem: {fileID: 769680501163754421}
   uiTextSellPrice: {fileID: 2110139323656478897}
   uiSellPrices: {fileID: 0}
@@ -5025,7 +5669,6 @@ MonoBehaviour:
   onHideWithObject:
     m_PersistentCalls:
       m_Calls: []
-  tutorial: {fileID: 0}
   objectSelected: {fileID: 0}
   clones: []
   selectionManager: {fileID: 0}
@@ -5185,9 +5828,14 @@ MonoBehaviour:
     localeKey: 320
     customKey: 
     customValue: 
-  formatKeyAmmoCapacityStats:
+  formatKeyAmmoCapacityModifierStats:
     useCustomValue: 0
     localeKey: 322
+    customKey: 
+    customValue: 
+  formatKeyAmmoCapacityRateStats:
+    useCustomValue: 0
+    localeKey: 323
     customKey: 
     customValue: 
   formatKeyRecoilModifierStats:
@@ -5195,19 +5843,54 @@ MonoBehaviour:
     localeKey: 345
     customKey: 
     customValue: 
+  formatKeyRecoilYawModifierStats:
+    useCustomValue: 0
+    localeKey: 352
+    customKey: 
+    customValue: 
+  formatKeyRecoilRollModifierStats:
+    useCustomValue: 0
+    localeKey: 356
+    customKey: 
+    customValue: 
   formatKeyRecoilRateStats:
     useCustomValue: 0
     localeKey: 324
     customKey: 
     customValue: 
-  formatKeyRateOfFireStats:
+  formatKeyRecoilYawRateStats:
+    useCustomValue: 0
+    localeKey: 354
+    customKey: 
+    customValue: 
+  formatKeyRecoilRollRateStats:
+    useCustomValue: 0
+    localeKey: 358
+    customKey: 
+    customValue: 
+  formatKeyRateOfFireModifierStats:
     useCustomValue: 0
     localeKey: 326
     customKey: 
     customValue: 
-  formatKeyReloadDurationStats:
+  formatKeyRateOfFireRateStats:
+    useCustomValue: 0
+    localeKey: 327
+    customKey: 
+    customValue: 
+  formatKeyReloadDurationModifierStats:
     useCustomValue: 0
     localeKey: 328
+    customKey: 
+    customValue: 
+  formatKeyReloadDurationRateStats:
+    useCustomValue: 0
+    localeKey: 329
+    customKey: 
+    customValue: 
+  formatKeyFireSpreadRangeModifierStats:
+    useCustomValue: 0
+    localeKey: 366
     customKey: 
     customValue: 
   formatKeyFireSpreadRangeRateStats:
@@ -5215,9 +5898,14 @@ MonoBehaviour:
     localeKey: 330
     customKey: 
     customValue: 
-  formatKeyFireSpreadStats:
+  formatKeyFireSpreadModifierStats:
     useCustomValue: 0
     localeKey: 332
+    customKey: 
+    customValue: 
+  formatKeyFireSpreadRateStats:
+    useCustomValue: 0
+    localeKey: 333
     customKey: 
     customValue: 
   formatKeyDecreaseFoodDecreationStats:
@@ -5400,9 +6088,14 @@ MonoBehaviour:
     localeKey: 321
     customKey: 
     customValue: 
-  formatKeyAmmoCapacityRateStats:
+  formatKeyAmmoCapacityModifierRateStats:
     useCustomValue: 0
     localeKey: 323
+    customKey: 
+    customValue: 
+  formatKeyAmmoCapacityRateRateStats:
+    useCustomValue: 0
+    localeKey: 361
     customKey: 
     customValue: 
   formatKeyRecoilModifierRateStats:
@@ -5410,19 +6103,54 @@ MonoBehaviour:
     localeKey: 346
     customKey: 
     customValue: 
+  formatKeyRecoilYawModifierRateStats:
+    useCustomValue: 0
+    localeKey: 353
+    customKey: 
+    customValue: 
+  formatKeyRecoilRollModifierRateStats:
+    useCustomValue: 0
+    localeKey: 357
+    customKey: 
+    customValue: 
   formatKeyRecoilRateRateStats:
     useCustomValue: 0
     localeKey: 325
     customKey: 
     customValue: 
-  formatKeyRateOfFireRateStats:
+  formatKeyRecoilYawRateRateStats:
+    useCustomValue: 0
+    localeKey: 355
+    customKey: 
+    customValue: 
+  formatKeyRecoilRollRateRateStats:
+    useCustomValue: 0
+    localeKey: 359
+    customKey: 
+    customValue: 
+  formatKeyRateOfFireModifierRateStats:
     useCustomValue: 0
     localeKey: 327
     customKey: 
     customValue: 
-  formatKeyReloadDurationRateStats:
+  formatKeyRateOfFireRateRateStats:
+    useCustomValue: 0
+    localeKey: 363
+    customKey: 
+    customValue: 
+  formatKeyReloadDurationModifierRateStats:
     useCustomValue: 0
     localeKey: 329
+    customKey: 
+    customValue: 
+  formatKeyReloadDurationRateRateStats:
+    useCustomValue: 0
+    localeKey: 365
+    customKey: 
+    customValue: 
+  formatKeyFireSpreadRangeModifierRateStats:
+    useCustomValue: 0
+    localeKey: 367
     customKey: 
     customValue: 
   formatKeyFireSpreadRangeRateRateStats:
@@ -5430,9 +6158,14 @@ MonoBehaviour:
     localeKey: 331
     customKey: 
     customValue: 
-  formatKeyFireSpreadRateStats:
+  formatKeyFireSpreadModifierRateStats:
     useCustomValue: 0
     localeKey: 333
+    customKey: 
+    customValue: 
+  formatKeyFireSpreadRateRateStats:
+    useCustomValue: 0
+    localeKey: 369
     customKey: 
     customValue: 
   formatKeyDecreaseFoodDecreationRateStats:
@@ -5492,26 +6225,25 @@ MonoBehaviour:
   uiTextFallDamageAbsorbs: {fileID: 0}
   uiTextGravityRate: {fileID: 0}
   uiTextProtectedSlotLimit: {fileID: 0}
-  uiTextAmmoCapacity: {fileID: 0}
+  uiTextAmmoCapacityModifier: {fileID: 0}
+  uiTextAmmoCapacityRate: {fileID: 0}
   uiTextRecoilModifier: {fileID: 0}
+  uiTextRecoilYawModifier: {fileID: 0}
+  uiTextRecoilRollModifier: {fileID: 0}
   uiTextRecoilRate: {fileID: 0}
-  uiTextRateOfFire: {fileID: 0}
-  uiTextReloadDuration: {fileID: 0}
+  uiTextRecoilYawRate: {fileID: 0}
+  uiTextRecoilRollRate: {fileID: 0}
+  uiTextRateOfFireModifier: {fileID: 0}
+  uiTextRateOfFireRate: {fileID: 0}
+  uiTextReloadDurationModifier: {fileID: 0}
+  uiTextReloadDurationRate: {fileID: 0}
+  uiTextFireSpreadRangeModifier: {fileID: 0}
   uiTextFireSpreadRangeRate: {fileID: 0}
-  uiTextFireSpread: {fileID: 0}
-  uiTextNightVision: {fileID: 0}
-  uiTextFlashLight: {fileID: 0}
+  uiTextFireSpreadModifier: {fileID: 0}
+  uiTextFireSpreadRate: {fileID: 0}
   uiTextDecreaseFoodDecreation: {fileID: 0}
   uiTextDecreaseWaterDecreation: {fileID: 0}
   uiTextDecreaseStaminaDecreation: {fileID: 0}
-  uiTextIncreaseDamageType1: {fileID: 0}
-  uiTextIncreaseDamageType2: {fileID: 0}
-  uiTextIncreaseDamageType3: {fileID: 0}
-  uiTextIncreaseDamageType4: {fileID: 0}
-  uiTextAtkSpeedType1: {fileID: 0}
-  uiTextAtkSpeedType2: {fileID: 0}
-  uiTextAtkSpeedType3: {fileID: 0}
-  uiTextAtkSpeedType4: {fileID: 0}
   uiTextBuyItemPriceRate: {fileID: 0}
   uiTextSellItemPriceRate: {fileID: 0}
   displayType: 0
@@ -5738,7 +6470,6 @@ MonoBehaviour:
   onHideWithObject:
     m_PersistentCalls:
       m_Calls: []
-  tutorial: {fileID: 0}
   objectSelected: {fileID: 0}
   clones: []
   selectionManager: {fileID: 0}
@@ -5836,7 +6567,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &3115510323805594702
 RectTransform:
   m_ObjectHideFlags: 0
@@ -5944,6 +6675,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 6392718608406569445}
+  - {fileID: 4193479505593788277}
   m_Father: {fileID: 8204757763213598837}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
@@ -5979,8 +6711,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: f72e834682cb1224d8ee12cc882a9420, type: 3}
-  m_Type: 0
+  m_Sprite: {fileID: 21300000, guid: c9a6a7bf665d9c64390f86b7af9244b9, type: 3}
+  m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -6089,6 +6821,7 @@ RectTransform:
   m_Children:
   - {fileID: 7463885670264518590}
   - {fileID: 2032560072203395436}
+  - {fileID: 4285690412222277986}
   m_Father: {fileID: 8204757763213598837}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -6147,15 +6880,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.8784314, g: 0.8784314, b: 0.8784314, a: 1}
+  m_Color: {r: 0.836, g: 0.842, b: 0.85, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: f72e834682cb1224d8ee12cc882a9420, type: 3}
-  m_Type: 0
+  m_Sprite: {fileID: 21300000, guid: c9a6a7bf665d9c64390f86b7af9244b9, type: 3}
+  m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -6247,6 +6980,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2584301178797829026}
+  - {fileID: 4225536902481614708}
   m_Father: {fileID: 8204757763213598837}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -6301,7 +7035,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0}
+  m_Color: {r: 0.918, g: 0.922, b: 0.927, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -6433,7 +7167,6 @@ MonoBehaviour:
   onHideWithObject:
     m_PersistentCalls:
       m_Calls: []
-  tutorial: {fileID: 0}
   objectSelected: {fileID: 0}
   clones: []
   selectionManager: {fileID: 0}
@@ -6619,7 +7352,6 @@ MonoBehaviour:
   onHideWithObject:
     m_PersistentCalls:
       m_Calls: []
-  tutorial: {fileID: 0}
   objectSelected: {fileID: 0}
   clones: []
   selectionManager: {fileID: 0}
@@ -6873,7 +7605,6 @@ MonoBehaviour:
   onHideWithObject:
     m_PersistentCalls:
       m_Calls: []
-  tutorial: {fileID: 0}
   formatKeyEntry:
     useCustomValue: 0
     localeKey: 307
@@ -7012,7 +7743,6 @@ MonoBehaviour:
   onHideWithObject:
     m_PersistentCalls:
       m_Calls: []
-  tutorial: {fileID: 0}
   objectSelected: {fileID: 0}
   clones: []
   selectionManager: {fileID: 0}
@@ -7172,7 +7902,6 @@ MonoBehaviour:
   onHideWithObject:
     m_PersistentCalls:
       m_Calls: []
-  tutorial: {fileID: 0}
   formatApplyingTargetSelf:
     useCustomValue: 0
     localeKey: 295
@@ -7263,6 +7992,102 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   unityText: {fileID: 8078262190665829230}
   textMeshText: {fileID: 0}
+--- !u!1 &7327700142177725913
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8754271784185668234}
+  - component: {fileID: 6269660586713009097}
+  - component: {fileID: 8645485998205868850}
+  - component: {fileID: 7787590127261157437}
+  m_Layer: 0
+  m_Name: --DemoFrame
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &8754271784185668234
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7327700142177725913}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4689084996560974219}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!222 &6269660586713009097
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7327700142177725913}
+  m_CullTransparentMesh: 1
+--- !u!114 &8645485998205868850
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7327700142177725913}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 0
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 21300000, guid: e571d704bfeae2e4188f492226325d29, type: 3}
+  m_Type: 1
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!114 &7787590127261157437
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7327700142177725913}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 306cc8c2b49d7114eaa3623786fc2126, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.LayoutElement
+  m_IgnoreLayout: 1
+  m_MinWidth: -1
+  m_MinHeight: -1
+  m_PreferredWidth: -1
+  m_PreferredHeight: -1
+  m_FlexibleWidth: -1
+  m_FlexibleHeight: -1
+  m_LayoutPriority: 1
 --- !u!1 &7528088438004972217
 GameObject:
   m_ObjectHideFlags: 0
@@ -7323,15 +8148,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.70980394, g: 0, b: 1, a: 1}
+  m_Color: {r: 0.4862745, g: 0.5254902, b: 0.5647059, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: f72e834682cb1224d8ee12cc882a9420, type: 3}
-  m_Type: 0
+  m_Sprite: {fileID: 21300000, guid: c9a6a7bf665d9c64390f86b7af9244b9, type: 3}
+  m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -7609,7 +8434,6 @@ MonoBehaviour:
   onHideWithObject:
     m_PersistentCalls:
       m_Calls: []
-  tutorial: {fileID: 0}
   objectSelected: {fileID: 0}
   clones: []
   selectionManager: {fileID: 0}
@@ -7856,7 +8680,6 @@ MonoBehaviour:
   onHideWithObject:
     m_PersistentCalls:
       m_Calls: []
-  tutorial: {fileID: 0}
   objectSelected: {fileID: 0}
   clones: []
   selectionManager: {fileID: 0}
@@ -7947,6 +8770,102 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   unityText: {fileID: 1915637147686045423}
   textMeshText: {fileID: 0}
+--- !u!1 &8014731383916395711
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4285690412222277986}
+  - component: {fileID: 1339487439981556051}
+  - component: {fileID: 2637820552051458904}
+  - component: {fileID: 6843096119556904206}
+  m_Layer: 0
+  m_Name: --DemoFrame
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &4285690412222277986
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8014731383916395711}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1117761841422385931}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 8, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!222 &1339487439981556051
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8014731383916395711}
+  m_CullTransparentMesh: 1
+--- !u!114 &2637820552051458904
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8014731383916395711}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 0
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 21300000, guid: e571d704bfeae2e4188f492226325d29, type: 3}
+  m_Type: 1
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!114 &6843096119556904206
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8014731383916395711}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 306cc8c2b49d7114eaa3623786fc2126, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.LayoutElement
+  m_IgnoreLayout: 1
+  m_MinWidth: -1
+  m_MinHeight: -1
+  m_PreferredWidth: -1
+  m_PreferredHeight: -1
+  m_FlexibleWidth: -1
+  m_FlexibleHeight: -1
+  m_LayoutPriority: 1
 --- !u!1 &8263171593913916807
 GameObject:
   m_ObjectHideFlags: 0
@@ -8107,7 +9026,6 @@ MonoBehaviour:
   onHideWithObject:
     m_PersistentCalls:
       m_Calls: []
-  tutorial: {fileID: 0}
   objectSelected: {fileID: 0}
   clones: []
   selectionManager: {fileID: 0}
@@ -8194,6 +9112,102 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   unityText: {fileID: 6014461876865036971}
   textMeshText: {fileID: 0}
+--- !u!1 &8618291240521310962
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5645828349010745198}
+  - component: {fileID: 5778963260022562097}
+  - component: {fileID: 7313315273992421464}
+  - component: {fileID: 3799145891016347836}
+  m_Layer: 0
+  m_Name: --DemoFrame
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &5645828349010745198
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8618291240521310962}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2584301178797829026}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 8, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!222 &5778963260022562097
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8618291240521310962}
+  m_CullTransparentMesh: 1
+--- !u!114 &7313315273992421464
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8618291240521310962}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 0
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 21300000, guid: e571d704bfeae2e4188f492226325d29, type: 3}
+  m_Type: 1
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!114 &3799145891016347836
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8618291240521310962}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 306cc8c2b49d7114eaa3623786fc2126, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.LayoutElement
+  m_IgnoreLayout: 1
+  m_MinWidth: -1
+  m_MinHeight: -1
+  m_PreferredWidth: -1
+  m_PreferredHeight: -1
+  m_FlexibleWidth: -1
+  m_FlexibleHeight: -1
+  m_LayoutPriority: 1
 --- !u!1 &8688436248332726995
 GameObject:
   m_ObjectHideFlags: 0
@@ -8478,7 +9492,6 @@ MonoBehaviour:
   onHideWithObject:
     m_PersistentCalls:
       m_Calls: []
-  tutorial: {fileID: 0}
   objectSelected: {fileID: 0}
   clones: []
   selectionManager: {fileID: 0}

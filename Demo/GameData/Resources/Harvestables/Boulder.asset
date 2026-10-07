@@ -21,17 +21,11 @@ MonoBehaviour:
   category: 
   icon: {fileID: 21300000, guid: 30cb9cd58af1a5744baf7dc2aad7ba48, type: 3}
   harvestEffectivenesses:
-  - weaponType: {fileID: 11400000, guid: 8bf9de9cb5b0fda498255c0b13cb217b, type: 2}
-    damageEffectiveness: 0.6
+  - weaponType: {fileID: 11400000, guid: 75690c1b909d21b40bf28be845b75474, type: 2}
+    damageEffectiveness: 1
     items:
     - item: {fileID: 11400000, guid: d86ee534fa79d5f4896338f39c96c98e, type: 2}
-      amountPerDamage: 0.05
-      randomWeight: 100
-  - weaponType: {fileID: 11400000, guid: 1a16eb003d7f19744b981f74a024c702, type: 2}
-    damageEffectiveness: 0.25
-    items:
-    - item: {fileID: 11400000, guid: d86ee534fa79d5f4896338f39c96c98e, type: 2}
-      amountPerDamage: 0.03
+      amountPerDamage: 0.2
       randomWeight: 100
   skillHarvestEffectivenesses: []
   expPerDamage: 1

@@ -202,6 +202,146 @@ MonoBehaviour:
   enterDialogActionsOnServer: []
   type: 0
   menus:
+  - title: Bram sent word
+    titles: []
+    icon: {fileID: 0}
+    showConditions:
+    - conditionType: 4
+      playerCharacter: {fileID: 0}
+      faction: {fileID: 0}
+      quest: {fileID: 11400000, guid: 4f8279b3a0ebaf040820c99bef0bf871, type: 2}
+      level: 0
+      customConditionScriptableObject: {fileID: 0}
+      customConditionCallback:
+        _target: {fileID: 0}
+        _methodName: 
+        _args: []
+        _dynamic: 0
+        _typeName: MultiplayerARPG.NpcDialogConditionData, Assembly-CSharp, Version=0.0.0.0,
+          Culture=neutral, PublicKeyToken=null
+        dirty: 0
+    isCloseMenu: 0
+    dialog: {fileID: 11400000, guid: 133345c3b743649408f7d5283b7225dd, type: 2}
+  - title: You look worried
+    titles: []
+    icon: {fileID: 0}
+    showConditions:
+    - conditionType: 2
+      playerCharacter: {fileID: 0}
+      faction: {fileID: 0}
+      quest: {fileID: 11400000, guid: 4f8279b3a0ebaf040820c99bef0bf871, type: 2}
+      level: 0
+      customConditionScriptableObject: {fileID: 0}
+      customConditionCallback:
+        _target: {fileID: 0}
+        _methodName: 
+        _args: []
+        _dynamic: 0
+        _typeName: MultiplayerARPG.NpcDialogConditionData, Assembly-CSharp, Version=0.0.0.0,
+          Culture=neutral, PublicKeyToken=null
+        dirty: 0
+    isCloseMenu: 0
+    dialog: {fileID: 11400000, guid: 133345c3b743649408f7d5283b7225dd, type: 2}
+  - title: About Bram...
+    titles: []
+    icon: {fileID: 0}
+    showConditions:
+    - conditionType: 253
+      playerCharacter: {fileID: 0}
+      faction: {fileID: 0}
+      quest: {fileID: 0}
+      level: 0
+      customConditionScriptableObject: {fileID: 11400000, guid: 703b71c327af0304fb8fd9b8d0915e81, type: 2}
+      customConditionCallback:
+        _target: {fileID: 0}
+        _methodName: 
+        _args: []
+        _dynamic: 0
+        _typeName: MultiplayerARPG.NpcDialogConditionData, Assembly-CSharp, Version=0.0.0.0,
+          Culture=neutral, PublicKeyToken=null
+        dirty: 0
+    isCloseMenu: 0
+    dialog: {fileID: 11400000, guid: 133345c3b743649408f7d5283b7225dd, type: 2}
+  - title: I have your venison
+    titles: []
+    icon: {fileID: 0}
+    showConditions:
+    - conditionType: 4
+      playerCharacter: {fileID: 0}
+      faction: {fileID: 0}
+      quest: {fileID: 11400000, guid: 6f6337a64d1acfd4fab19a6c08b28712, type: 2}
+      level: 0
+      customConditionScriptableObject: {fileID: 0}
+      customConditionCallback:
+        _target: {fileID: 0}
+        _methodName: 
+        _args: []
+        _dynamic: 0
+        _typeName: MultiplayerARPG.NpcDialogConditionData, Assembly-CSharp, Version=0.0.0.0,
+          Culture=neutral, PublicKeyToken=null
+        dirty: 0
+    isCloseMenu: 0
+    dialog: {fileID: 11400000, guid: 694f7237610f7714ca5b081c30ac025f, type: 2}
+  - title: Can I help in the kitchen?
+    titles: []
+    icon: {fileID: 0}
+    showConditions:
+    - conditionType: 2
+      playerCharacter: {fileID: 0}
+      faction: {fileID: 0}
+      quest: {fileID: 11400000, guid: 6f6337a64d1acfd4fab19a6c08b28712, type: 2}
+      level: 0
+      customConditionScriptableObject: {fileID: 0}
+      customConditionCallback:
+        _target: {fileID: 0}
+        _methodName: 
+        _args: []
+        _dynamic: 0
+        _typeName: MultiplayerARPG.NpcDialogConditionData, Assembly-CSharp, Version=0.0.0.0,
+          Culture=neutral, PublicKeyToken=null
+        dirty: 0
+    isCloseMenu: 0
+    dialog: {fileID: 11400000, guid: 694f7237610f7714ca5b081c30ac025f, type: 2}
+  - title: About the venison...
+    titles: []
+    icon: {fileID: 0}
+    showConditions:
+    - conditionType: 253
+      playerCharacter: {fileID: 0}
+      faction: {fileID: 0}
+      quest: {fileID: 0}
+      level: 0
+      customConditionScriptableObject: {fileID: 11400000, guid: e7a96e0661c5b214ba4136351941ac09, type: 2}
+      customConditionCallback:
+        _target: {fileID: 0}
+        _methodName: 
+        _args: []
+        _dynamic: 0
+        _typeName: MultiplayerARPG.NpcDialogConditionData, Assembly-CSharp, Version=0.0.0.0,
+          Culture=neutral, PublicKeyToken=null
+        dirty: 0
+    isCloseMenu: 0
+    dialog: {fileID: 11400000, guid: 694f7237610f7714ca5b081c30ac025f, type: 2}
+  - title: Is the pot empty again?
+    titles: []
+    icon: {fileID: 0}
+    showConditions:
+    - conditionType: 5
+      playerCharacter: {fileID: 0}
+      faction: {fileID: 0}
+      quest: {fileID: 11400000, guid: 6f6337a64d1acfd4fab19a6c08b28712, type: 2}
+      level: 0
+      customConditionScriptableObject: {fileID: 0}
+      customConditionCallback:
+        _target: {fileID: 0}
+        _methodName: 
+        _args: []
+        _dynamic: 0
+        _typeName: MultiplayerARPG.NpcDialogConditionData, Assembly-CSharp, Version=0.0.0.0,
+          Culture=neutral, PublicKeyToken=null
+        dirty: 0
+    isCloseMenu: 0
+    dialog: {fileID: 11400000, guid: 694f7237610f7714ca5b081c30ac025f, type: 2}
   - title: What have you got?
     titles: []
     icon: {fileID: 0}

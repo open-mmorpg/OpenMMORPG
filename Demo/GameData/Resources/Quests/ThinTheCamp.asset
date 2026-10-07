@@ -29,10 +29,10 @@ MonoBehaviour:
   tasks: []
   randomTasks:
   - tasks:
-    - taskType: 0
+    - taskType: 254
       monsterCharacterAmount:
-        monster: {fileID: 11400000, guid: 7c0c6f3301553204f84dcd1b5bd6e4f3, type: 2}
-        amount: 8
+        monster: {fileID: 0}
+        amount: 0
       itemAmount:
         item: {fileID: 0}
         level: 0
@@ -44,7 +44,7 @@ MonoBehaviour:
       npcEntityTitles: []
       talkToNpcDialog: {fileID: 0}
       completeAfterTalked: 0
-      customQuestTask: {fileID: 0}
+      customQuestTask: {fileID: 11400000, guid: b043b5ddba4fe4d4e8bd09c02e669b4e, type: 2}
       useCustomDescription: 0
       defaultDescription: 
       languageSpecificDescriptions: []

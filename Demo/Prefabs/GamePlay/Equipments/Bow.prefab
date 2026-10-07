@@ -9,6 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7875329598669371861}
+  - component: {fileID: 149370914706875188}
   m_Layer: 0
   m_Name: Bow
   m_TagString: Untagged
@@ -32,6 +33,71 @@ Transform:
   - {fileID: 2373651639970361933}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &149370914706875188
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4112531239855661145}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fecfbcc9aa47ea14887ebfe52c133cff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MultiplayerARPG.BowEquipmentEntity
+  refToPrefab: {fileID: 0}
+  repacePrefab: 0
+  visibleMaterials: []
+  invisibleMaterials: []
+  fpsMaterials: []
+  hiddingObjects: []
+  hiddingRenderers: []
+  fpsHiddingObjects: []
+  fpsHiddingRenderers: []
+  weaponLaunchEffects: []
+  poolingWeaponLaunchEffects: []
+  missileDamageTransform: {fileID: 0}
+  onSetup:
+    m_PersistentCalls:
+      m_Calls: []
+  onEnable:
+    m_PersistentCalls:
+      m_Calls: []
+  onDisable:
+    m_PersistentCalls:
+      m_Calls: []
+  onPlayLaunch:
+    m_PersistentCalls:
+      m_Calls: []
+  onPlayReload:
+    m_PersistentCalls:
+      m_Calls: []
+  onPlayReloaded:
+    m_PersistentCalls:
+      m_Calls: []
+  onPlayCharge:
+    m_PersistentCalls:
+      m_Calls: []
+  setProperMissileDamageTransformForIK: 0
+  mainHandSupportTransform: {fileID: 0}
+  reloadAnimPosOffsets: {x: 0, y: 0, z: 0}
+  adsTransform: {fileID: 0}
+  effects: []
+  arrowPrefab: {fileID: 6272089227986449817, guid: 58e60bf087acf114e9d927b9c38d5670, type: 3}
+  maxDraw: 0.65
+  nockRadius: 0.16
+  planeTolerance: 0.3
+  nockBlend: 0.1
+  limbFlex: 0.09
+  releaseTime: 0.3
+  releaseFrequency: 13
+  releaseDamping: 20
+  ringAmplitude: 0.035
+  relaxTime: 0.25
+  rightHandSocket: RightHand
+  leftHandSocket: LeftHand
+  heldItem: {fileID: 0}
+  releaseEffects: {fileID: 11400000, guid: cdc3eadf372aaa144b4cab0e73a73002, type: 2}
 --- !u!1 &6762949712700340452
 GameObject:
   m_ObjectHideFlags: 0
@@ -58,9 +124,9 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6762949712700340452}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: -0.0709968, y: 0.04810204, z: 0.004843358}
-  m_LocalScale: {x: 84.595604, y: 84.595604, z: 84.595604}
+  m_LocalRotation: {x: 0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 0.7}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 7875329598669371861}
@@ -98,7 +164,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 97238e9df85a15b4aa3be330bab5bb3f, type: 2}
+  - {fileID: 2100000, guid: b99a248278bf52a438c94ea22a40db3b, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

@@ -12,7 +12,6 @@ GameObject:
   - component: {fileID: 7656347808766541721}
   - component: {fileID: 3102987586950139809}
   - component: {fileID: 2759918694439413055}
-  - component: {fileID: 1887423946240516473}
   m_Layer: 5
   m_Name: Sign
   m_TagString: Untagged
@@ -29,7 +28,7 @@ RectTransform:
   m_GameObject: {fileID: 4667120074746148724}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.02, y: 0.02, z: 0.02}
+  m_LocalScale: {x: 0.0125, y: 0.0125, z: 0.0125}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 5841070438614586244}
@@ -92,24 +91,6 @@ MonoBehaviour:
   m_EffectColor: {r: 0, g: 0, b: 0, a: 0.5}
   m_EffectDistance: {x: 0, y: -1}
   m_UseGraphicAlpha: 1
---- !u!114 &1887423946240516473
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4667120074746148724}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2821429afeb347742974dc8b4c38e003, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  bone: 10
-  followPosition: 1
-  followRotation: 0
-  positionOffsets: {x: 0, y: 1.5, z: 0}
-  rotationOffsets: {x: 0, y: 0, z: 0}
-  animator: {fileID: 0}
 --- !u!1 &5914040168613522836
 GameObject:
   m_ObjectHideFlags: 0
@@ -123,6 +104,7 @@ GameObject:
   - component: {fileID: 6017365801755984990}
   - component: {fileID: 1983427472371533129}
   - component: {fileID: 6017451700393496932}
+  - component: {fileID: 2176993532516605534}
   m_Layer: 5
   m_Name: CanvasIsInSafeArea
   m_TagString: Untagged
@@ -223,3 +205,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targetCamera: {fileID: 0}
+--- !u!114 &2176993532516605534
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5914040168613522836}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 928994f250e482c4fa2b87225b0d6abe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MultiplayerARPG.NameplateSign
+  offset: {x: 0, y: 0.3, z: 0}

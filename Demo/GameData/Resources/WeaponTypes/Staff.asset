@@ -24,16 +24,16 @@ MonoBehaviour:
   dualWieldRestriction: 0
   equippableSetIndexes: 
   damageInfo:
-    damageType: 1
+    damageType: 0
     hitOnlySelectedTarget: 0
-    startAttackDistance: 11.900001
-    hitDistance: 3
-    hitFov: 70
+    startAttackDistance: 1.8700001
+    hitDistance: 2.2
+    hitFov: 90
     originOffsets: 1
     missileDistance: 14
     missileSpeed: 22
     isHeadshotInstantDeath: 1
-    missileDamageEntity: {fileID: 5906052722408871587, guid: f189b6fd0a0e0ee4485aa3140a5109f8, type: 3}
+    missileDamageEntity: {fileID: 0}
     projectileEffect: {fileID: 0}
     pierceThroughEntities: 0
     impactEffects: {fileID: 0}

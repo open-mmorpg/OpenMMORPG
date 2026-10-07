@@ -24,7 +24,7 @@ MonoBehaviour:
   stats:
     baseStats:
       hp: 55
-      hpRecovery: -0.04999999
+      hpRecovery: 0
       hpLeechRate: 0
       mp: 0
       mpRecovery: 0
@@ -77,7 +77,7 @@ MonoBehaviour:
       sellItemPriceRate: 0
     statsIncreaseEachLevel:
       hp: 18
-      hpRecovery: -0.17999999
+      hpRecovery: 0
       hpLeechRate: 0
       mp: 0
       mpRecovery: 0
@@ -656,7 +656,7 @@ MonoBehaviour:
   damageInfo:
     damageType: 0
     hitOnlySelectedTarget: 0
-    startAttackDistance: 0
+    startAttackDistance: 1.2750001
     hitDistance: 1.5
     hitFov: 90
     originOffsets: 1
@@ -727,37 +727,37 @@ MonoBehaviour:
       minAmount: 1
       maxAmount: 2
       dropRate: 0.3
-    - item: {fileID: 11400000, guid: 05381f45add346b4bb3f3b3ae15e884d, type: 2}
+    - item: {fileID: 11400000, guid: d2b437cb6e220af4c938f74157159acc, type: 2}
       minLevel: 0
       maxLevel: 1
       minAmount: 1
       maxAmount: 1
       dropRate: 0.1
-    - item: {fileID: 11400000, guid: 70969d037b51d7e47a534059009d4cef, type: 2}
+    - item: {fileID: 11400000, guid: 84ca1f14142e7db4cb14808ff6891f81, type: 2}
       minLevel: 0
       maxLevel: 1
       minAmount: 1
       maxAmount: 1
       dropRate: 0.088
-    - item: {fileID: 11400000, guid: 240cc4f8c35d3ad45b8fc96242047424, type: 2}
+    - item: {fileID: 11400000, guid: bae345bc738940f4bacc44eba33634c3, type: 2}
       minLevel: 0
       maxLevel: 1
       minAmount: 1
       maxAmount: 1
       dropRate: 0.076000005
-    - item: {fileID: 11400000, guid: 7ff55bb40cbbf2f4792e992e9133824b, type: 2}
+    - item: {fileID: 11400000, guid: bdabe24f89587bd45a38a0184a7fe024, type: 2}
       minLevel: 0
       maxLevel: 1
       minAmount: 1
       maxAmount: 1
       dropRate: 0.064
-    - item: {fileID: 11400000, guid: cf214cebb1ab08a4bbc3701a654af722, type: 2}
+    - item: {fileID: 11400000, guid: 26b2989169755814b8df11c8c9df3e8f, type: 2}
       minLevel: 0
       maxLevel: 1
       minAmount: 1
       maxAmount: 1
       dropRate: 0.052
-    - item: {fileID: 11400000, guid: e6c3401888659804daaec5c69c2e7df4, type: 2}
+    - item: {fileID: 11400000, guid: b72783405887f784e85120b86b65eaae, type: 2}
       minLevel: 0
       maxLevel: 1
       minAmount: 1

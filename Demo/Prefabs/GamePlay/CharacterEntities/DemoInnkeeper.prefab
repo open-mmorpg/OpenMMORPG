@@ -209,7 +209,6 @@ GameObject:
   - component: {fileID: 1392806503142125010}
   - component: {fileID: 149209862771762627}
   - component: {fileID: 3137371919575446271}
-  - component: {fileID: 3392008030180358179}
   m_Layer: 0
   m_Name: DemoInnkeeper
   m_TagString: Untagged
@@ -233,7 +232,6 @@ Transform:
   - {fileID: 1441139500705910326}
   - {fileID: 8552739539212648941}
   - {fileID: 377649668859224000}
-  - {fileID: 1006294978798411598}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &5594508409894417553
@@ -252,7 +250,7 @@ MonoBehaviour:
   forceUseAssetGUIDAsAssetId: 0
   assetId: a18814b4676875a4e9a42c8a798c41b7
   autoAssignSceneObjectIdIfEmpty: 1
-  sceneObjectId: DemoInnkeeper_2
+  sceneObjectId: DemoInnkeeper_1
   forceNotSceneObject: 0
   networkedObjectId: 0
   syncChannelId: 0
@@ -292,7 +290,7 @@ MonoBehaviour:
     isDebug: 0
   ownerObjects: []
   nonOwnerObjects: []
-  model: {fileID: 0}
+  model: {fileID: 8389647479230001994}
   cameraTargetTransform: {fileID: 0}
   fpsCameraTargetTransform: {fileID: 0}
   canSideSprint: 0
@@ -358,7 +356,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 99a250dc50d53944b80c6628ab2509d5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MultiplayerARPG.CharacterModelManager
-  mainTpsModel: {fileID: 8722912748005773001}
+  mainTpsModel: {fileID: 8389647479230001994}
   fpsModelPrefab: {fileID: 0}
   fpsModelPositionOffsets: {x: 0, y: 0, z: 0}
   fpsModelRotationOffsets: {x: 0, y: 0, z: 0}
@@ -486,7 +484,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6737fa654bc9f3f44b65dea301686ec7, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MultiplayerARPG.Demo.DemoHurtSoundComponent
+  m_EditorClassIdentifier: Assembly-CSharp::MultiplayerARPG.CharacterHurtSoundComponent
   clips:
   - {fileID: 8300000, guid: 30bf05e67faf0c943883d0264c310ec5, type: 3}
   - {fileID: 8300000, guid: cf8cd701094d6ff4593f41b0443d2138, type: 3}
@@ -495,154 +493,7 @@ MonoBehaviour:
   cooldown: 0.35
   minPitch: 0.95
   maxPitch: 1.05
-  volume: 1
---- !u!114 &3392008030180358179
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2397087961519136042}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ece22f44f32f73642913c5dab06a32e9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MultiplayerARPG.CharacterDeathSoundComponent
-  audioSource: {fileID: 6567828550614981188}
-  settingType: 2
-  otherSettingId: 
-  soundData:
-    randomAudioClips:
-    - {fileID: 8300000, guid: cb1ab5ae95d544c4cbd71bf2e1fa61db, type: 3}
---- !u!1 &3777993297620293724
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1006294978798411598}
-  - component: {fileID: 6567828550614981188}
-  m_Layer: 0
-  m_Name: _DeathAudioSource
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1006294978798411598
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3777993297620293724}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 2939035964358655730}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!82 &6567828550614981188
-AudioSource:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3777993297620293724}
-  m_Enabled: 1
-  serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 0}
-  m_Resource: {fileID: 0}
-  m_PlayOnAwake: 0
-  m_Volume: 1
-  m_Pitch: 1
-  Loop: 0
-  Mute: 0
-  Spatialize: 0
-  SpatializePostEffects: 0
-  Priority: 128
-  DopplerLevel: 1
-  MinDistance: 1
-  MaxDistance: 500
-  Pan2D: 0
-  rolloffMode: 0
-  BypassEffects: 0
-  BypassListenerEffects: 0
-  BypassReverbZones: 0
-  rolloffCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 1
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  panLevelCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  spreadCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  reverbZoneMixCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
+  volume: 0.45
 --- !u!1 &5475322298218827361
 GameObject:
   m_ObjectHideFlags: 0
@@ -717,6 +568,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Model
       objectReference: {fileID: 0}
+    - target: {fileID: 2908150397829664413, guid: c3db25be057ecba45bed3098c2c83547, type: 3}
+      propertyPath: skinnedMeshRenderer
+      value: 
+      objectReference: {fileID: 6091813090460618933}
     - target: {fileID: 5749447679731119073, guid: c3db25be057ecba45bed3098c2c83547, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -767,14 +622,19 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 5749447679731119073, guid: c3db25be057ecba45bed3098c2c83547, type: 3}
   m_PrefabInstance: {fileID: 6644446135275306455}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &8722912748005773001 stripped
+--- !u!137 &6091813090460618933 stripped
+SkinnedMeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 630406317734358370, guid: c3db25be057ecba45bed3098c2c83547, type: 3}
+  m_PrefabInstance: {fileID: 6644446135275306455}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &8389647479230001994 stripped
 MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 2682969328924586782, guid: c3db25be057ecba45bed3098c2c83547, type: 3}
+  m_CorrespondingSourceObject: {fileID: 2908150397829664413, guid: c3db25be057ecba45bed3098c2c83547, type: 3}
   m_PrefabInstance: {fileID: 6644446135275306455}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5d001d904d2d27d46a89e978fbf5e85b, type: 3}
+  m_Script: {fileID: 11500000, guid: 07350a417f6b8f8448b8cbaa847ba456, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MultiplayerARPG.GameData.Model.Playables.PlayableCharacterModel
+  m_EditorClassIdentifier: Assembly-CSharp::MultiplayerARPG.SeatAwarePlayableCharacterModel

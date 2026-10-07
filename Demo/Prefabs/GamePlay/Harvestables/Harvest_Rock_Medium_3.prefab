@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 7901885435906323932}
   - component: {fileID: 4910717563865486227}
   - component: {fileID: 9078805512289956070}
+  - component: {fileID: 140684723835485282}
   m_Layer: 14
   m_Name: Harvest_Rock_Medium_3
   m_TagString: Untagged
@@ -34,6 +35,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2513121986008081169}
+  - {fileID: 8466533814118050477}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!136 &2435814800250822509
@@ -70,9 +72,13 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2b4a9065a7286cb48a19eaeec6635a7d, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MultiplayerARPG.Demo.DemoNodeVariety
+  m_EditorClassIdentifier: Assembly-CSharp::MultiplayerARPG.NodeVariety
   smallest: 0.7
   largest: 1.45
+  tiltToGround: 0.9
+  maxTilt: 38
+  maxSink: 0.7
+  footprint: 0
 --- !u!114 &4910717563865486227
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -155,7 +161,7 @@ MonoBehaviour:
     logTagName: 
     isDebug: 0
   combatTextTransform: {fileID: 0}
-  opponentAimTransform: {fileID: 0}
+  opponentAimTransform: {fileID: 8466533814118050477}
   isStaticHitBoxes: 0
   onNormalDamageHit:
     m_PersistentCalls:
@@ -179,7 +185,7 @@ MonoBehaviour:
     _elementId: 0
     logTagName: 
     isDebug: 0
-  maxHp: 80
+  maxHp: 50
   harvestable: {fileID: 11400000, guid: 3d519bf9cce325d4f9ed6595a6f180c0, type: 2}
   collectType: 0
   colliderDetectionRadius: 2.5
@@ -191,6 +197,60 @@ MonoBehaviour:
   onHarvestableDestroy:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &140684723835485282
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2891241170706049617}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 07082c596cfa4ef4d942d9ba955b6ff8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MultiplayerARPG.HarvestImpactEffects
+  clips:
+  - {fileID: 8300000, guid: 643aacf87de0fc146b74657f5c3a8cfc, type: 3}
+  - {fileID: 8300000, guid: f05566640a260cb43b354edbfc7e600c, type: 3}
+  - {fileID: 8300000, guid: 8757b8f09bc0bdc49809e3d2590de032, type: 3}
+  volume: 0.9
+  near: 6
+  far: 50
+  gap: 0.3
+  hitEffect: {fileID: 2125764079491098988, guid: eea70b8c2708a764cb21964fab4b231e, type: 3}
+  fellEffect: {fileID: 5575186553954670466, guid: d117511297ac81b45bcdf99961b76aab, type: 3}
+  crownShare: 0
+--- !u!1 &3232903749957422003
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8466533814118050477}
+  m_Layer: 0
+  m_Name: Aim
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8466533814118050477
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3232903749957422003}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.73831517, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6055784229420152113}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1434995204929161895
 PrefabInstance:
   m_ObjectHideFlags: 0

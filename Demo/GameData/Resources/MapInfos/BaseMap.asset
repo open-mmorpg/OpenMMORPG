@@ -49,14 +49,14 @@ MonoBehaviour:
   excludeSocketEnhancer: 0
   excludeMount: 0
   excludeSkill: 0
-  minimapSprite: {fileID: 0}
+  minimapSprite: {fileID: 21300000, guid: fb59284c95e26cc46a0ffb36889eadec, type: 3}
   minimapSprite2: {fileID: 0}
   minimapPosition: {x: 0, y: 0, z: 0}
-  minimapBoundsWidth: 0
-  minimapBoundsLength: 0
-  minimapOrthographicSize: 0
+  minimapBoundsWidth: 260
+  minimapBoundsLength: 260
+  minimapOrthographicSize: 130
   canReturnToSavePoint: 0
-  pvpMode: 0
+  pvpMode: 1
   respawnPointsByCondition: []
   duelersCanAttackEachOtherOnly: 0
   useMonsterFactionAsAlliance: 1

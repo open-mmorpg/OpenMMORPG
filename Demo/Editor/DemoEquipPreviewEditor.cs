@@ -39,7 +39,7 @@ namespace MultiplayerARPG.Demo.EditorTools
                     preview.Unequip();
             }
 
-            using (new EditorGUI.DisabledScope(preview.item == null))
+            using (new EditorGUI.DisabledScope(preview.item == null || preview.IsWearingSkinned))
             {
                 if (GUILayout.Button("Save grip to weapon game data", GUILayout.Height(24f)))
                     preview.SaveGripToGameData();
@@ -66,6 +66,17 @@ namespace MultiplayerARPG.Demo.EditorTools
             {
                 EditorGUILayout.HelpBox($"\"{preview.item.name}\" has no equipment model at index " +
                                         $"{preview.modelIndex}.", MessageType.Warning);
+                return;
+            }
+
+            if (DemoEquipPreview.IsSkinned(models[preview.modelIndex].MeshPrefab))
+            {
+                // A garment has no stored grip to compare against, so the readout below would
+                // be measuring the distance from one meaningless number to another.
+                EditorGUILayout.HelpBox(
+                    $"\"{preview.item.name}\" is armour: skinned to the \"{models[preview.modelIndex].equipSocket}\" " +
+                    "slot and placed by its bones. The offsets above do nothing to it, and there is no grip to save.",
+                    MessageType.Info);
                 return;
             }
 

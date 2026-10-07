@@ -17,6 +17,14 @@ Shader "Demo/DayNightSkybox"
         _Rotation ("Rotation", Range(0, 360)) = 0
         _Blend ("Night", Range(0, 1)) = 0
 
+        // Overcast, driven by DemoSkyCycle from the weather. At 0 the sky is exactly what it was
+        // before this existed. Towards 1 the sky is washed to its own luminance in a flat cool grey
+        // and dimmed: a sky that is still blue is not an overcast sky however dark it is made, which
+        // is why this is a desaturation and not just a tint.
+        _Overcast ("Overcast", Range(0, 1)) = 0
+        _OvercastTint ("Overcast Grey", Color) = (0.86, 0.90, 0.96, 1)
+        _OvercastDim ("Overcast Brightness", Range(0, 1)) = 0.55
+
         [NoScaleOffset] _FrontTex ("Day Front [+Z]", 2D) = "grey" {}
         [NoScaleOffset] _BackTex ("Day Back [-Z]", 2D) = "grey" {}
         [NoScaleOffset] _LeftTex ("Day Left [+X]", 2D) = "grey" {}
@@ -44,6 +52,9 @@ Shader "Demo/DayNightSkybox"
         half _Exposure;
         float _Rotation;
         half _Blend;
+        half _Overcast;
+        half4 _OvercastTint;
+        half _OvercastDim;
 
         float3 RotateAroundYInDegrees (float3 vertex, float degrees)
         {
@@ -88,6 +99,11 @@ Shader "Demo/DayNightSkybox"
             half3 c = lerp(day, night, _Blend);
             c = c * _Tint.rgb * unity_ColorSpaceDouble.rgb;
             c *= _Exposure;
+            // The same grade DemoSkyCycle.Grade applies to the fog colour, so the haze the sea fades
+            // into stays the colour of the sky it meets at the horizon.
+            const half3 lumaWeights = half3(0.2126, 0.7152, 0.0722);
+            half3 grey = _OvercastTint.rgb / max(dot(_OvercastTint.rgb, lumaWeights), 1e-4);
+            c = lerp(c, dot(c, lumaWeights) * grey, _Overcast) * lerp(1.0, _OvercastDim, _Overcast);
             return half4(c, 1);
         }
         ENDCG

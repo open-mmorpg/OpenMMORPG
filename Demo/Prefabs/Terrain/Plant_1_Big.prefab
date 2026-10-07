@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 8978858452633967571}
   - component: {fileID: 6721818707288942416}
   - component: {fileID: 194966646731044583}
+  - component: {fileID: 5947915010334863741}
   m_Layer: 0
   m_Name: Plant_1_Big
   m_TagString: Untagged
@@ -66,7 +67,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: b599750ca4baf0641b1e90e972332abb, type: 2}
+  - {fileID: 2100000, guid: adda25c861837b14d9d10823fbd4448d, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -90,3 +91,22 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!205 &5947915010334863741
+LODGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5155181220975708046}
+  serializedVersion: 2
+  m_LocalReferencePoint: {x: -0.051107883, y: 1.8221744, z: -0.095158696}
+  m_Size: 3.7564256
+  m_FadeMode: 0
+  m_AnimateCrossFading: 0
+  m_LastLODIsBillboard: 0
+  m_LODs:
+  - screenRelativeHeight: 0
+    fadeTransitionWidth: 0
+    renderers:
+    - renderer: {fileID: 194966646731044583}
+  m_Enabled: 1

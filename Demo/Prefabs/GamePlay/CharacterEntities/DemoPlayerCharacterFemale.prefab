@@ -1,5 +1,36 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &1708737695572809975
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5990481819134970324}
+  m_Layer: 0
+  m_Name: DashHop
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5990481819134970324
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1708737695572809975}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6042214706176240900}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &3046768395339628661
 GameObject:
   m_ObjectHideFlags: 0
@@ -305,7 +336,7 @@ GameObject:
   - component: {fileID: 4451981674991659786}
   - component: {fileID: 7778349493328795881}
   - component: {fileID: 7057020962132185440}
-  - component: {fileID: 2209795495647781607}
+  - component: {fileID: 8325135351513289527}
   - component: {fileID: 374841327822414116}
   - component: {fileID: 6284121327819546646}
   - component: {fileID: 1632924085613701309}
@@ -314,12 +345,19 @@ GameObject:
   - component: {fileID: 1576918989435726554}
   - component: {fileID: 1649115990056107627}
   - component: {fileID: 7776385482551740024}
-  - component: {fileID: 3805768628907096112}
-  - component: {fileID: 5090364806970550008}
   - component: {fileID: 4562281673261415608}
+  - component: {fileID: 6451375191172821504}
+  - component: {fileID: 3107721322422393419}
+  - component: {fileID: 5090364806970550008}
   - component: {fileID: 804775375820316195}
   - component: {fileID: 1304263984012409259}
   - component: {fileID: 3151336801820883059}
+  - component: {fileID: 1966471187372983173}
+  - component: {fileID: 1273000706128744926}
+  - component: {fileID: 2524653625229886896}
+  - component: {fileID: 8153710053820653670}
+  - component: {fileID: 3711982680621952556}
+  - component: {fileID: 3741276858412678263}
   m_Layer: 0
   m_Name: DemoPlayerCharacterFemale
   m_TagString: Untagged
@@ -342,9 +380,10 @@ Transform:
   m_Children:
   - {fileID: 9106907253504300087}
   - {fileID: 1860716947002896454}
-  - {fileID: 1168913049831724215}
+  - {fileID: 5990481819134970324}
   - {fileID: 5249571038008770746}
   - {fileID: 4189348415110892728}
+  - {fileID: 2773482198512115998}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &4600389645916854778
@@ -797,7 +836,7 @@ MonoBehaviour:
   standBackwardMoveSpeedRate: 0.75
   crouchForwardMoveSpeedRate: 1
   crouchForwardSideMoveSpeedRate: 1
-  crouchSideMoveSpeedRate: 1
+  crouchSideMoveSpeedRate: 0.65
   crouchBackwardSideMoveSpeedRate: 0.75
   crouchBackwardMoveSpeedRate: 0.75
   crawlForwardMoveSpeedRate: 1
@@ -827,8 +866,8 @@ MonoBehaviour:
   crawlCheckRadius: 1
   crawlCheckGizmosColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dashingForceApplier:
-    speed: 20
-    deceleration: 20
+    speed: 8
+    deceleration: 3.2
     duration: 0
   alwaysUseRootMotion: 0
   useRootMotionForMovement: 0
@@ -915,7 +954,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _behaviourIndex: 0
---- !u!114 &2209795495647781607
+--- !u!114 &8325135351513289527
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -924,10 +963,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 3717109295463310313}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7e7ae6d49d900d44f9ee7b5e151f5a38, type: 3}
+  m_Script: {fileID: 11500000, guid: 8e8d3267501f5264ab5114a4145a5d23, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _behaviourIndex: 0
+  interruptChance: 0.35
 --- !u!114 &374841327822414116
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1056,7 +1096,7 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!114 &3805768628907096112
+--- !u!114 &4562281673261415608
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1065,10 +1105,71 @@ MonoBehaviour:
   m_GameObject: {fileID: 3717109295463310313}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 24cd55fe8aac141488b495f85d5eaef4, type: 3}
+  m_Script: {fileID: 11500000, guid: 527d66d9b1fab6b4c866df06d771398b, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MultiplayerARPG.CharacterLadderComponent
+  m_EditorClassIdentifier: Assembly-CSharp::MultiplayerARPG.SurfaceSwimmer
+  model: {fileID: 0}
+  depthBelowSurface: 0.15
+  blendSpeed: 4
+--- !u!114 &6451375191172821504
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3717109295463310313}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 40dc475107e65e5479fb2efe1781ae56, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MultiplayerARPG.EasedCharacterLadderComponent
   _behaviourIndex: 0
+  climbSpeed: 1.2
+  kerbClearance: 0.3
+  topEnterPoseUp: 1.78
+  topEnterPoseIn: 0.86
+--- !u!114 &3107721322422393419
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3717109295463310313}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 563c51e7cb4eabf48aac45deee88a66c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MultiplayerARPG.DashAttackHandler
+  sourceType: 1
+  sourceDataId: 1756692610
+  sourceData: {fileID: 0}
+  enableTestJumpTime: 0
+  testJumpTime: 0
+  jumpCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  jumpAnimTransform: {fileID: 5990481819134970324}
 --- !u!114 &5090364806970550008
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2158,21 +2259,6 @@ MonoBehaviour:
             materialColor: {r: 1, g: 1, b: 1, a: 1}
             useUpperLevelMaterialColorSetting: 1
   optionObjects: []
---- !u!114 &4562281673261415608
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3717109295463310313}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 527d66d9b1fab6b4c866df06d771398b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MultiplayerARPG.Demo.DemoSurfaceSwimmer
-  model: {fileID: 0}
-  depthBelowSurface: 0.15
-  blendSpeed: 4
 --- !u!114 &804775375820316195
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2296,7 +2382,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6737fa654bc9f3f44b65dea301686ec7, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MultiplayerARPG.Demo.DemoHurtSoundComponent
+  m_EditorClassIdentifier: Assembly-CSharp::MultiplayerARPG.CharacterHurtSoundComponent
   clips:
   - {fileID: 8300000, guid: 30bf05e67faf0c943883d0264c310ec5, type: 3}
   - {fileID: 8300000, guid: cf8cd701094d6ff4593f41b0443d2138, type: 3}
@@ -2305,7 +2391,7 @@ MonoBehaviour:
   cooldown: 0.35
   minPitch: 0.95
   maxPitch: 1.05
-  volume: 1
+  volume: 0.45
 --- !u!114 &3151336801820883059
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2324,6 +2410,182 @@ MonoBehaviour:
   soundData:
     randomAudioClips:
     - {fileID: 8300000, guid: cb1ab5ae95d544c4cbd71bf2e1fa61db, type: 3}
+--- !u!114 &1966471187372983173
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3717109295463310313}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ab2a84b1e4e669549a254bf2251b1eb3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MultiplayerARPG.SkinTone
+  skinMaterials:
+  - materialName: MI_Body_Female_Dark
+    measuredMean: {r: 0.41065362, g: 0.19049168, b: 0.08721407, a: 1}
+  - materialName: MI_Skin_Female
+    measuredMean: {r: 0.3911393, g: 0.16539946, b: 0.078845404, a: 1}
+  - materialName: MI_Body_Male_Dark
+    measuredMean: {r: 0.41082156, g: 0.19384731, b: 0.08799027, a: 1}
+  - materialName: MI_Skin_Male
+    measuredMean: {r: 0.3882725, g: 0.15894526, b: 0.07648554, a: 1}
+  tones:
+  - {r: 0.8235294, g: 0.6901961, b: 0.63529414, a: 1}
+  - {r: 0.7607843, g: 0.6039216, b: 0.5019608, a: 1}
+  - {r: 0.7176471, g: 0.5294118, b: 0.39215687, a: 1}
+  - {r: 0.6745098, g: 0.47843137, b: 0.32941177, a: 1}
+  - {r: 0.6, g: 0.4117647, b: 0.2901961, a: 1}
+  - {r: 0.5568628, g: 0.3764706, b: 0.2509804, a: 1}
+  - {r: 0.4392157, g: 0.28235295, b: 0.18431373, a: 1}
+  - {r: 0.32941177, g: 0.20392157, b: 0.13333334, a: 1}
+  - {r: 0.22745098, g: 0.13725491, b: 0.09019608, a: 1}
+  toneTitles:
+  - Fair
+  - Light
+  - Warm
+  - Tan
+  - Olive
+  - Bronze
+  - Umber
+  - Deep
+  - Ebony
+  defaultTone: 4
+--- !u!114 &1273000706128744926
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3717109295463310313}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 100e9986ac771364c9504c3d7e3f966e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MultiplayerARPG.CharacterSize
+  scales:
+  - 0.876471
+  - 0.90474427
+  - 0.93301755
+  - 0.96129084
+  - 0.98956406
+  - 1.0178373
+  - 1.0461106
+  - 1.0743839
+  - 1.1026571
+  sizeTitles:
+  - 1.55 m
+  - 1.60 m
+  - 1.65 m
+  - 1.70 m
+  - 1.75 m
+  - 1.80 m
+  - 1.85 m
+  - 1.90 m
+  - 1.95 m
+  defaultSize: 5
+  standingHeight: 1.7684555
+  anchors:
+  - {fileID: 7439061980251227977}
+  - {fileID: 1050165238507730540}
+  - {fileID: 37664588318559700}
+  - {fileID: 261394503015460135}
+--- !u!114 &2524653625229886896
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3717109295463310313}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: efc676ff475b809408b12a5bb5d129ef, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MultiplayerARPG.AirborneSnapGuard
+  settleTime: 0.35
+--- !u!114 &8153710053820653670
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3717109295463310313}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 420a5e4235acc894aab573f31b6e4a67, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MultiplayerARPG.PlayerCharacterInteractionComponent
+  _behaviourIndex: 0
+  reachTolerance: 1.5
+--- !u!114 &3711982680621952556
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3717109295463310313}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f16b378b0fdd6c942953e422473c2504, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MultiplayerARPG.WeaponSheathSounds
+  sheathClips:
+  - {fileID: 8300000, guid: 067c0fcedcff3f1418c49a060339f690, type: 3}
+  unsheathClips:
+  - {fileID: 8300000, guid: f8c4467ac3d15834f8af7848752efe29, type: 3}
+  volume: 1
+  sheatheLead: 0.22
+  near: 5
+  far: 40
+  height: 1.3
+--- !u!114 &3741276858412678263
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3717109295463310313}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ccf89b7facc02e94a9bc8b7e95447cd5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MultiplayerARPG.FootstepEffects
+  hubPrefab: {fileID: 9216742072220532207, guid: b33de71d4bc02b64b86200c8b6de5d70, type: 3}
+  seaLevel: 0
+  seaMaterial: {fileID: 2100000, guid: 40d53cd7933e5684cb01281c8409bdb4, type: 2}
+  printLayer: Island_Sand
+  wetBand: 1.2
+  swashBand: 0.25
+  printLength: 0.36
+  printWidth: 0.17
+  dryTint: {r: 0.72, g: 0.66, b: 0.5, a: 1}
+  wetTint: {r: 0.46, g: 0.4, b: 0.29, a: 1}
+  dryOpacity: 0.9
+  wetOpacity: 0.95
+  dryLife: 30
+  wetLife: 20
+  swashLife: 6
+  plantHeight: 0.025
+  liftHeight: 0.05
+  restepDistance: 0.3
+  plantConfirm: 0.05
+  minStepInterval: 0.35
+  wetPrints: 6
+  sandKickSpeed: 3.2
+  splashDepth: 0.03
+  stillFoot: 0.5
+  idleRippleEvery: 1.5
+  splashClips:
+  - {fileID: 8300000, guid: 9e424402d0f41b94ba22e02c1e90a740, type: 3}
+  - {fileID: 8300000, guid: bf425021ef3e38d4f9193a42873202ce, type: 3}
+  - {fileID: 8300000, guid: a27fe7829e1398344973954a4d1f8c3c, type: 3}
+  splashVolume: 0.6
+  splashNear: 4
+  splashFar: 35
+  muteDryStepsInWater: 1
+  syncStepSounds: 1
+  maxCameraDistance: 35
 --- !u!1 &3853328739378338823
 GameObject:
   m_ObjectHideFlags: 0
@@ -2452,7 +2714,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 9106907253504300087}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1001 &8525604522126092854
+--- !u!1001 &4617521405161693087
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
@@ -2599,7 +2861,7 @@ PrefabInstance:
     - target: {fileID: 8952510780293377007, guid: 7c20e8a2a1a299649b49e1b53706a87a, type: 3}
       propertyPath: 'activateObjectsWhenSwitchModel.Array.data[0]'
       value: 
-      objectReference: {fileID: 1129495363895975296}
+      objectReference: {fileID: 4172995619840763945}
     - target: {fileID: 8952510780293377007, guid: 7c20e8a2a1a299649b49e1b53706a87a, type: 3}
       propertyPath: defaultAnimations.moveStates.rightState.clip
       value: 
@@ -2624,6 +2886,10 @@ PrefabInstance:
       propertyPath: 'deactivateObjectsWhenSwitchModel.Array.data[0]'
       value: 
       objectReference: {fileID: 452204948572715377}
+    - target: {fileID: 8952510780293377007, guid: 7c20e8a2a1a299649b49e1b53706a87a, type: 3}
+      propertyPath: defaultAnimations.climbIdleState.animSpeedRate
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8952510780293377007, guid: 7c20e8a2a1a299649b49e1b53706a87a, type: 3}
       propertyPath: defaultAnimations.climbMoveStates.upState.clip
       value: 
@@ -2813,6 +3079,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 0}
     - target: {fileID: 8952510780293377007, guid: 7c20e8a2a1a299649b49e1b53706a87a, type: 3}
+      propertyPath: defaultAnimations.climbMoveStates.upState.animSpeedRate
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8952510780293377007, guid: 7c20e8a2a1a299649b49e1b53706a87a, type: 3}
       propertyPath: defaultAnimations.crawlMoveStates.forwardLeftState.clip
       value: 
       objectReference: {fileID: 7400000, guid: 78a472b9ea70f464abca5d11c4f887d8, type: 2}
@@ -2857,6 +3127,14 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 0}
     - target: {fileID: 8952510780293377007, guid: 7c20e8a2a1a299649b49e1b53706a87a, type: 3}
+      propertyPath: defaultAnimations.climbMoveStates.downState.animSpeedRate
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8952510780293377007, guid: 7c20e8a2a1a299649b49e1b53706a87a, type: 3}
+      propertyPath: defaultAnimations.climbTopEnterExitStates.enterState.clip
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 8952510780293377007, guid: 7c20e8a2a1a299649b49e1b53706a87a, type: 3}
       propertyPath: defaultAnimations.crawlMoveStates.backwardRightState.clip
       value: 
       objectReference: {fileID: 7400000, guid: 78a472b9ea70f464abca5d11c4f887d8, type: 2}
@@ -2885,6 +3163,18 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8952510780293377007, guid: 7c20e8a2a1a299649b49e1b53706a87a, type: 3}
+      propertyPath: defaultAnimations.climbBottomEnterExitStates.exitState.animSpeedRate
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8952510780293377007, guid: 7c20e8a2a1a299649b49e1b53706a87a, type: 3}
+      propertyPath: defaultAnimations.climbBottomEnterExitStates.enterState.animSpeedRate
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8952510780293377007, guid: 7c20e8a2a1a299649b49e1b53706a87a, type: 3}
+      propertyPath: defaultAnimations.climbTopEnterExitStates.enterState.transitionDuration
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8952510780293377007, guid: 7c20e8a2a1a299649b49e1b53706a87a, type: 3}
       propertyPath: defaultAnimations.skillActivateAnimation.triggerDurationRates.Array.size
       value: 0
       objectReference: {fileID: 0}
@@ -2894,43 +3184,43 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 8790408723063535542, guid: 7c20e8a2a1a299649b49e1b53706a87a, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 944146755177772686}
+      addedObject: {fileID: 1812032486539815537}
   m_SourcePrefab: {fileID: 100100000, guid: 7c20e8a2a1a299649b49e1b53706a87a, type: 3}
---- !u!114 &751183299635298777 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 8952510780293377007, guid: 7c20e8a2a1a299649b49e1b53706a87a, type: 3}
-  m_PrefabInstance: {fileID: 8525604522126092854}
+--- !u!4 &2773482198512115998 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 7379667086311947905, guid: 7c20e8a2a1a299649b49e1b53706a87a, type: 3}
+  m_PrefabInstance: {fileID: 4617521405161693087}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1129495363895975296}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5d001d904d2d27d46a89e978fbf5e85b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MultiplayerARPG.GameData.Model.Playables.PlayableCharacterModel
---- !u!1 &1129495363895975296 stripped
+--- !u!1 &4172995619840763945 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8790408723063535542, guid: 7c20e8a2a1a299649b49e1b53706a87a, type: 3}
-  m_PrefabInstance: {fileID: 8525604522126092854}
+  m_PrefabInstance: {fileID: 4617521405161693087}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &944146755177772686
+--- !u!114 &1812032486539815537
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1129495363895975296}
+  m_GameObject: {fileID: 4172995619840763945}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a0d972e4292533d46aabf200d05364e8, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MultiplayerARPG.Demo.DemoRiderLegs
+  m_EditorClassIdentifier: Assembly-CSharp::MultiplayerARPG.RiderLegSpread
   abductionDegrees: 35
   dropDegrees: 45
---- !u!4 &1168913049831724215 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 7379667086311947905, guid: 7c20e8a2a1a299649b49e1b53706a87a, type: 3}
-  m_PrefabInstance: {fileID: 8525604522126092854}
+--- !u!114 &4335011919960290416 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8952510780293377007, guid: 7c20e8a2a1a299649b49e1b53706a87a, type: 3}
+  m_PrefabInstance: {fileID: 4617521405161693087}
   m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4172995619840763945}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 07350a417f6b8f8448b8cbaa847ba456, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MultiplayerARPG.SeatAwarePlayableCharacterModel
 --- !u!1001 &9204020811620142791
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2998,7 +3288,7 @@ PrefabInstance:
     - target: {fileID: 8952510780293377007, guid: 7c20e8a2a1a299649b49e1b53706a87a, type: 3}
       propertyPath: 'deactivateObjectsWhenSwitchModel.Array.data[0]'
       value: 
-      objectReference: {fileID: 1129495363895975296}
+      objectReference: {fileID: 4172995619840763945}
     - target: {fileID: 8952510780293377007, guid: 7c20e8a2a1a299649b49e1b53706a87a, type: 3}
       propertyPath: vehicleModels.Array.data[0].modelsForEachSeats.Array.size
       value: 1
@@ -3006,7 +3296,7 @@ PrefabInstance:
     - target: {fileID: 8952510780293377007, guid: 7c20e8a2a1a299649b49e1b53706a87a, type: 3}
       propertyPath: 'vehicleModels.Array.data[0].modelsForEachSeats.Array.data[0]'
       value: 
-      objectReference: {fileID: 751183299635298777}
+      objectReference: {fileID: 4335011919960290416}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -3020,9 +3310,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 452204948572715377}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5d001d904d2d27d46a89e978fbf5e85b, type: 3}
+  m_Script: {fileID: 11500000, guid: 07350a417f6b8f8448b8cbaa847ba456, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MultiplayerARPG.GameData.Model.Playables.PlayableCharacterModel
+  m_EditorClassIdentifier: Assembly-CSharp::MultiplayerARPG.SeatAwarePlayableCharacterModel
 --- !u!1 &452204948572715377 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8790408723063535542, guid: 7c20e8a2a1a299649b49e1b53706a87a, type: 3}

@@ -23,6 +23,7 @@ MonoBehaviour:
   iconSettingsInitialized: 1
   iconRotation: {x: 0, y: 0, z: -35}
   iconZoom: 1.2535107
+  iconHalf: 0
   iconLightingSettings:
     useSceneLighting: 0
     exposureEV: 0
@@ -44,13 +45,16 @@ MonoBehaviour:
   noSlotUsage: 0
   maxStack: 1
   overrideAmmoCapacity: 0
-  itemRefine: {fileID: 0}
+  itemRefine: {fileID: 11400000, guid: 53b159b214a011847ae91d9e609c7bad, type: 2}
   lockDuration: 0
   expireDurationUnit: 2
   expireDuration: 0
   dropModel: {fileID: 0}
   dismantleReturnGold: 0
-  dismantleReturnItems: []
+  dismantleReturnItems:
+  - item: {fileID: 11400000, guid: 593531c59904ae9429ca0e409ba9592d, type: 2}
+    level: 0
+    amount: 5
   dismantleReturnCurrencies: []
   restrictDealing: 0
   restrictDropping: 0
@@ -72,14 +76,15 @@ MonoBehaviour:
     specificSheathEquipWeaponSet: 0
   requirement:
     availableClass: {fileID: 0}
-    availableClasses: []
+    availableClasses:
+    - {fileID: 11400000, guid: d763dabf6ea6b604b939ab857c455b8d, type: 2}
     availableFactions: []
     level: 0
     attributeAmounts: []
   equipmentSet: {fileID: 0}
-  maxDurability: 0
+  maxDurability: 150
   destroyIfBroken: 0
-  availableSocketEnhancerTypes: 
+  availableSocketEnhancerTypes: 0000
   maxSocket: 0
   increaseStats:
     baseStats:
@@ -403,7 +408,13 @@ MonoBehaviour:
       buyItemPriceRate: 0
       sellItemPriceRate: 0
     statsIncreaseEachLevelByLevels: []
-  increaseAttributes: []
+  increaseAttributes:
+  - attribute: {fileID: 11400000, guid: 0d87aaef7ab62154eaa5a864b28cebf3, type: 2}
+    amount:
+      baseAmount: 6
+      amountIncreaseEachLevel: 1
+      rateIncreaseEachLevel: 0
+      amountIncreaseEachLevelByLevels: []
   increaseAttributesRate: []
   increaseResistances: []
   increaseArmors: []
@@ -411,7 +422,13 @@ MonoBehaviour:
   increaseDamages: []
   increaseDamagesRate: []
   increaseSkillLevels: []
-  increaseSkills: []
+  increaseSkills:
+  - skill: {fileID: 11400000, guid: 51eab8bdfe6c6ef48a950279b6fb16fc, type: 2}
+    level:
+      baseAmount: 1
+      amountIncreaseEachLevel: 0
+      rateIncreaseEachLevel: 0
+      amountIncreaseEachLevelByLevels: []
   increaseStatusEffectResistances: []
   selfStatusEffectsWhenAttacking: []
   enemyStatusEffectsWhenAttacking: []
@@ -604,28 +621,41 @@ MonoBehaviour:
     randomDamageAmountRates: []
     randomSkillLevels: []
   offHandEquipmentModels: []
-  sheathModels: []
+  sheathModels:
+  - equipSocket: SheathBack
+    useInstantiatedObject: 0
+    meshPrefab: {fileID: 9173423934567575980, guid: 382bd993016627048959a66a8b83b859, type: 3}
+    instantiatedObjectIndex: 0
+    priority: 0
+    doNotSetupBones: 1
+    equipmentModelBonesSetupManager: {fileID: 0}
+    localPosition: {x: 0.15483223, y: -0.64559984, z: 0.0070037376}
+    localEulerAngles: {x: 354.36307, y: 182.05876, z: 339.89865}
+    doNotChangeScale: 0
+    localScale: {x: 1, y: 1, z: 1}
+    useSpecificSheathEquipWeaponSet: 0
+    specificSheathEquipWeaponSet: 0
   offHandSheathModels: []
   weaponType: {fileID: 11400000, guid: fc3e5b2dd1a0ac340bca470db6f480b4, type: 2}
   createWeaponType: 0
   doRecoilingAsAttackAnimation: 0
   damageAmount:
-    damageElement: {fileID: 0}
+    damageElement: {fileID: 11400000, guid: db2cf3e9d6bd9d945b5580aa2f9837df, type: 2}
     amount:
       baseAmount:
-        min: 14
-        max: 20
+        min: 8
+        max: 12
       amountIncreaseEachLevel:
-        min: 4.9
-        max: 7
+        min: 2.8
+        max: 4.2
       rateIncreaseEachLevel:
         min: 0
         max: 0
       amountIncreaseEachLevelByLevels: []
   harvestDamageAmount:
     baseAmount:
-      min: 0
-      max: 0
+      min: 10
+      max: 10
     amountIncreaseEachLevel:
       min: 0
       max: 0
@@ -679,22 +709,7 @@ MonoBehaviour:
     recoilRoll: 0
   launchClip: {fileID: 0}
   launchClips: []
-  launchClipSettings:
-  - audioClip: {fileID: 8300000, guid: 15e1b9f7096a3424cab4d573dd73816a, type: 3}
-    minRandomVolume: 0.85
-    maxRandomVolume: 1
-  - audioClip: {fileID: 8300000, guid: 58203f64e822a8f49a5b1d39cf8afebe, type: 3}
-    minRandomVolume: 0.85
-    maxRandomVolume: 1
-  - audioClip: {fileID: 8300000, guid: 7b6141ae770832f47b8f20752b86db5c, type: 3}
-    minRandomVolume: 0.85
-    maxRandomVolume: 1
-  - audioClip: {fileID: 8300000, guid: afb56ba5f4aaf5c409801de123b6acee, type: 3}
-    minRandomVolume: 0.85
-    maxRandomVolume: 1
-  - audioClip: {fileID: 8300000, guid: afb56ba5f4aaf5c409801de123b6acee, type: 3}
-    minRandomVolume: 0.85
-    maxRandomVolume: 1
+  launchClipSettings: []
   reloadClip: {fileID: 0}
   reloadClips: []
   reloadClipSettings: []

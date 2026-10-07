@@ -20,6 +20,32 @@
 // visibly repeats and reads as cloth. Detuning them is most of what makes this look
 // like water.
 //
+// Detuning alone was not enough. A sum of plane waves is still a sum of plane
+// waves: however the frequencies are chosen, every crest in it runs dead straight
+// from one side of the map to the other, and once the octaves are all within a
+// narrow fan of one heading their sum collapses to a profile that only varies along
+// that heading - parallel ridges marching to the horizon. Two things break it:
+//
+//  - The fan widens with each octave (`kFan`), so the short waves cut across the
+//    long ones instead of lying on top of them. That is also how a real sea works;
+//    short waves are far less directional than swell.
+//  - The plane the waves are evaluated on is itself bent, slowly, by a second wave
+//    field (`MakeWarp`). Crests then meander rather than running straight, and the
+//    pattern stops repeating at any scale you can see. This costs two sincos for
+//    the whole surface and is the single biggest part of the effect.
+//
+// Warping a wave field is ordinarily a way to lose the analytic gradient that the
+// per-pixel normals depend on. It is kept here by carrying the warp's Jacobian
+// through the chain rule - see `WaveTrain`.
+//
+// Both the size of the warp and its own wavelength are measured in multiples of the
+// wavelength being warped, which is the part that took two attempts to get right.
+// A warp of one fixed size and one fixed length bends the surface as a single sheet:
+// it breaks up the swell, and the ripples - an order of magnitude smaller than the
+// bend - simply ride along on it unchanged, still locally parallel and evenly
+// spaced. The grain survives at small scale, which is exactly where the eye finds
+// it. Sized relative to each train, every scale of the surface gets its own meander.
+//
 // Shore foam and the shallow-to-deep colour are read from the depth buffer, and the
 // refraction from the opaque colour copy, so this needs Depth Texture and Opaque
 // Texture enabled on the pipeline asset. PC_RPAsset has both; Mobile_RPAsset has
@@ -49,6 +75,21 @@ Shader "Demo/StylizedWater"
         // tessellating water nobody is looking at.
         _DisplaceFade ("Displacement Fade (near, far)", Vector) = (110, 280, 0, 0)
         _SwellNormalFade ("Swell Normal Fade (near, far)", Vector) = (320, 900, 0, 0)
+
+        [Header(Crest Wander)]
+        // How far the crests wander off straight, as a fraction of their own
+        // wavelength. Zero is the old behaviour: straight crests and a visible
+        // corduroy. Past about 0.3 a train bends far enough to fold over itself and
+        // reads as churn rather than water.
+        _WarpStrength ("Amount", Range(0, 0.5)) = 0.2
+        // The distance over which the bend varies, **as a multiple of the wavelength
+        // being bent**. This has to be relative. A warp of one fixed length bends the
+        // whole surface as one sheet: the long swell meanders nicely and the short
+        // ripples, being far smaller than the bend, are carried along unchanged - still
+        // locally parallel, still evenly spaced, still a visible grain. Every train
+        // needs its own meander at its own scale.
+        _WarpLength ("Length (x wavelength)", Range(1.5, 12)) = 3.2
+        _WarpSpeed ("Speed", Float) = 0.12
 
         [Header(Ripples)]
         _RippleStrength ("Strength", Range(0, 2)) = 1
@@ -140,6 +181,10 @@ Shader "Demo/StylizedWater"
                 float4 _DisplaceFade;
                 float4 _SwellNormalFade;
 
+                half _WarpStrength;
+                float _WarpLength;
+                float _WarpSpeed;
+
                 half _RippleStrength;
                 float _RippleLength;
                 float _RippleSpeed;
@@ -162,18 +207,78 @@ Shader "Demo/StylizedWater"
                 half _RefractionStrength;
             CBUFFER_END
 
+            // ---- domain warp ---------------------------------------------------
+            //
+            // A unit-amplitude bend of the ground plane, used to displace the position
+            // at which a train of waves is sampled. Built for one wavelength: both the
+            // bend's own length and its speed are relative to it, so each train is
+            // warped at its own scale rather than all of them sharing one sheet.
+            //
+            // Two octaves, crossed. One alone gives a smooth meander that still reads
+            // as a regular wobble; the second, finer and weaker, is what turns it from
+            // a wobble into something without a spacing. The gradients come back with
+            // the offset, because waves sampled on the bent plane need the chain rule
+            // to recover their slope on the flat one.
+            struct DomainWarp
+            {
+                float2 offset;      // unit amplitude, scaled per train by the caller
+                float2 gradX;       // d(offset.x) / d(pos)
+                float2 gradZ;       // d(offset.y) / d(pos)
+            };
+
+            DomainWarp MakeWarp(float2 pos, float t, float wavelength)
+            {
+                // Four bearings well away from each other and from any round number,
+                // so the warp has no axis of its own for the waves to line up on.
+                const float2 d1 = float2(0.8746, 0.4848);
+                const float2 d2 = float2(-0.4226, 0.9063);
+                const float2 d3 = float2(0.2588, -0.9659);
+                const float2 d4 = float2(-0.9397, -0.3420);
+
+                // Weight of the finer octave. Held well under the first: the Jacobian
+                // grows with frequency, and a fine octave given equal weight bends the
+                // plane back over itself, which shows up as dark creases rather than
+                // as detail.
+                const float fine = 0.35;
+                const float norm = 1.0 / (1.0 + fine);
+
+                float k1 = TWO_PI / max(wavelength * _WarpLength, 0.01);
+                float k2 = k1 * 1.37;
+                float k3 = k1 * 2.40;
+                float k4 = k1 * 3.11;
+
+                float s1, c1, s2, c2, s3, c3, s4, c4;
+                sincos(dot(d1, pos) * k1 + t * _WarpSpeed, s1, c1);
+                sincos(dot(d2, pos) * k2 + t * _WarpSpeed * 0.79, s2, c2);
+                sincos(dot(d3, pos) * k3 + t * _WarpSpeed * 1.31, s3, c3);
+                sincos(dot(d4, pos) * k4 + t * _WarpSpeed * 1.07, s4, c4);
+
+                DomainWarp warp;
+                warp.offset = float2(s1 + fine * s3, s2 + fine * s4) * norm;
+                warp.gradX = (c1 * k1 * d1 + fine * c3 * k3 * d3) * norm;
+                warp.gradZ = (c2 * k2 * d2 + fine * c4 * k4 * d4) * norm;
+                return warp;
+            }
+
             // ---- wave field ---------------------------------------------------
             //
-            // A single plane wave running along `dir`, of wavelength 2*pi/k. It
-            // contributes its height and, so the surface can be shaded without a
-            // normal map, the two horizontal derivatives of that height.
-            void AddOctave(float2 pos, float2 dir, float k, float amp, float omega, float t,
+            // A single plane wave running along `dir`, of wavelength 2*pi/k, sampled
+            // at `pos` on the warped plane. It contributes its height and, so the
+            // surface can be shaded without a normal map, the two horizontal
+            // derivatives of that height.
+            //
+            // `dirJ` is `dir` carried back through the warp's Jacobian: the direction
+            // the wave is really running in once the bend is undone. Without it the
+            // normals would describe the straight wave the warped one was made from,
+            // and the highlights would slide off the crests.
+            void AddOctave(float2 pos, float2 dir, float2 dirJ, float k, float amp,
+                           float omega, float t, float phase,
                            inout float height, inout float2 gradient)
             {
                 float s, c;
-                sincos(dot(dir, pos) * k + t * omega, s, c);
+                sincos(dot(dir, pos) * k + t * omega + phase, s, c);
                 height += amp * s;
-                gradient += dir * (amp * k * c);
+                gradient += dirJ * (amp * k * c);
             }
 
             // A train of `octaves` waves fanned around one heading. See the note at the
@@ -182,12 +287,39 @@ Shader "Demo/StylizedWater"
             // `amplitude` is the height of the finished train, not of its first octave:
             // the octaves are summed and then normalised, so changing the octave count
             // does not change how tall the water is.
-            void WaveTrain(float2 pos, float t, float heading, float wavelength,
-                           float amplitude, float speed, float spread, int octaves,
-                           out float height, out float2 gradient)
+            void WaveTrain(float2 pos, float t, float heading,
+                           float wavelength, float amplitude, float speed, float spread,
+                           int octaves, out float height, out float2 gradient)
             {
                 height = 0;
                 gradient = 0;
+
+                // Built here rather than passed in, because it is specific to this
+                // train's wavelength - see MakeWarp. The warp is applied as a fraction
+                // of that wavelength, so the swell and the ripples bend by the same
+                // amount *of a wave* rather than by the same number of metres.
+                DomainWarp warp = MakeWarp(pos, t, wavelength);
+                float warpAmp = wavelength * _WarpStrength;
+                float2 warped = pos + warp.offset * warpAmp;
+                float2 gradX = warp.gradX * warpAmp;
+                float2 gradZ = warp.gradZ * warpAmp;
+
+                // Transpose of the warp's Jacobian, d(warped)/d(pos), which is the
+                // identity plus the two gradient rows above.
+                float2 jRow0 = float2(1 + gradX.x, gradZ.x);
+                float2 jRow1 = float2(gradX.y, 1 + gradZ.y);
+
+                // How far each octave swings off the heading, in multiples of `spread`.
+                // Signs alternate so the fan opens both ways, and the magnitude grows
+                // with the octave: the swell keeps the wind line, while the short waves
+                // run across it. Octave 0 is nearly on the heading because it carries
+                // most of the amplitude, and it is what makes the sea look like it has
+                // a direction at all.
+                const float4 kFan = float4(0.15, -0.85, 1.45, -2.05);
+                // Fixed offsets so the octaves do not all cross zero together at the
+                // world origin, which otherwise lays a seam of aligned crests through
+                // the middle of the map.
+                const float4 kPhase = float4(0, 2.399, 4.303, 1.117);
 
                 float k0 = TWO_PI / max(wavelength, 0.01);
                 float k = k0;
@@ -197,13 +329,13 @@ Shader "Demo/StylizedWater"
                 [unroll(4)]
                 for (int i = 0; i < octaves; i++)
                 {
-                    // Golden-ratio offsets: an even-looking spread around the heading
-                    // that never lands two octaves on the same bearing.
-                    float angle = heading + spread * (frac(i * 0.6180339) * 2 - 1);
+                    float angle = heading + spread * kFan[i];
                     float2 dir = float2(cos(angle), sin(angle));
+                    float2 dirJ = float2(dot(dir, jRow0), dot(dir, jRow1));
                     // Deep water: phase speed goes as 1/sqrt(k), and this form leaves
                     // the longest octave travelling at exactly `speed`.
-                    AddOctave(pos, dir, k, amp, speed * sqrt(k * k0), t, height, gradient);
+                    AddOctave(warped, dir, dirJ, k, amp, speed * sqrt(k * k0), t,
+                              kPhase[i], height, gradient);
 
                     total += amp;
                     k *= 2.13;
@@ -291,10 +423,13 @@ Shader "Demo/StylizedWater"
                           _WaveHeight, _WaveSpeed, radians(_WaveSpread), 4,
                           swellHeight, swellGradient);
 
+                // Four octaves rather than three, and fanned right round: ripples are
+                // where the repeat showed worst, because they are the smallest thing on
+                // the surface with a direction of its own.
                 float rippleHeight;
                 float2 rippleGradient;
                 WaveTrain(positionWS.xz, _Time.y, radians(_WaveHeading + 55), _RippleLength,
-                          1, _RippleSpeed, radians(40), 3, rippleHeight, rippleGradient);
+                          1, _RippleSpeed, radians(52), 4, rippleHeight, rippleGradient);
 
                 float rippleFade = FadeOut(toCamera, _RippleFade.xy);
                 float swellFade = FadeOut(toCamera, _SwellNormalFade.xy);
