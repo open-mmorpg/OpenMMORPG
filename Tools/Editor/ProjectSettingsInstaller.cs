@@ -26,7 +26,7 @@ namespace OpenMMORPG.Setup
             "ProjectSettings/TimeManager.asset",
         };
 
-        [MenuItem("Open MMORPG/Install/Import Project Settings", false, -1000)]
+        [MenuItem("Tools/Open MMORPG/Install/Import Project Settings", false, -1000)]
         private static void ImportProjectSettings()
         {
             string path = FindArchive();

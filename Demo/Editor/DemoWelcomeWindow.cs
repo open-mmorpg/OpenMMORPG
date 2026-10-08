@@ -49,12 +49,12 @@ namespace MultiplayerARPG.Demo.EditorTools
     /// until that build exists.
     ///
     /// Every button acts only when pressed. Nothing here opens a web page, changes a setting or
-    /// starts a build on its own. `Open MMORPG > Demo > Welcome` brings the window back.
+    /// starts a build on its own. `Tools > Open MMORPG > Demo > Welcome` brings the window back.
     /// </summary>
     public class DemoWelcomeWindow : EditorWindow
     {
         private const string DocumentationUrl = "https://open-mmorpg.github.io/documentation/";
-        private const string SettingsMenu = "Open MMORPG/Install/Import Project Settings";
+        private const string SettingsMenu = "Tools/Open MMORPG/Install/Import Project Settings";
         private const string DemoDir = "Assets/OpenMMORPG/Demo";
         private const string RenderPipelinePath = DemoDir + "/Settings/DemoURP.asset";
         private const string LowRenderPipelinePath = DemoDir + "/Settings/DemoURP_Low.asset";
@@ -97,7 +97,7 @@ namespace MultiplayerARPG.Demo.EditorTools
             set { EditorUserSettings.SetConfigValue(ShownConfigKey, value ? "true" : "false"); }
         }
 
-        [MenuItem("Open MMORPG/Demo/Welcome", false, 0)]
+        [MenuItem("Tools/Open MMORPG/Demo/Welcome", false, 0)]
         public static void Open()
         {
             var window = GetWindow<DemoWelcomeWindow>(true, "Welcome to Open MMORPG", true);

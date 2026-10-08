@@ -32,8 +32,8 @@ namespace MultiplayerARPG.Demo.EditorTools
             return File.Exists(GetServerBuildFullPath());
         }
 
-        [MenuItem("Open MMORPG/Demo/Build Demo Map Server", false, 1)]
-        [MenuItem("Open MMORPG/Build/Build Demo Map Server", false, -1001)]
+        [MenuItem("Tools/Open MMORPG/Demo/Build Demo Map Server", false, 1)]
+        [MenuItem("Tools/Open MMORPG/Build/Build Demo Map Server", false, -1001)]
         public static void BuildDemoMapServerMenu()
         {
             BuildDemoMapServer(false);

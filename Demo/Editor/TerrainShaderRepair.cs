@@ -84,7 +84,7 @@ namespace MultiplayerARPG
             return baseShader != null && baseShader.passCount < HealthyPassFloor;
         }
 
-        [MenuItem("Open MMORPG/Demo/Repair Terrain Shaders")]
+        [MenuItem("Tools/Open MMORPG/Demo/Repair Terrain Shaders")]
         public static void Repair()
         {
             foreach (string source in Sources)

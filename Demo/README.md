@@ -115,7 +115,7 @@ and the spells override it with their own colour, so being hit by an Arcane Bolt
 different from being hit by an axe. The deer and the collie got effect sockets for this;
 without them a hit on wildlife was silent, which mattered because hunting is a living here.
 
-**The in-game HUD is trimmed, not just restyled** (`Open MMORPG > Demo > Build HUD`). The kit's
+**The in-game HUD is trimmed, not just restyled** (`Tools > Open MMORPG > Demo > Build HUD`). The kit's
 gameplay canvas ships every feature it has turned on at once; the demo hides the ones it has no
 content for - the RTT/server-timestamp readout, the PvP counters, vending, and the party panel that
 shipped standing open - folds Crafting and Mail into the menu bar, centres the hotkey bar over the
@@ -148,7 +148,7 @@ window dragging of its own. The quest tracker also sits **under** every window n
 last thing on the canvas, so it drew over the inventory and its quest lines took the clicks meant
 for the inventory's close button.
 
-**Every panel wears the same frame** (`Open MMORPG > Demo > Skin UI`, added 2026-09-18).
+**Every panel wears the same frame** (`Tools > Open MMORPG > Demo > Skin UI`, added 2026-09-18).
 Until then the minimap was the only thing on screen with a border, and the reason turned out to be
 that **1,847 `Image`s across 90 prefabs pointed at a sprite that is not in the project** - one
 deleted guid, inherited when the UI was copied from the kit's template. Unity draws a *missing*
@@ -477,11 +477,11 @@ contacts after the IK has run (so the prints land under the real feet, and anoth
 the same from their synced pose); `Scripts/FootstepEffectsHub` draws everything, in seven particle
 systems shared by the whole scene. Prints fade out where the sand layer does, are darker and crisper
 on wet sand and in the surf, and a boot that has been in the sea leaves wet ones for a few steps.
-Built by `Open MMORPG > Demo > Build Footstep Effects`; the how and the traps are in the builder's
+Built by `Tools > Open MMORPG > Demo > Build Footstep Effects`; the how and the traps are in the builder's
 README under "Footsteps".
 
 **Audio** lives in `Audio/` and is wired by name: a family is a prefix plus a number
-(`Footstep1.wav`, `SwordSwing3.wav`, `WomanHit2.wav`), and `Open MMORPG > Demo > Wire
+(`Footstep1.wav`, `SwordSwing3.wav`, `WomanHit2.wav`), and `Tools > Open MMORPG > Demo > Wire
 Audio` hooks every family the kit has a slot for and logs the ones still empty. Footsteps
 go on every character through the kit's footstep component - the players' play on each real foot
 landing (`FootstepEffects` calls the component when a foot comes down), everyone else's on the

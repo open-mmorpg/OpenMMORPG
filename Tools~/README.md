@@ -34,8 +34,8 @@ the kit ships after changing them:
 python "Tools~/build_unitypackage.py" settings "Tools~/ProjectSettings" "Tools/Install/OpenMMORPG_Settings.unitypackage"
 ```
 
-That archive travels inside the kit, and `Open MMORPG > Install > Import Project
-Settings` imports it. Keep project specific values out of
+That archive travels inside the kit, and `Tools > Open MMORPG > Install > Import
+Project Settings` imports it. Keep project specific values out of
 `ProjectSettings.asset`, namely `productName`, `cloudProjectId`, `organizationId`,
 `projectName`, `metroPackageName` and `metroApplicationDescription`.
 

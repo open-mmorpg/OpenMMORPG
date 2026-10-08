@@ -17,7 +17,6 @@ namespace MultiplayerARPG
             LegacyInputManager = 0,
         }
 
-        [MenuItem("Open MMORPG/Input/Input System Setup", false, 50)]
         [MenuItem("Tools/Open MMORPG/Input System Setup", false, 50)]
         public static void OpenWindow()
         {
@@ -50,6 +49,7 @@ namespace MultiplayerARPG
 
             var gameInstance = AssetDatabase.LoadAssetAtPath<GameObject>(GAME_INSTANCE_PREFAB_PATH);
             bool isAssigned = false;
+#if ENABLE_INPUT_SYSTEM
             if (gameInstance != null)
             {
                 var inputSetting = gameInstance.GetComponent<Insthync.CameraAndInput.InputSettingManager>();
@@ -58,6 +58,7 @@ namespace MultiplayerARPG
                     isAssigned = true;
                 }
             }
+#endif
             EditorGUILayout.LabelField("GameInstance.prefab Link:", isAssigned ? "Assigned" : "Not Assigned");
 
             EditorGUILayout.Space(15);
