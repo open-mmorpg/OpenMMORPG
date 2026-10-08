@@ -102,6 +102,11 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for the branch model and how the kit is a
 
 Open MMORPG is released under the [MIT License](LICENSE). Third-party components under `ThirdParty` carry their own licenses in their respective folders. The demo's art, animation, sound and music are dedicated to the public domain under CC0 1.0; see [Demo/CREDITS.md](Demo/CREDITS.md). [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) lists everything bundled.
 
+## Community & Support
+
+Join our [Discord community](https://discord.gg/Czgrg4YGgq) for support, questions, and discussion with other developers and contributors.
+
 ## Thanks
 
 Huge thanks to Ittipon Teerapruettikulchai for open sourcing the original kit, and to the MmoKitCE team at [Denarii Games](https://github.com/denariigames) for preserving and hardening it, and for blessing this continuation. Special thanks to the entire community of former customers and new developers who continue to keep this ecosystem alive.
+

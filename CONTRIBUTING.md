@@ -2,7 +2,10 @@
 
 The master branch will always reflect the latest release, while development for the next release is queued in the develop branch. **You should create your own feature branch and pull request into develop.** All changes to develop and master (on release) branches require a pull request.
 
+Have questions or want to discuss ideas before contributing? Join our [Discord community](https://discord.gg/Czgrg4YGgq) to connect with the team and other contributors.
+
 1. **Start with an Issue**. Give it a sensible name so that when a feature branch is created, you can tell what the branch is about.
+
 
 2. Tag the issue with a label like scalability, security or stability.
 
