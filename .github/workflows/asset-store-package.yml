@@ -40,20 +40,35 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Determine package name
+        run: |
+          REF="${{ github.event.inputs.ref || github.ref_name }}"
+          REF="${REF#refs/tags/}"
+          REF="${REF#refs/heads/}"
+          if [[ "$REF" == v* ]]; then
+            PKG_NAME="OpenMMORPG-${REF}.unitypackage"
+          elif [ -n "$REF" ] && [ "$REF" != "master" ] && [ "$REF" != "main" ]; then
+            PKG_NAME="OpenMMORPG-${REF}.unitypackage"
+          else
+            PKG_NAME="OpenMMORPG.unitypackage"
+          fi
+          echo "PACKAGE_NAME=${PKG_NAME}" >> "$GITHUB_ENV"
+          echo "Built package name: ${PKG_NAME}"
+
       - name: Build the package
         run: |
-          python "Tools~/build_unitypackage.py" kit . Assets/OpenMMORPG OpenMMORPG.unitypackage --deps "Tools~/dependencies.json"
+          python "Tools~/build_unitypackage.py" kit . Assets/OpenMMORPG "$PACKAGE_NAME" --deps "Tools~/dependencies.json"
 
       # Same script the Checks workflow runs, so a tag build cannot pass looser
       # rules than an ordinary push.
       - name: Verify the package
-        run: python "Tools~/check_package.py" OpenMMORPG.unitypackage
+        run: python "Tools~/check_package.py" "$PACKAGE_NAME"
 
       - name: Upload for inspection
         uses: actions/upload-artifact@v4
         with:
-          name: OpenMMORPG-unitypackage
-          path: OpenMMORPG.unitypackage
+          name: ${{ env.PACKAGE_NAME }}
+          path: ${{ env.PACKAGE_NAME }}
           retention-days: 14
 
       - name: Publish the release
@@ -62,11 +77,11 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ github.ref_name }}
         run: |
-          notes="Import \`OpenMMORPG.unitypackage\` into a Unity 6000.3 project, then run Open MMORPG > Install > Import Project Settings.
+          notes="Import \`$PACKAGE_NAME\` into a Unity 6000.3 project, then run Open MMORPG > Install > Import Project Settings.
 
           This archive is the Asset Store build: the complete kit, with its Unity package dependencies embedded so they are added on import."
           if gh release view "$TAG" >/dev/null 2>&1; then
-            gh release upload "$TAG" OpenMMORPG.unitypackage --clobber
+            gh release upload "$TAG" "$PACKAGE_NAME" --clobber
           else
-            gh release create "$TAG" --title "$TAG" --notes "$notes" OpenMMORPG.unitypackage
+            gh release create "$TAG" --title "$TAG" --notes "$notes" "$PACKAGE_NAME"
           fi

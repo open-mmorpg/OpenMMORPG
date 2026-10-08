@@ -19,7 +19,7 @@ adds them to the project.
 
 1. Tag the kit, for example `git tag v1.1.0 && git push origin v1.1.0`.
 2. The workflow builds the archive, checks it, and publishes a GitHub release with
-   `OpenMMORPG.unitypackage` attached.
+   `OpenMMORPG-v1.1.0.unitypackage` attached.
 3. Upload that archive to the Asset Store through Unity's Asset Store Tools.
 
 To rehearse without publishing, run the workflow by hand from the Actions tab. It
