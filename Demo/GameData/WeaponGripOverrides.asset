@@ -25,3 +25,15 @@ MonoBehaviour:
     localPosition: {x: -0.01930633, y: -0.044532135, z: 0.06931949}
     localEulerAngles: {x: 338.62146, y: 17.004976, z: 5.0625324}
     localScale: {x: 1, y: 1, z: 1}
+  - itemName: IronShortsword
+    localPosition: {x: -0.0273, y: -0.0479, z: 0.0124}
+    localEulerAngles: {x: -0, y: 80, z: 0}
+    localScale: {x: 1, y: 1, z: 1}
+  - itemName: IronLongsword
+    localPosition: {x: -0.023, y: -0.091, z: 0.016}
+    localEulerAngles: {x: -0, y: 80, z: 0}
+    localScale: {x: 1, y: 1, z: 1}
+  - itemName: ElderStaff
+    localPosition: {x: -0.0226, y: 0.0025, z: 0.0074}
+    localEulerAngles: {x: -0, y: 0, z: 0}
+    localScale: {x: 1, y: 1, z: 1}
