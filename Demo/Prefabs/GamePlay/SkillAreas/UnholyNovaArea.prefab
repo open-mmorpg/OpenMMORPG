@@ -73,7 +73,7 @@ MonoBehaviour:
   forceUseAssetGUIDAsAssetId: 0
   assetId: 56c402debe314c84798b2b64e3090384
   autoAssignSceneObjectIdIfEmpty: 1
-  sceneObjectId: 
+  sceneObjectId: UnholyNovaArea_1
   forceNotSceneObject: 0
   networkedObjectId: 0
   syncChannelId: 0
@@ -192,7 +192,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3252224095609766646}
-  m_Mesh: {fileID: 0}
+  m_Mesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!23 &924540207195890914
 MeshRenderer:
   m_ObjectHideFlags: 0

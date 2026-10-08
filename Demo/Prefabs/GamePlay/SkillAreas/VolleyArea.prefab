@@ -86,7 +86,7 @@ MonoBehaviour:
   forceUseAssetGUIDAsAssetId: 0
   assetId: 0184de07813eb1141b42b009ac22e4e2
   autoAssignSceneObjectIdIfEmpty: 1
-  sceneObjectId: 
+  sceneObjectId: VolleyArea_1
   forceNotSceneObject: 0
   networkedObjectId: 0
   syncChannelId: 0
@@ -172,7 +172,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 9167103808221766482}
-  m_Mesh: {fileID: 0}
+  m_Mesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!23 &906316894050337752
 MeshRenderer:
   m_ObjectHideFlags: 0

@@ -100,7 +100,7 @@ MonoBehaviour:
   forceUseAssetGUIDAsAssetId: 0
   assetId: c71dcb7f6b7143543a39b1aa35059987
   autoAssignSceneObjectIdIfEmpty: 1
-  sceneObjectId: 
+  sceneObjectId: MeteorArea_1
   forceNotSceneObject: 0
   networkedObjectId: 0
   syncChannelId: 0
@@ -5022,7 +5022,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 463239367235991090}
-  m_Mesh: {fileID: 0}
+  m_Mesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!23 &2737288498620434637
 MeshRenderer:
   m_ObjectHideFlags: 0
