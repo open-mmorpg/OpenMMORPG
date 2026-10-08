@@ -211,6 +211,12 @@ namespace Insthync.CameraAndInput
                         axis = inputAction.ReadValue<float>();
                     }
 
+                    // Guard against raw unscaled mouse scroll wheel in New Input System (which delivers 120 per notch)
+                    if (name == "Mouse ScrollWheel" && Mathf.Abs(axis) >= 1.0f)
+                    {
+                        axis *= (0.1f / 120f);
+                    }
+
                     if (raw)
                     {
                         if (axis > 0f)
@@ -268,19 +274,19 @@ namespace Insthync.CameraAndInput
                     }
                     else if (name == "Mouse X" && Mouse.current != null)
                     {
-                        float delta = Mouse.current.delta.x.ReadValue();
+                        float delta = Mouse.current.delta.x.ReadValue() * 0.1f;
                         if (Mathf.Abs(delta) > 0.00001f)
                             return delta;
                     }
                     else if (name == "Mouse Y" && Mouse.current != null)
                     {
-                        float delta = Mouse.current.delta.y.ReadValue();
+                        float delta = Mouse.current.delta.y.ReadValue() * 0.1f;
                         if (Mathf.Abs(delta) > 0.00001f)
                             return delta;
                     }
                     else if (name == "Mouse ScrollWheel" && Mouse.current != null)
                     {
-                        float scroll = Mouse.current.scroll.ReadValue().y * 0.01f;
+                        float scroll = Mouse.current.scroll.ReadValue().y * (0.1f / 120f);
                         if (Mathf.Abs(scroll) > 0.00001f)
                             return scroll;
                     }
