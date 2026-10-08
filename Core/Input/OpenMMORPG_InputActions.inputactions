@@ -463,7 +463,7 @@
                     "id": "848bb215-6800-4740-96f7-c5dff6697b0a",
                     "path": "<Mouse>/scroll/y",
                     "interactions": "",
-                    "processors": "scale(factor=0.008333333)",
+                    "processors": "scale(factor=0.02)",
                     "groups": "KeyboardMouse",
                     "action": "Mouse ScrollWheel",
                     "isComposite": false,
