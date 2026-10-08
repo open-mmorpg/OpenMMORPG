@@ -403,7 +403,7 @@ MonoBehaviour:
   - keyName: SheathWeapons
     keyCode: 122
   settingsSaveKeyPrefix: SETTING_KEY_BIND
-  inputActionAsset: {fileID: 0}
+  inputActionAsset: {fileID: -944628639613478452, guid: c74d7ae38efb7e641ab1814785401d21, type: 3}
 --- !u!114 &5555039954835809266
 MonoBehaviour:
   m_ObjectHideFlags: 0
