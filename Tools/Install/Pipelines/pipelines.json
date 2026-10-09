@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "kitVersion": "dev",
-  "builtFrom": "6904d916c8b5+",
+  "builtFrom": "08e08ad1db20+",
   "prefix": "Assets/OpenMMORPG",
   "pipelines": [
     {
@@ -1300,7 +1300,7 @@
         },
         {
           "path": "Demo/Shaders/HDRPLitVariantData.hlsl",
-          "hash": "519ea70b515d016b16e618ef256586c684ad2d51"
+          "hash": "1f67367fd91c6958b97a3c4b7a8c591d7363daa0"
         },
         {
           "path": "Demo/Shaders/HDRPLitVariantHooks.hlsl",
