@@ -139,7 +139,6 @@ namespace MultiplayerARPG.GameData.Model.Playables
 #endif
             if (tempAudioClips != null && tempAudioClips.Length > 0)
             {
-                await UniTask.Yield();
                 return tempAudioClips[Random.Range(0, tempAudioClips.Length)];
             }
 #if !DISABLE_ADDRESSABLES

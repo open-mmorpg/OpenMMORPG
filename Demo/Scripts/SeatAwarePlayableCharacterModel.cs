@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using MultiplayerARPG.GameData.Model.Playables;
 using UnityEngine;
 
@@ -96,7 +97,14 @@ namespace MultiplayerARPG
             if (HolsterPending())
             {
                 if (SameWeapons(target, _holsterTarget))
+                {
+                    EquipItems = equipItems;
+                    SelectableWeaponSets = selectableWeaponSets;
+                    EquipWeaponSet = equipWeaponSet;
+                    IsWeaponsSheathed = isWeaponsSheathed;
+                    UpdateEquipmentModels(equipItems, selectableWeaponSets, equipWeaponSet, isWeaponsSheathed).Forget();
                     return;
+                }
                 if (SameWeapons(target, _oldEquipWeapons.Value))
                     CancelHolster();
             }
@@ -117,7 +125,7 @@ namespace MultiplayerARPG
         /// </summary>
         public bool HolsterPending()
         {
-            return _holsterRoutine != null && _actionCoroutine == _holsterRoutine && _oldEquipWeapons.HasValue &&
+            return _isDoingAction && _holsterRoutine != null && _actionCoroutine == _holsterRoutine && _oldEquipWeapons.HasValue &&
                 !SameWeapons(_oldEquipWeapons.Value, _holsterTarget);
         }
 
@@ -131,6 +139,10 @@ namespace MultiplayerARPG
         {
             if (a.IsEmptySlot() && b.IsEmptySlot())
                 return true;
+            if (a.dataId != b.dataId)
+                return false;
+            if (string.IsNullOrWhiteSpace(a.id) || string.IsNullOrWhiteSpace(b.id))
+                return a.level == b.level;
             return !a.IsDiffer(b, true, true, true, true);
         }
 

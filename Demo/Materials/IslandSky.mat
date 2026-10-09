@@ -73,9 +73,9 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _Blend: 0.8137614
+    - _Blend: 1
     - _Exposure: 1
-    - _Overcast: 0.8508211
+    - _Overcast: 0
     - _OvercastDim: 0.55
     - _Rotation: 0
     m_Colors:

@@ -153,6 +153,7 @@ GameObject:
   - component: {fileID: 2335917828740882350}
   - component: {fileID: 4323528796034422904}
   - component: {fileID: 7433525657050693491}
+  - component: {fileID: 2388296456144848079}
   m_Layer: 0
   m_Name: DemoCultistMale
   m_TagString: Untagged
@@ -788,6 +789,53 @@ MonoBehaviour:
   soundData:
     randomAudioClips:
     - {fileID: 8300000, guid: 5ae82e29cb50e3544a086bc8b7af8976, type: 3}
+--- !u!114 &2388296456144848079
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5429196871933681071}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ccf89b7facc02e94a9bc8b7e95447cd5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MultiplayerARPG.FootstepEffects
+  hubPrefab: {fileID: 9216742072220532207, guid: b33de71d4bc02b64b86200c8b6de5d70, type: 3}
+  seaLevel: 0
+  seaMaterial: {fileID: 2100000, guid: 40d53cd7933e5684cb01281c8409bdb4, type: 2}
+  printLayer: Island_Sand
+  wetBand: 1.2
+  swashBand: 0.25
+  printLength: 0.36
+  printWidth: 0.17
+  dryTint: {r: 0.72, g: 0.66, b: 0.5, a: 1}
+  wetTint: {r: 0.46, g: 0.4, b: 0.29, a: 1}
+  dryOpacity: 0.9
+  wetOpacity: 0.95
+  dryLife: 30
+  wetLife: 20
+  swashLife: 6
+  plantHeight: 0.025
+  liftHeight: 0.05
+  restepDistance: 0.3
+  plantConfirm: 0.05
+  minStepInterval: 0.35
+  wetPrints: 6
+  sandKickSpeed: 3.2
+  splashDepth: 0.03
+  stillFoot: 0.5
+  idleRippleEvery: 1.5
+  splashClips:
+  - {fileID: 8300000, guid: 9e424402d0f41b94ba22e02c1e90a740, type: 3}
+  - {fileID: 8300000, guid: bf425021ef3e38d4f9193a42873202ce, type: 3}
+  - {fileID: 8300000, guid: a27fe7829e1398344973954a4d1f8c3c, type: 3}
+  splashVolume: 0.6
+  splashNear: 4
+  splashFar: 35
+  muteDryStepsInWater: 1
+  syncStepSounds: 0
+  maxCameraDistance: 35
 --- !u!1 &8508988384215428116
 GameObject:
   m_ObjectHideFlags: 0

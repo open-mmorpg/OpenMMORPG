@@ -197,6 +197,12 @@ namespace MultiplayerARPG
             public bool hasContacts;
             public Vector3 heel, ball, toe;
 
+            // For quadrupeds:
+            public Transform contactHeel;
+            public Transform contactToe;
+            public float printLengthScale = 1f;
+            public float printWidthScale = 1f;
+
             public bool planted;
             // Down, but not yet for long enough to count: see plantConfirm.
             public bool pending;
@@ -224,6 +230,8 @@ namespace MultiplayerARPG
         private BaseCharacterEntity _character;
         private Animator _animator;
         private Transform _hips;
+        private Foot[] _feet;
+        private bool _isQuadruped;
         private Foot _left;
         private Foot _right;
         private Hand _handLeft;
@@ -275,21 +283,89 @@ namespace MultiplayerARPG
             _animator = model != null ? model.GetComponent<Animator>() : null;
             if (_animator == null && model != null)
                 _animator = model.GetComponentInChildren<Animator>();
-            if (_animator == null || !_animator.isHuman)
+            if (_animator == null)
+                _animator = GetComponentInChildren<Animator>();
+            if (_animator == null)
             {
                 enabled = false;
                 return;
             }
 
-            _hips = _animator.GetBoneTransform(HumanBodyBones.Hips);
-            HumanoidFootIK ik = _animator.GetComponent<HumanoidFootIK>();
-            _left = MakeFoot(true, HumanBodyBones.LeftFoot, HumanBodyBones.LeftToes, ik);
-            _right = MakeFoot(false, HumanBodyBones.RightFoot, HumanBodyBones.RightToes, ik);
-            Transform leftHand = _animator.GetBoneTransform(HumanBodyBones.LeftHand);
-            Transform rightHand = _animator.GetBoneTransform(HumanBodyBones.RightHand);
-            _handLeft = leftHand != null ? new Hand { bone = leftHand } : null;
-            _handRight = rightHand != null ? new Hand { bone = rightHand } : null;
-            _valid = _left != null && _right != null;
+            if (_animator.isHuman)
+            {
+                _isQuadruped = false;
+                _hips = _animator.GetBoneTransform(HumanBodyBones.Hips);
+                HumanoidFootIK ik = _animator.GetComponent<HumanoidFootIK>();
+                _left = MakeFoot(true, HumanBodyBones.LeftFoot, HumanBodyBones.LeftToes, ik);
+                _right = MakeFoot(false, HumanBodyBones.RightFoot, HumanBodyBones.RightToes, ik);
+                _feet = new[] { _left, _right };
+                Transform leftHand = _animator.GetBoneTransform(HumanBodyBones.LeftHand);
+                Transform rightHand = _animator.GetBoneTransform(HumanBodyBones.RightHand);
+                _handLeft = leftHand != null ? new Hand { bone = leftHand } : null;
+                _handRight = rightHand != null ? new Hand { bone = rightHand } : null;
+                _valid = _left != null && _right != null;
+            }
+            else
+            {
+                _isQuadruped = true;
+                syncStepSounds = false;
+                QuadrupedFootIK qik = _animator.GetComponent<QuadrupedFootIK>();
+                if (qik == null)
+                    qik = GetComponentInChildren<QuadrupedFootIK>();
+
+                if (qik != null && qik.legs != null && qik.legs.Length > 0)
+                {
+                    _hips = qik.body != null ? qik.body : _animator.transform;
+
+                    float lenScale = 0.45f;
+                    float widthScale = 0.70f;
+                    string n = gameObject.name.ToLower();
+                    if (n.Contains("horse")) { lenScale = 0.55f; widthScale = 0.95f; }
+                    else if (n.Contains("deer")) { lenScale = 0.35f; widthScale = 0.55f; }
+                    else if (n.Contains("pup")) { lenScale = 0.25f; widthScale = 0.45f; }
+                    else if (n.Contains("wolf")) { lenScale = 0.38f; widthScale = 0.65f; }
+
+                    var feetList = new System.Collections.Generic.List<Foot>();
+                    for (int i = 0; i < qik.legs.Length; i++)
+                    {
+                        var leg = qik.legs[i];
+                        if (leg == null) continue;
+                        bool left = (i % 2 == 0);
+                        var f = new Foot
+                        {
+                            left = left,
+                            bone = leg.foot != null ? leg.foot : leg.end,
+                            toes = leg.foot != null ? leg.foot : leg.end,
+                            printLengthScale = lenScale,
+                            printWidthScale = widthScale,
+                        };
+                        if (leg.contacts != null && leg.contacts.Length >= 2)
+                        {
+                            f.contactHeel = leg.contacts[0];
+                            f.contactToe = leg.contacts[1];
+                        }
+                        else if (leg.contacts != null && leg.contacts.Length == 1)
+                        {
+                            f.contactHeel = leg.contacts[0];
+                            f.contactToe = leg.contacts[0];
+                        }
+                        feetList.Add(f);
+                    }
+                    _feet = feetList.ToArray();
+                    if (_feet.Length >= 2)
+                    {
+                        _left = _feet[0];
+                        _right = _feet[1];
+                    }
+                    else if (_feet.Length == 1)
+                    {
+                        _left = _feet[0];
+                        _right = _feet[0];
+                    }
+                    _valid = _feet.Length > 0;
+                }
+            }
+
             if (!_valid)
                 enabled = false;
         }
@@ -372,8 +448,14 @@ namespace MultiplayerARPG
             float scale = Mathf.Max(0.1f, _animator.transform.lossyScale.y);
             int mask = GameInstance.Singleton != null ? GameInstance.Singleton.GetGameEntityGroundDetectionLayerMask() : Physics.DefaultRaycastLayers;
 
-            StepFoot(_left, swimming, scale, dt, mask);
-            StepFoot(_right, swimming, scale, dt, mask);
+            if (_feet != null)
+            {
+                for (int i = 0; i < _feet.Length; i++)
+                {
+                    if (_feet[i] != null)
+                        StepFoot(_feet[i], swimming, scale, dt, mask);
+                }
+            }
             TrackWading(root, swimming);
             if (swimming)
             {
@@ -422,8 +504,14 @@ namespace MultiplayerARPG
             _airborneSince = -1f;
             _impactUntil = -1f;
             float scale = Mathf.Max(0.1f, _animator.transform.lossyScale.y);
-            PrimeFoot(_left, scale);
-            PrimeFoot(_right, scale);
+            if (_feet != null)
+            {
+                for (int i = 0; i < _feet.Length; i++)
+                {
+                    if (_feet[i] != null)
+                        PrimeFoot(_feet[i], scale);
+                }
+            }
             PrimeHand(_handLeft);
             PrimeHand(_handRight);
             _primed = true;
@@ -528,7 +616,8 @@ namespace MultiplayerARPG
             }
             if (f.planted)
             {
-                if (!grounded || clearance > liftHeight * scale)
+                float lift = (_isQuadruped ? 0.04f : liftHeight) * scale;
+                if (!grounded || clearance > lift)
                 {
                     // Lifted before it had held: a brush, not a step.
                     f.planted = false;
@@ -540,7 +629,7 @@ namespace MultiplayerARPG
                     OnPlant(f, heel, toe, hit, scale);
                 }
             }
-            else if (grounded && clearance < plantHeight * scale)
+            else if (grounded && clearance < (_isQuadruped ? 0.035f : plantHeight) * scale)
             {
                 f.planted = true;
                 f.pending = true;
@@ -561,7 +650,15 @@ namespace MultiplayerARPG
         /// </summary>
         private void SolePoints(Foot f, float scale, out Vector3 heel, out Vector3 ball, out Vector3 toe, out Vector3 low)
         {
-            if (f.hasContacts)
+            if (f.contactHeel != null && f.contactToe != null)
+            {
+                heel = f.contactHeel.position;
+                toe = f.contactToe.position;
+                if ((toe - heel).sqrMagnitude < 1e-4f)
+                    toe = heel + (f.bone != null ? f.bone.forward : _moveDirection) * (0.08f * scale);
+                ball = Vector3.Lerp(heel, toe, 0.5f);
+            }
+            else if (f.hasContacts)
             {
                 heel = f.bone.TransformPoint(f.heel);
                 ball = f.bone.TransformPoint(f.ball);
@@ -570,8 +667,8 @@ namespace MultiplayerARPG
             else
             {
                 Vector3 down = Vector3.down * (0.08f * scale);
-                heel = f.bone.position + down;
-                toe = (f.toes != f.bone ? f.toes.position : f.bone.position + _moveDirection * 0.15f * scale) + down;
+                heel = (f.bone != null ? f.bone.position : transform.position) + down;
+                toe = ((f.toes != null && f.toes != f.bone) ? f.toes.position : heel + _moveDirection * 0.15f * scale) + down;
                 ball = Vector3.Lerp(heel, toe, 0.7f);
             }
             low = heel;
@@ -586,11 +683,13 @@ namespace MultiplayerARPG
             Vector3 centre = (heel + toe) * 0.5f;
             centre -= hit.normal * Vector3.Dot(centre - hit.point, hit.normal);
             // Still near where this foot last came down: it has shifted or stumbled, not stepped.
-            float restep = restepDistance * scale;
+            float restepBase = _isQuadruped ? 0.18f : restepDistance;
+            float restep = restepBase * scale;
             if (f.hasPlant && (centre - f.lastPlant).sqrMagnitude < restep * restep)
                 return;
             // The second contact of a jog's footfall: the first was the step.
-            if (Time.time - f.lastStep < minStepInterval)
+            float minInterval = _isQuadruped ? 0.18f : minStepInterval;
+            if (Time.time - f.lastStep < minInterval)
                 return;
             f.lastStep = Time.time;
             f.lastPlant = centre;
@@ -633,7 +732,7 @@ namespace MultiplayerARPG
             Color colour = Color.Lerp(dryTint, wetTint, wet);
             colour.a = sand * Mathf.Lerp(dryOpacity, wetOpacity, wet);
 
-            _hub.Print(f.left, centre, along, hit.normal, printLength * scale, printWidth * scale, colour, life);
+            _hub.Print(f.left, centre, along, hit.normal, printLength * scale * f.printLengthScale, printWidth * scale * f.printWidthScale, colour, life);
             // A boot that came out of the sea stops dripping a step at a time.
             _soaked = Mathf.Max(0f, _soaked - 1f / Mathf.Max(1, wetPrints));
 
@@ -839,7 +938,18 @@ namespace MultiplayerARPG
         /// <summary>Someone standing in the water still disturbs it, slowly.</summary>
         private void Standing(Vector3 root, float dt)
         {
-            bool inWater = _left.submerged || _right.submerged;
+            bool inWater = false;
+            if (_feet != null)
+            {
+                for (int i = 0; i < _feet.Length; i++)
+                {
+                    if (_feet[i] != null && _feet[i].submerged)
+                    {
+                        inWater = true;
+                        break;
+                    }
+                }
+            }
             float depth = SurfaceAt(root.x, root.z) - root.y;
             if (!inWater || depth < splashDepth + 0.05f || _speed > 0.35f)
             {

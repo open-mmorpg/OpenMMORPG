@@ -23,6 +23,9 @@ public domain under [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/
   Pro plan, which gives the maker full rights to the output;
 - the Wayside Shrine (`Art/Shrine`), generated with [Ludo AI](https://ludo.ai) on a paid
   plan;
+- the horse's saddle (`Art/Saddle`), generated with [Ludo AI](https://ludo.ai) on a paid plan,
+  then fitted to the horse and its rider, retopologised and re-baked in Blender (the original
+  `.glb` and the scripts are in `Art/Saddle/Source~`);
 - the icons under `Textures/Icons/Items`, `Textures/Icons/Skills`,
   `Textures/Icons/Attributes` and `Textures/Icons/Badges`, generated with
   [Ludo AI](https://ludo.ai) on a paid plan;
@@ -81,6 +84,6 @@ song ids and "made with Suno" tags that Suno embeds.
 - **Sound effects:** every clip under `Audio` except the Freesound edits listed above, made with
   AI audio models.
 - **3D models:** the horse, deer, border collie and wolf (Tripo); the bow, staff, arrow,
-  quiver, short sword, Viking shield and the Wayside Shrine (Ludo AI).
+  quiver, short sword, Viking shield, the Wayside Shrine and the horse's saddle (Ludo AI).
 - **Images:** the item, skill, attribute and badge icons (Ludo AI); the menu background,
   loading screen and title (Google Gemini).

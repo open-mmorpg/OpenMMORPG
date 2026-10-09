@@ -79,6 +79,7 @@ public domain under CC0 1.0, and the store listing's AI disclosure names the sam
 | Horse, deer, border collie and wolf | `Demo/Meshes`, `Demo/Textures` | Tripo, Pro plan |
 | Bow, staff, arrow, quiver, short sword and Viking shield | `Demo/Art/Weapons` | Ludo AI, paid plan |
 | Wayside Shrine | `Demo/Art/Shrine` | Ludo AI, paid plan |
+| Horse saddle | `Demo/Art/Saddle` | Ludo AI, paid plan |
 | Item, skill, attribute and badge icons | `Demo/Textures/Icons` | Ludo AI, paid plan |
 | Menu background, loading screen and title | `Demo/Textures` | Google Gemini |
 
