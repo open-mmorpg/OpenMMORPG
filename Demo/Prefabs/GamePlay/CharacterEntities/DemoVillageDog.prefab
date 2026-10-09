@@ -241,6 +241,7 @@ GameObject:
   - component: {fileID: 6129888466704280945}
   - component: {fileID: 6081792712829699807}
   - component: {fileID: 2282054589682713254}
+  - component: {fileID: 5902345620001832151}
   m_Layer: 0
   m_Name: DemoVillageDog
   m_TagString: Untagged
@@ -634,3 +635,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5d001d904d2d27d46a89e978fbf5e85b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MultiplayerARPG.GameData.Model.Playables.PlayableCharacterModel
+--- !u!114 &5902345620001832151
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9207214850822088101}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9294df20c8442558be0884f3e96f0c6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MultiplayerARPG.NpcFaceSpeaker
+  turnSpeed: 360
+  returnDelay: 4
+  reachTolerance: 1.5
+  adjustAngle: 10

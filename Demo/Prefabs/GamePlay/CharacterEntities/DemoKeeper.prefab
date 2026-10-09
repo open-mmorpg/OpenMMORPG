@@ -209,6 +209,7 @@ GameObject:
   - component: {fileID: 3825725776006274682}
   - component: {fileID: 8268600716248706871}
   - component: {fileID: 5310118441437338773}
+  - component: {fileID: 7033550346047772023}
   m_Layer: 0
   m_Name: DemoKeeper
   m_TagString: Untagged
@@ -638,3 +639,19 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 6980099330192371602, guid: 4b7607a8f3565ea49a47dbaada8bbfe9, type: 3}
   m_PrefabInstance: {fileID: 4440248720489780868}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &7033550346047772023
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5346465414712521236}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9294df20c8442558be0884f3e96f0c6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MultiplayerARPG.NpcFaceSpeaker
+  turnSpeed: 360
+  returnDelay: 4
+  reachTolerance: 1.5
+  adjustAngle: 10

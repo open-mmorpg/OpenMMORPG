@@ -178,6 +178,7 @@ GameObject:
   - component: {fileID: 7703507934710724876}
   - component: {fileID: 6169518294745731509}
   - component: {fileID: 6462590519145711662}
+  - component: {fileID: 354993350449669112}
   m_Layer: 0
   m_Name: DemoVillager
   m_TagString: Untagged
@@ -638,3 +639,19 @@ SkinnedMeshRenderer:
   m_CorrespondingSourceObject: {fileID: 1926899698274396937, guid: c945a450f6a98a14aa2d0dc86a15781a, type: 3}
   m_PrefabInstance: {fileID: 6541913758863981284}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &354993350449669112
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4640585648789077605}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9294df20c8442558be0884f3e96f0c6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MultiplayerARPG.NpcFaceSpeaker
+  turnSpeed: 360
+  returnDelay: 4
+  reachTolerance: 1.5
+  adjustAngle: 10
