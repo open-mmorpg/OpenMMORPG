@@ -7,6 +7,7 @@ someone's project:
   * build tooling and CI config never ship to customers
   * the licence and third-party notices are present, as review requires
   * the project settings and the menu item that imports them travel with the kit
+  * the render pipeline installer travels with the kit, with the manifest and both pipelines' archives
   * the Package Manager manifest is embedded, including URP, which the kit needs
 
 usage: check_package.py <archive.unitypackage>
@@ -24,6 +25,11 @@ REQUIRED = [
     ("Assets/OpenMMORPG/LICENSE", "the licence"),
     ("Tools/Install/OpenMMORPG_Settings.unitypackage", "the project settings archive"),
     ("Tools/Editor/ProjectSettingsInstaller.cs", "the menu item that imports the settings"),
+    ("Tools/Editor/PipelineInstaller/PipelineInstaller.cs", "the render pipeline installer"),
+    ("Tools/Editor/PipelineInstaller/PipelineInstallerWindow.cs", "the render pipeline installer's window"),
+    ("Tools/Install/Pipelines/pipelines.json", "the pipeline manifest"),
+    ("Tools/Install/Pipelines/OpenMMORPG_URP.unitypackage", "the URP version of the demo content"),
+    ("Tools/Install/Pipelines/OpenMMORPG_HDRP.unitypackage", "the HDRP version of the demo content"),
 ]
 
 
@@ -68,8 +74,11 @@ def main():
     else:
         deps = manifest.get("dependencies", {})
         print(f"embedded {len(deps)} package dependencies")
+        # The kit's own files are the URP version, so it needs URP to compile; that is also what lets an HDRP
+        # project import it and reach the installer, which then offers to remove URP again.
         if "com.unity.render-pipelines.universal" not in deps:
-            failures.append("the kit needs URP, but it is not in the embedded dependencies")
+            failures.append("the kit needs URP to compile before the pipeline installer has run, "
+                            "but it is not in the embedded dependencies")
 
     if failures:
         print("\nFAILED")

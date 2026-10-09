@@ -32,6 +32,10 @@ namespace MultiplayerARPG.Demo.EditorTools
         {
             if (EditorApplication.isCompiling || EditorApplication.isUpdating || EditorApplication.isPlayingOrWillChangePlaymode)
                 return;
+            // The render pipeline installer comes first: the steps below assume the demo's content matches the pipeline.
+            // This keeps waiting, and the window opens once the content is installed or the user has said not now.
+            if (OpenMMORPG.Setup.PipelineInstaller.IsContentPending)
+                return;
             EditorApplication.update -= ShowWhenSettled;
             if (Application.isBatchMode || DemoWelcomeWindow.IsShown)
                 return;
@@ -146,13 +150,7 @@ namespace MultiplayerARPG.Demo.EditorTools
             if (GUILayout.Button("Import Project Settings", GUILayout.Height(24)))
                 EditorApplication.ExecuteMenuItem(SettingsMenu);
 
-            Step(heading, wrap, "2. Use the demo's render settings",
-                "The demo is lit for its own Universal Render Pipeline asset, and the sea needs the depth " +
-                "and opaque textures it turns on. This also gives the lower half of your Quality levels a " +
-                "lighter one (no ambient occlusion, two shadow cascades, hard shadows), so the Quality " +
-                "setting does something on a slower machine. Currently in use: <b>" + CurrentPipeline() + "</b>.");
-            if (GUILayout.Button("Use Demo Render Pipeline", GUILayout.Height(24)))
-                UseDemoPipeline();
+            PipelineStep(heading, wrap);
 
             Step(heading, wrap, "3. Build the map server",
                 "The demo runs as an MMO cluster where maps run as separate server processes. " +
@@ -204,12 +202,121 @@ namespace MultiplayerARPG.Demo.EditorTools
             GUILayout.Label(body, wrap);
         }
 
+        private enum Pipeline { BuiltIn, Urp, Hdrp, Other }
+
+        /// <summary>
+        /// Which pipeline the project is rendering with, by the pipeline asset's type name, so this window needs neither
+        /// package to compile and can be the same file in a URP project and an HDRP one.
+        /// </summary>
+        private static Pipeline DetectPipeline()
+        {
+            RenderPipelineAsset current = GraphicsSettings.currentRenderPipeline;
+            if (current == null)
+                return Pipeline.BuiltIn;
+            string type = current.GetType().Name;
+            if (type == "UniversalRenderPipelineAsset")
+                return Pipeline.Urp;
+            if (type == "HDRenderPipelineAsset")
+                return Pipeline.Hdrp;
+            return Pipeline.Other;
+        }
+
         private static string CurrentPipeline()
         {
             RenderPipelineAsset current = GraphicsSettings.defaultRenderPipeline;
             if (current == null)
                 return "none (Built-in Render Pipeline)";
             return AssetDatabase.GetAssetPath(current) == RenderPipelinePath ? "the demo's" : current.name;
+        }
+
+        private void PipelineStep(GUIStyle heading, GUIStyle wrap)
+        {
+            Pipeline pipeline = DetectPipeline();
+            switch (pipeline)
+            {
+                case Pipeline.Urp:
+                    if (OpenMMORPG.Setup.PipelineInstaller.NeedsContent)
+                    {
+                        Step(heading, wrap, "2. Install the URP content",
+                            "This project renders with URP but the demo's materials, shaders, scenes and lights are the HDRP " +
+                            "version. One click installs the URP version of them.");
+                        if (GUILayout.Button("Install URP Content", GUILayout.Height(24)))
+                            OpenMMORPG.Setup.PipelineInstallerWindow.Open();
+                        break;
+                    }
+                    Step(heading, wrap, "2. Use the demo's render settings",
+                        "The demo is lit for its own Universal Render Pipeline asset, and the sea needs the depth " +
+                        "and opaque textures it turns on. This also gives the lower half of your Quality levels a " +
+                        "lighter one (no ambient occlusion, two shadow cascades, hard shadows), so the Quality " +
+                        "setting does something on a slower machine. Currently in use: <b>" + CurrentPipeline() + "</b>.");
+                    if (GUILayout.Button("Use Demo Render Pipeline", GUILayout.Height(24)))
+                        UseDemoPipeline();
+                    break;
+
+                case Pipeline.Hdrp:
+                    // The demo's content is installed for the pipeline by Tools > Open MMORPG > Install > Render Pipeline Content.
+                    if (OpenMMORPG.Setup.PipelineInstaller.NeedsContent)
+                    {
+                        Step(heading, wrap, "2. Install the HDRP content",
+                            "This project renders with HDRP but the demo's materials, shaders, scenes and lights are the URP " +
+                            "version. One click installs the HDRP version of them.");
+                        if (GUILayout.Button("Install HDRP Content", GUILayout.Height(24)))
+                            OpenMMORPG.Setup.PipelineInstallerWindow.Open();
+                        break;
+                    }
+                    Step(heading, wrap, "2. Check the HDRP settings",
+                        "This project renders with HDRP (<b>" + GraphicsSettings.currentRenderPipeline.name + "</b>), and the " +
+                        "demo needs nothing special of it: the sky, fog, exposure and sun shadows are Volumes in the scenes, " +
+                        "and the lights are in physical units. Your own pipeline asset is left alone.\n\n" +
+                        "One optional setting: the Resolution Scaling option in the graphics settings uses HDRP's dynamic " +
+                        "resolution, which is " + (DynamicResolutionEnabled() ? "<b>on</b>" : "<b>off</b>") + " in this asset. " +
+                        "If it is off the game turns it on the first time a player moves the slider, which rebuilds the " +
+                        "pipeline once (a short hitch); enabling it here avoids that.");
+                    using (new EditorGUI.DisabledScope(DynamicResolutionEnabled()))
+                    {
+                        if (GUILayout.Button("Enable Dynamic Resolution", GUILayout.Height(24)))
+                            EnableDynamicResolution();
+                    }
+                    break;
+
+                default:
+                    Step(heading, wrap, "2. Render pipeline",
+                        "This project is using <b>" + CurrentPipeline() + "</b>. The demo is made for the Universal " +
+                        "Render Pipeline and for HDRP; install and select one of them under Project Settings > Graphics " +
+                        "before going on.");
+                    break;
+            }
+        }
+
+        // The HDRP asset is read and written by property path, so this file needs no reference to the HDRP package.
+        private const string DynamicResolutionPath = "m_RenderPipelineSettings.dynamicResolutionSettings";
+
+        private static bool DynamicResolutionEnabled()
+        {
+            var so = new SerializedObject(GraphicsSettings.currentRenderPipeline);
+            SerializedProperty enabled = so.FindProperty(DynamicResolutionPath + ".enabled");
+            return enabled != null && enabled.boolValue;
+        }
+
+        /// <summary>Turns dynamic resolution on with a range down to 30%, the lowest the Resolution Scaling slider goes.</summary>
+        private static void EnableDynamicResolution()
+        {
+            RenderPipelineAsset asset = GraphicsSettings.currentRenderPipeline;
+            var so = new SerializedObject(asset);
+            SerializedProperty enabled = so.FindProperty(DynamicResolutionPath + ".enabled");
+            SerializedProperty min = so.FindProperty(DynamicResolutionPath + ".minPercentage");
+            SerializedProperty max = so.FindProperty(DynamicResolutionPath + ".maxPercentage");
+            if (enabled == null || min == null || max == null)
+            {
+                EditorUtility.DisplayDialog("Dynamic Resolution", "Could not find the dynamic resolution settings on " + asset.name +
+                    ". Turn it on under the asset's Quality > Dynamic Resolution.", "OK");
+                return;
+            }
+            enabled.boolValue = true;
+            min.floatValue = Mathf.Min(min.floatValue, 30f);
+            max.floatValue = 100f;
+            so.ApplyModifiedProperties();
+            AssetDatabase.SaveAssets();
         }
 
         private static void UseDemoPipeline()

@@ -37,6 +37,11 @@ jobs:
       - name: Repository integrity
         run: python "Tools~/check_repo.py" .
 
+      # The URP and HDRP archives in Tools/Install/Pipelines must hold what pipelines.json says. Files that
+      # changed since the HDRP versions were made are listed but do not fail a push; a release does fail.
+      - name: Pipeline packs
+        run: python "Tools~/pipeline_packs.py" check --repo .
+
       - name: Build the package
         run: |
           python "Tools~/build_unitypackage.py" kit . Assets/OpenMMORPG OpenMMORPG.unitypackage --deps "Tools~/dependencies.json"

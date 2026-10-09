@@ -1,0 +1,11 @@
+# Files that are the same in the URP and HDRP versions of the kit but have no place under HDRP.
+# An HDRP install removes them; a URP install puts them back. Paths are relative to Assets/OpenMMORPG.
+# (Files that exist only in the URP version need no entry here: the build finds them by comparing.)
+
+Demo/Shaders/DemoWindTerrainDetail.shader   # URP's terrain detail shader; HDRP draws the grass as instanced meshes
+Demo/Settings/DemoURP.asset                 # the demo's URP pipeline assets and their renderers
+Demo/Settings/DemoURP_Low.asset
+Demo/Settings/DemoURP_Renderer.asset
+Demo/Settings/DemoURP_Low_Renderer.asset
+Demo/Settings/DemoVolumeProfile.asset       # URP volume components; the HDRP look is in DemoPostProcessVolumeProfile
+Demo/Materials/CryptSky.mat                 # a Skybox/Cubemap material; HDRP draws the crypt's sky from a Volume

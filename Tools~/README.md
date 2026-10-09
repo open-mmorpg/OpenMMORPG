@@ -39,6 +39,18 @@ Project Settings` imports it. Keep project specific values out of
 `ProjectSettings.asset`, namely `productName`, `cloudProjectId`, `organizationId`,
 `projectName`, `metroPackageName` and `metroApplicationDescription`.
 
+## Render pipeline packs
+
+The kit is URP; its HDRP version travels inside it as an archive, with a URP one to switch back, and
+an editor window installs the one that matches the project. `pipeline_packs.py` builds those archives
+from a converted copy of the project and checks them. How it works, and what to do when a
+pipeline-specific file changes, is in [`pipelines/README.md`](pipelines/README.md).
+
+```sh
+python "Tools~/pipeline_packs.py" build --repo . --hdrp "<HDRP project>/Assets/OpenMMORPG"
+python "Tools~/pipeline_packs.py" check --repo .
+```
+
 ## Checks
 
 [Checks](../.github/workflows/checks.yml) runs on every push and pull request, needs no
@@ -46,6 +58,7 @@ Unity install, and finishes in seconds. Run the same checks locally before pushi
 
 ```sh
 python "Tools~/check_repo.py" .
+python "Tools~/pipeline_packs.py" check --repo .
 python "Tools~/build_unitypackage.py" kit . Assets/OpenMMORPG OpenMMORPG.unitypackage --deps "Tools~/dependencies.json"
 python "Tools~/check_package.py" OpenMMORPG.unitypackage
 ```
@@ -56,6 +69,7 @@ in case, and a `ThirdParty` component missing from `THIRD-PARTY-NOTICES.md`.
 
 `check_package.py` inspects a built archive: everything under `Assets/OpenMMORPG`, no
 build tooling or CI config inside, the licence, notices, project settings archive and
-settings menu item all present, and no render pipeline among the embedded
-dependencies, so the kit stays usable under URP, HDRP and Built-in. The release
+settings menu item all present, the render pipeline installer with its manifest and both
+pipelines' archives, and URP among the embedded dependencies (the kit's own files are the URP
+version, so it needs URP to compile before the installer has run). The release
 workflow runs the same script, so a tag build cannot pass looser rules than a push.
