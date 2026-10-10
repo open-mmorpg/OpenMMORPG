@@ -58,6 +58,11 @@ Shader "OpenMMORPG/Demo/Prop Sign (Emblem)"
 
             #pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
             #pragma multi_compile _ _ADDITIONAL_LIGHTS_VERTEX _ADDITIONAL_LIGHTS
+            // Forward+ hands the torches and lamps to a shader through this keyword and not through _ADDITIONAL_LIGHTS, which
+            // is off under it. Without it a variant has no additional lights at all, and the demo's renderers are Forward+:
+            // the board was lit by the sun, the moon and the ambient and by nothing that was burning, so at night it stood
+            // black beside a torch-lit wall.
+            #pragma multi_compile _ _CLUSTER_LIGHT_LOOP
             #pragma multi_compile_fragment _ _ADDITIONAL_LIGHT_SHADOWS
             #pragma multi_compile_fragment _ _SHADOWS_SOFT
             #pragma multi_compile_fragment _ _SCREEN_SPACE_OCCLUSION

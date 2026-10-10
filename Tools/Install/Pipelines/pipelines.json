@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "kitVersion": "dev",
-  "builtFrom": "08e08ad1db20+",
+  "builtFrom": "06b180a58d63+",
   "prefix": "Assets/OpenMMORPG",
   "pipelines": [
     {
@@ -594,11 +594,11 @@
         },
         {
           "path": "Demo/Shaders/PropSignEmblem.shader",
-          "hash": "047bac2297df07c68176e7729b7bbb0ea4c7eb9d"
+          "hash": "1f24f32ecd864dd777189de30bbbd0546d1b0120"
         },
         {
           "path": "Demo/Shaders/PropTrimVertexColor.shader",
-          "hash": "22586cc3b73bae4561743b4936e2dc53819f44d8"
+          "hash": "f890c698450144cf4a90324a12d99015be5d09f4"
         },
         {
           "path": "Demo/Terrain/IslandTerrain.asset",
@@ -1300,7 +1300,7 @@
         },
         {
           "path": "Demo/Shaders/HDRPLitVariantData.hlsl",
-          "hash": "1f67367fd91c6958b97a3c4b7a8c591d7363daa0"
+          "hash": "1a57f558eaacf249b354984480a9e6df8073bef3"
         },
         {
           "path": "Demo/Shaders/HDRPLitVariantHooks.hlsl",
@@ -1308,7 +1308,7 @@
         },
         {
           "path": "Demo/Shaders/HDRPLitVariantProperties.hlsl",
-          "hash": "0ec425951fd15445f90726881581fa2e43a14c9a"
+          "hash": "92ade4bb1251b25b6f25063686d28bfa2c08b9f3"
         },
         {
           "path": "Demo/Shaders/HDRPUnlitVariantData.hlsl",
@@ -1332,7 +1332,7 @@
         },
         {
           "path": "Demo/Shaders/PropSignEmblem.shader",
-          "hash": "85b50eec8590f4c4847ca94dbd03900ff2115965"
+          "hash": "95b0ef29b6f6750ea88d15305ebad4b00cfbebaa"
         },
         {
           "path": "Demo/Shaders/PropTrimVertexColor.shader",
