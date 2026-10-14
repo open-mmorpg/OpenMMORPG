@@ -44,6 +44,9 @@ namespace OpenMMORPG.Setup
         private const string ImportedKey = "OpenMMORPG.PipelineInstall.Imported";
         private const string RemovalQueueKey = "OpenMMORPG.PipelineInstall.RemovalQueue";
         private const string DismissedConfigKey = "OpenMMORPG.PipelineInstallerDismissed";
+        /// <summary>What "Don't ask again" stores under <see cref="DismissedConfigKey"/>: every pipeline, not only the current one.</summary>
+        private const string DismissedForGood = "*";
+        private const string SnoozedKey = "OpenMMORPG.PipelineInstall.Snoozed";
         private const string LastResultKey = "OpenMMORPG.PipelineInstall.LastResult";
 
         /// <summary>How long to wait for an import that has not reported, before checking what is on disk anyway.</summary>
@@ -311,26 +314,40 @@ namespace OpenMMORPG.Setup
 
         public static string PendingInstall { get { return SessionState.GetString(PendingKey, ""); } }
 
-        /// <summary>True while the window should be put in front of the user: content is wrong, an install is running, and the user has not said not now.</summary>
+        /// <summary>
+        /// True while the window should be put in front of the user: an install is running, or the content is wrong and the user
+        /// has neither said not now in this session nor said don't ask again in this project.
+        /// </summary>
         public static bool IsContentPending
         {
             get
             {
                 if (PendingInstall != "")
                     return true;
-                string project = ProjectPipelineId();
-                return NeedsContent && EditorUserSettings.GetConfigValue(DismissedConfigKey) != project;
+                if (SessionState.GetBool(SnoozedKey, false))
+                    return false;
+                // A pipeline id here is what "Not now" used to store, for good, before it meant this session only.
+                string dismissed = EditorUserSettings.GetConfigValue(DismissedConfigKey);
+                return NeedsContent && dismissed != DismissedForGood && dismissed != ProjectPipelineId();
             }
         }
 
+        /// <summary>"Not now", or closing the window: it does not open by itself again until Unity restarts.</summary>
+        public static void Snooze()
+        {
+            SessionState.SetBool(SnoozedKey, true);
+        }
+
+        /// <summary>"Don't ask again": it never opens by itself in this project again. The menu item still opens it.</summary>
         public static void Dismiss()
         {
-            EditorUserSettings.SetConfigValue(DismissedConfigKey, ProjectPipelineId() ?? "");
+            EditorUserSettings.SetConfigValue(DismissedConfigKey, DismissedForGood);
         }
 
         public static void ClearDismissal()
         {
             EditorUserSettings.SetConfigValue(DismissedConfigKey, "");
+            SessionState.EraseBool(SnoozedKey);
         }
 
         public static string LastResult

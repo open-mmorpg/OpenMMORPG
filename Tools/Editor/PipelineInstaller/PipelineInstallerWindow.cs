@@ -6,9 +6,10 @@ using UnityEngine;
 namespace OpenMMORPG.Setup
 {
     /// <summary>
-    /// Opens by itself, once, when the project renders with a pipeline the demo content is not made for, and says what is
-    /// wrong in a sentence and what to press. <c>Tools &gt; Open MMORPG &gt; Install &gt; Render Pipeline Content</c> brings it
-    /// back, to switch pipelines or to check what is installed.
+    /// Opens by itself when the project renders with a pipeline the demo content is not made for, and says what is wrong in a
+    /// sentence and what to press. "Not now" (or closing it) keeps it shut until Unity restarts, "Don't ask again" for good.
+    /// <c>Tools &gt; Open MMORPG &gt; Install &gt; Render Pipeline Content</c> brings it back, to switch pipelines or to check
+    /// what is installed.
     /// </summary>
     [InitializeOnLoad]
     internal static class PipelineInstallerLauncher
@@ -55,6 +56,12 @@ namespace OpenMMORPG.Setup
         private void OnFocus()
         {
             PipelineInstaller.Invalidate();
+        }
+
+        private void OnDestroy()
+        {
+            // Closed without an answer is "not now": every script reload (a server build makes two) would bring it back.
+            PipelineInstaller.Snooze();
         }
 
         private void OnInspectorUpdate()
@@ -141,12 +148,22 @@ namespace OpenMMORPG.Setup
                     PipelineInstaller.ClearDismissal();
                     PipelineInstaller.Install(project);
                 }
+                GUILayout.BeginHorizontal();
                 if (GUILayout.Button("Not now", GUILayout.Height(22)))
+                {
+                    PipelineInstaller.Snooze();
+                    Close();
+                    GUIUtility.ExitGUI();
+                }
+                if (GUILayout.Button("Don't ask again", GUILayout.Height(22)))
                 {
                     PipelineInstaller.Dismiss();
                     Close();
-                    return;
+                    GUIUtility.ExitGUI();
                 }
+                GUILayout.EndHorizontal();
+                GUILayout.Label("<i>Not now</i> asks again the next time Unity starts. <i>Don't ask again</i> is for projects that " +
+                                "do not use the demo; this window stays under Tools > Open MMORPG > Install.", wrap);
             }
 
             UnneededPackagesSection(manifest);
