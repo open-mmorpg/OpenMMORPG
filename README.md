@@ -56,7 +56,7 @@ Get Open MMORPG from the Unity Asset Store and import it from Window → **Packa
 
 2. **Import the project settings**
 
-Run Open MMORPG → Install → **Import Project Settings**. It lists exactly which files it replaces before doing anything:
+Run Tools → Open MMORPG → Install → **Import Project Settings**. It lists exactly which files it replaces before doing anything:
 
  - ProjectSettings/DynamicsManager.asset
  - ProjectSettings/InputManager.asset
@@ -67,13 +67,13 @@ Run Open MMORPG → Install → **Import Project Settings**. It lists exactly wh
 
 3. **Choose your render pipeline**
 
-The kit's demo content ships as URP. If the project renders with URP there is nothing to do. If it renders with HDRP, a **Render Pipeline Content** window opens by itself after the import; press **Install HDRP content**. It replaces the demo's pipeline-specific files (shaders, materials, scenes, prefabs with lights or cameras, and a few scripts) with their HDRP versions and removes the URP-only ones, after copying any of those files you had edited to `OpenMMORPG_PipelineBackups` beside `Assets`. Afterwards it offers to remove the URP packages the import added, which HDRP does not need. Open MMORPG → Install → **Render Pipeline Content** brings the window back, to check what is installed or to switch pipelines later.
+The kit's demo content ships as URP. If the project renders with URP there is nothing to do. If it renders with HDRP, a **Render Pipeline Content** window opens by itself after the import; press **Install HDRP content**. It replaces the demo's pipeline-specific files (shaders, materials, scenes, prefabs with lights or cameras, and a few scripts) with their HDRP versions and removes the URP-only ones, after copying any of those files you had edited to `OpenMMORPG_PipelineBackups` beside `Assets`. Afterwards it offers to remove the URP packages the import added, which HDRP does not need. Tools → Open MMORPG → Install → **Render Pipeline Content** brings the window back, to check what is installed or to switch pipelines later.
 
-After installation, browse available addons via the Addon Manager window (Open MMORPG → Develop → **Addon Manager**). Have fun building!
+After installation, browse available addons via the Addon Manager window (Tools → Open MMORPG → Develop → **Addon Manager**). Have fun building!
 
 ## Running the demo
 
-The kit ships with a demo in `Assets/OpenMMORPG/Demo`: a small island with a village, three enemy families, a rideable horse and a dungeon, running on the kit's MMO servers. A **Welcome** window walks through these steps the first time the project opens, and Open MMORPG → Demo → **Welcome** brings it back.
+The kit ships with a demo in `Assets/OpenMMORPG/Demo`: a small island with a village, three enemy families, a rideable horse and a dungeon, running on the kit's MMO servers. A **Welcome** window walks through these steps the first time the project opens, and Tools → Open MMORPG → Demo → **Welcome** brings it back.
 
 1. **Import the project settings**, as in Quick Start.
 2. **Use the demo's render settings.**
