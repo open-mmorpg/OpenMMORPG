@@ -80,3 +80,29 @@ the HDRP content in a release is never behind the kit.
 It is a copy of the project with the kit imported and converted in place (GUIDs kept), plus its own
 `Assets/_HDRPConversion` folder of editor tools that does the converting and is never shipped.
 Keep it on the same Unity version as the kit.
+
+> **Never copy the repository over the HDRP project, and never import the kit into it.** The
+> repository's files are the URP version. Either one puts the URP originals back over the converted
+> files, drops the files that exist only under HDRP (the HDRP scripts, volume profiles and shader
+> includes, so the project stops compiling), brings back the URP-only files, and an import also adds
+> the URP packages to the project again. A scene left open through it picks up stray light overrides.
+> Bring repository changes in with `sync`, which skips every pipeline-specific file.
+
+**The pack is the only backup.** The HDRP project is not under version control, and the installer's
+own backup does not cover this: it copies aside only files you have edited past the shipped version,
+and in an accident like this the converted files are the shipped version. So the HDRP archive in
+`Tools/Install/Pipelines` is the one copy of the converted content that outlives it, and HDRP work is
+only as safe as the last `build`. Rebuild after any change worth keeping, and commit.
+
+**If it happens anyway**, nothing is lost that is in the pack:
+
+1. Do not save the scene that is open. Open an empty one first if the editor asks about it.
+2. Import `Tools/Install/Pipelines/OpenMMORPG_HDRP.unitypackage` with **Assets → Import Package →
+   Custom Package** (this works even while the project does not compile).
+3. Once it compiles, open **Tools → Open MMORPG → Install → Render Pipeline Content**. It reports the HDRP
+   content with a few files "changed or removed" (the URP-only ones that came back); press
+   **Reinstall the shipped High Definition Render Pipeline (HDRP) content**. It removes them and
+   checks every file against `pipelines.json`.
+4. Check the result against the repository: `sync --dry-run` should list nothing.
+
+Work done in the project after the last `build` is not in the pack and cannot be restored this way.
