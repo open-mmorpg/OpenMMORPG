@@ -6,6 +6,8 @@ Catches the quiet failures in a Unity repo distributed as a .unitypackage:
   * an orphan .meta is a file someone deleted without its metadata
   * two assets sharing a GUID breaks references in ways that are painful to trace
   * names differing only in case break checkouts on Windows and macOS
+  * an AssetOrigin block in a .meta makes the Package Manager list the kit as
+    whichever Asset Store product stamped it
   * a ThirdParty component missing from THIRD-PARTY-NOTICES.md fails Asset Store
     review, which requires the notices file
 
@@ -46,8 +48,10 @@ def walk(root):
     return assets, metas
 
 
-def read_guids(root, metas):
+def read_metas(root, metas):
+    """GUID -> .meta files, plus the .meta files carrying an Asset Store origin stamp."""
     guids = collections.defaultdict(list)
+    stamped = []
     for rel in metas:
         path = os.path.join(root, rel + ".meta")
         try:
@@ -55,10 +59,11 @@ def read_guids(root, metas):
                 for line in f:
                     if line.startswith("guid: "):
                         guids[line[6:].strip()].append(rel + ".meta")
-                        break
+                    elif line.startswith("AssetOrigin:"):
+                        stamped.append(rel + ".meta")
         except OSError:
             continue
-    return guids
+    return guids, sorted(stamped)
 
 
 def main():
@@ -76,12 +81,20 @@ def main():
     if orphans:
         failures.append(f"{len(orphans)} orphan .meta file(s), the asset is gone:\n  " + "\n  ".join(o + ".meta" for o in orphans[:20]))
 
-    guids = read_guids(root, metas)
+    guids, stamped = read_metas(root, metas)
     dupes = {g: f for g, f in guids.items() if len(f) > 1}
     if dupes:
         lines = [f"  {g}: {', '.join(f[:3])}" for g, f in list(dupes.items())[:10]]
         failures.append(f"{len(dupes)} duplicate GUID(s):\n" + "\n".join(lines))
     print(f"unique GUIDs: {len(guids)}")
+
+    # The Asset Store stamps downloaded .meta files with the product they came from, and the
+    # Package Manager lists whatever product those stamps name. A stamp carried over from
+    # another asset makes the kit show up as that asset.
+    if stamped:
+        failures.append(
+            f"{len(stamped)} .meta file(s) carry an AssetOrigin block from another Asset Store product:\n  "
+            + "\n  ".join(stamped[:20]))
 
     lowered = collections.defaultdict(list)
     for a in assets:
