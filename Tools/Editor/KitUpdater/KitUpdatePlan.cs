@@ -111,6 +111,23 @@ namespace OpenMMORPG.KitUpdater
             return changes;
         }
 
+        /// <summary>
+        /// Of <see cref="PackageChanges"/>, the packages the project does not have at that version or newer: name to the
+        /// version needed. The updater never adds them itself (Asset Store guideline 2.5.1.e: an asset must not add, update
+        /// or remove packages in the user's project), so the user adds them before updating.
+        /// </summary>
+        /// <param name="projectPackages">Name to version of every package the project has.</param>
+        public Dictionary<string, string> UnmetPackages(IDictionary<string, string> projectPackages)
+        {
+            var unmet = new Dictionary<string, string>();
+            foreach (var need in PackageChanges())
+            {
+                if (!projectPackages.TryGetValue(need.Key, out string have) || !(KitVersion.Compare(have, need.Value) >= 0))
+                    unmet[need.Key] = need.Value;
+            }
+            return unmet;
+        }
+
         public static KitUpdatePlan Make(KitManifest installed, KitManifest target, string kitRoot, IKitProject project,
             Func<float, bool> progress = null)
         {

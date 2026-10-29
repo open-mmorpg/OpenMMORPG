@@ -6,7 +6,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using UnityEditor;
-using UnityEditor.PackageManager;
 using UnityEngine;
 
 namespace OpenMMORPG.KitUpdater
@@ -15,6 +14,7 @@ namespace OpenMMORPG.KitUpdater
     /// Applies a <see cref="KitUpdatePlan"/>: downloads what it writes, checks every file against the target manifest's hash,
     /// backs up everything it is about to change, then moves, writes and deletes, records the target manifest as the
     /// installed one and lets Unity import and compile. If the result does not compile it offers to restore the backup.
+    /// It never changes the project's packages: a release that needs newer ones waits until the user has added them.
     ///
     /// Progress is kept in <c>Library/OpenMMORPGUpdater/state.json</c>, because a successful compile reloads the editor's
     /// code and this class with it. Backups go to <c>OpenMMORPGBackups</c> beside Assets, out of Unity's sight.
@@ -44,8 +44,6 @@ namespace OpenMMORPG.KitUpdater
             public string compareUrl;
             /// <summary>Kit files left as the user had them, for the summary: project-relative paths.</summary>
             public List<string> kept = new List<string>();
-            /// <summary>Packages asked for: "name@version".</summary>
-            public List<string> packages = new List<string>();
             public long appliedTicks;
             public string message;
         }
@@ -116,7 +114,19 @@ namespace OpenMMORPG.KitUpdater
                 return "This kit is a git checkout. Update it with git instead.";
             if (!EditorIsAtLeast(plan.target.unity))
                 return "Open MMORPG " + plan.target.version + " needs Unity " + plan.target.unity + " or newer; this is " + Application.unityVersion + ".";
+            if (plan.UnmetPackages(ProjectPackages()).Count > 0)
+                return "Open MMORPG " + plan.target.version + " needs the package versions listed below. Add them in Package Manager first; " +
+                       "the kit does not change your project's packages itself.";
             return null;
+        }
+
+        /// <summary>Name to version of every package the project has.</summary>
+        public static Dictionary<string, string> ProjectPackages()
+        {
+            var packages = new Dictionary<string, string>();
+            foreach (UnityEditor.PackageManager.PackageInfo package in UnityEditor.PackageManager.PackageInfo.GetAllRegisteredPackages())
+                packages[package.name] = package.version;
+            return packages;
         }
 
         /// <summary>Whether this editor is at least "6000.3" (major.minor; the patch is not compared).</summary>
@@ -198,16 +208,12 @@ namespace OpenMMORPG.KitUpdater
                     .Select(a => a.currentPath ?? a.targetPath).ToList(),
                 appliedTicks = DateTime.UtcNow.Ticks,
             };
-            Dictionary<string, string> packages = plan.PackageChanges();
-            state.packages = packages.Select(p => p.Key + "@" + p.Value).ToList();
             SaveState(state);
             s_idleSince = DateTime.MaxValue;
             // An update that changes no script reloads nothing, so this domain watches the result itself.
             EditorApplication.update -= Watch;
             EditorApplication.update += Watch;
 
-            if (state.packages.Count > 0)
-                Client.AddAndRemove(state.packages.ToArray(), null); // resolving imports and compiles everything again
             AssetDatabase.Refresh();
             try { Directory.Delete(D(staging), true); } catch (Exception) { }
             return true;
@@ -426,8 +432,7 @@ namespace OpenMMORPG.KitUpdater
             }
             State state = LoadState() ?? new State();
             state.stage = "restored";
-            state.message = "Restored " + record.from + " from " + backup + "." +
-                            (state.packages != null && state.packages.Count > 0 ? " Packages the update added were left in place." : "");
+            state.message = "Restored " + record.from + " from " + backup + ".";
             SaveState(state);
             AssetDatabase.Refresh();
         }

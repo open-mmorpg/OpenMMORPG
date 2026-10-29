@@ -14,8 +14,10 @@ namespace OpenMMORPG.KitUpdater
     /// so in one Console line and ticks Tools &gt; Open MMORPG &gt; Update &gt; Check for Updates; nothing opens and nothing
     /// is downloaded. One unsigned call to the public releases list; nothing about the user or the project is sent.
     ///
-    /// Off with the box at the foot of the Check for Updates window (per project, in EditorUserSettings). Never runs in
-    /// batch mode, in a kit with no manifest (a git checkout, or one installed from an older release), or for a test build.
+    /// Off until the user turns it on: the Check for Updates window asks once, and the box at its foot changes it later (per
+    /// project, in EditorUserSettings). The Asset Store wants anything that reaches the network unasked to be opt-in
+    /// (submission guideline 1.5.e asks it of analytics; this sends nothing, but is held to the same standard). Never runs
+    /// in batch mode, in a kit with no manifest (a git checkout, or one installed from an older release), or for a test build.
     /// </summary>
     [InitializeOnLoad]
     public static class KitUpdateCheck
@@ -48,8 +50,18 @@ namespace OpenMMORPG.KitUpdater
 
         public static bool Enabled
         {
-            get { return EditorUserSettings.GetConfigValue(SettingKey) != "off"; }
+            get { return EditorUserSettings.GetConfigValue(SettingKey) == "on"; }
             set { EditorUserSettings.SetConfigValue(SettingKey, value ? "on" : "off"); }
+        }
+
+        /// <summary>Whether the user has answered, either way; until then the window asks.</summary>
+        public static bool Asked
+        {
+            get
+            {
+                string value = EditorUserSettings.GetConfigValue(SettingKey);
+                return value == "on" || value == "off";
+            }
         }
 
         public static Result Last()
@@ -74,38 +86,13 @@ namespace OpenMMORPG.KitUpdater
         /// <summary>Whether a release tag ("v1.2.0") is a later version than an installed one ("1.1.5"). A test build is never behind.</summary>
         public static bool IsNewer(string tag, string installedVersion)
         {
-            int[] release = Numbers(tag);
-            int[] installed = Numbers(installedVersion);
-            if (release == null || installed == null)
-                return false;
-            for (int i = 0; i < Math.Max(release.Length, installed.Length); ++i)
-            {
-                int r = i < release.Length ? release[i] : 0;
-                int n = i < installed.Length ? installed[i] : 0;
-                if (r != n)
-                    return r > n;
-            }
-            return false;
+            return KitVersion.Compare(tag, installedVersion) > 0;
         }
 
         /// <summary>Whether a check is due: none yet, or the last one (found something or failed) is a day old or dated in the future.</summary>
         public static bool Due(Result last, DateTime now)
         {
             return last == null || now - last.Checked >= Interval || last.Checked > now;
-        }
-
-        private static int[] Numbers(string version)
-        {
-            if (string.IsNullOrEmpty(version))
-                return null;
-            string[] parts = version.TrimStart('v', 'V').Split('-')[0].Split('.');
-            var numbers = new int[parts.Length];
-            for (int i = 0; i < parts.Length; ++i)
-            {
-                if (!int.TryParse(parts[i], out numbers[i]))
-                    return null;
-            }
-            return numbers;
         }
 
         private static void WhenSettled()

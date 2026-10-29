@@ -285,6 +285,48 @@ namespace OpenMMORPG.KitUpdater.Tests
         }
 
         [Test]
+        public void UnmetPackages_AreTheChangedOnesTheProjectLacksOrHasOlder()
+        {
+            _installed.dependencies["com.unity.burst"] = "1.8.30";
+            _installed.dependencies["com.unity.ugui"] = "2.0.0";
+            _target.dependencies["com.unity.burst"] = "1.8.31";
+            _target.dependencies["com.unity.collections"] = "2.6.8";
+            _target.dependencies["com.unity.mathematics"] = "1.3.3";
+            _target.dependencies["com.unity.ugui"] = "2.0.0";
+            var project = new Dictionary<string, string>
+            {
+                { "com.unity.burst", "1.8.30" },        // older than needed
+                { "com.unity.mathematics", "1.4.0" },   // newer than needed: fine
+                // collections missing; ugui missing too, but the release did not change it, so it is not the update's business
+            };
+            Dictionary<string, string> unmet = Plan().UnmetPackages(project);
+            Assert.That(unmet.Keys, Is.EquivalentTo(new[] { "com.unity.burst", "com.unity.collections" }));
+            Assert.That(unmet["com.unity.burst"], Is.EqualTo("1.8.31"));
+
+            project["com.unity.burst"] = "1.8.31";
+            project["com.unity.collections"] = "2.6.8";
+            Assert.That(Plan().UnmetPackages(project), Is.Empty);
+        }
+
+        [TestCase("1.8.31", "1.8.30", 1)]
+        [TestCase("1.10.0", "1.9.9", 1)]
+        [TestCase("2.0", "2.0.0", 0)]
+        [TestCase("v1.1.5", "1.1.5", 0)]
+        [TestCase("1.8.30-pre.1", "1.8.30", 0)]
+        [TestCase("1.0.0", "1.0.1", -1)]
+        public void KitVersion_Compares(string a, string b, int sign)
+        {
+            Assert.That(System.Math.Sign(KitVersion.Compare(a, b).Value), Is.EqualTo(sign));
+        }
+
+        [Test]
+        public void KitVersion_IsNullForNonVersions()
+        {
+            Assert.That(KitVersion.Compare("develop", "1.0.0"), Is.Null);
+            Assert.That(KitVersion.Compare(null, "1.0.0"), Is.Null);
+        }
+
+        [Test]
         public void EditorVersionCheck_ComparesMajorAndMinor()
         {
             Assert.That(KitUpdater.EditorIsAtLeast("6000.0"), Is.True);

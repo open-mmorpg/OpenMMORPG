@@ -69,6 +69,8 @@ namespace OpenMMORPG.KitUpdater
                 return;
             }
             EditorGUILayout.LabelField("Installed: Open MMORPG " + _installed.version + (_installed.tag == null ? " (test build)" : ""), EditorStyles.boldLabel);
+            if (!KitUpdateCheck.Asked && _installed.tag != null)
+                DrawCheckQuestion();
             string newer = KitUpdateCheck.NewerThan(_installed.version);
             if (newer != null && _plan == null)
                 EditorGUILayout.HelpBox(newer + " is out. Check GitHub for Releases, then Compare, to see what it changes before anything is touched.", MessageType.Info);
@@ -80,6 +82,30 @@ namespace OpenMMORPG.KitUpdater
                 DrawPlan();
             DrawCheckSetting();
             EditorGUILayout.EndScrollView();
+        }
+
+        /// <summary>Asked once per project, until answered: the daily check is opt-in.</summary>
+        private void DrawCheckQuestion()
+        {
+            using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
+            {
+                EditorGUILayout.LabelField("Check GitHub once a day for a new release of the kit? When the editor starts, it reads the " +
+                                           "public release list and, if a newer version is out, says so in the Console. It never " +
+                                           "downloads anything by itself and sends nothing about you or your project.",
+                    EditorStyles.wordWrappedLabel);
+                using (new EditorGUILayout.HorizontalScope())
+                {
+                    if (GUILayout.Button("Check Daily", GUILayout.Width(110f)))
+                    {
+                        KitUpdateCheck.Enabled = true;
+                        KitUpdateCheck.CheckNow();
+                    }
+                    if (GUILayout.Button("No Thanks", GUILayout.Width(110f)))
+                        KitUpdateCheck.Enabled = false;
+                    GUILayout.FlexibleSpace();
+                }
+            }
+            EditorGUILayout.Space(4f);
         }
 
         private void DrawCheckSetting()
@@ -251,10 +277,7 @@ namespace OpenMMORPG.KitUpdater
             EditorGUILayout.LabelField(applying.Count + " file(s) change, " + Megabytes(_plan.DownloadSize) + " to download. " +
                                        "Everything changed is backed up to " + KitUpdater.BackupRoot + " beside Assets first.",
                 EditorStyles.wordWrappedMiniLabel);
-            Dictionary<string, string> packages = _plan.PackageChanges();
-            if (packages.Count > 0)
-                EditorGUILayout.LabelField("Packages to add or change: " + string.Join(", ", packages.Select(p => p.Key + " " + p.Value).ToArray()),
-                    EditorStyles.wordWrappedMiniLabel);
+            DrawUnmetPackages();
 
             foreach (KitActionKind kind in Groups)
                 DrawGroup(kind);
@@ -273,6 +296,29 @@ namespace OpenMMORPG.KitUpdater
                             _plan = null;
                         Reload();
                         GUIUtility.ExitGUI();
+                    }
+                }
+            }
+        }
+
+        /// <summary>Packages the release needs at a version the project lacks. The user adds them; the kit never does.</summary>
+        private void DrawUnmetPackages()
+        {
+            Dictionary<string, string> project = KitUpdater.ProjectPackages();
+            Dictionary<string, string> unmet = _plan.UnmetPackages(project);
+            if (unmet.Count == 0)
+                return;
+            using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
+            {
+                EditorGUILayout.LabelField("Add or upgrade these in Package Manager, then come back:", EditorStyles.boldLabel);
+                foreach (var need in unmet)
+                {
+                    using (new EditorGUILayout.HorizontalScope())
+                    {
+                        string have = project.TryGetValue(need.Key, out string v) ? "you have " + v : "not in the project";
+                        EditorGUILayout.LabelField(need.Key + " " + need.Value + " or newer  (" + have + ")", EditorStyles.miniLabel);
+                        if (GUILayout.Button("Open Package Manager", EditorStyles.miniButton, GUILayout.Width(150f)))
+                            UnityEditor.PackageManager.UI.Window.Open(need.Key);
                     }
                 }
             }

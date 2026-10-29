@@ -57,6 +57,41 @@ namespace OpenMMORPG.KitUpdater
         public long size;
     }
 
+    /// <summary>Dotted version numbers ("1.1.5", "v2.0", "1.8.30-pre.1"): the numbers before any "-" are compared in order.</summary>
+    public static class KitVersion
+    {
+        /// <summary>Negative, zero or positive as <paramref name="a"/> is older, the same or newer; null if either is not a version.</summary>
+        public static int? Compare(string a, string b)
+        {
+            int[] x = Numbers(a);
+            int[] y = Numbers(b);
+            if (x == null || y == null)
+                return null;
+            for (int i = 0; i < Math.Max(x.Length, y.Length); ++i)
+            {
+                int p = i < x.Length ? x[i] : 0;
+                int q = i < y.Length ? y[i] : 0;
+                if (p != q)
+                    return p.CompareTo(q);
+            }
+            return 0;
+        }
+
+        private static int[] Numbers(string version)
+        {
+            if (string.IsNullOrEmpty(version))
+                return null;
+            string[] parts = version.TrimStart('v', 'V').Split('-')[0].Split('.');
+            var numbers = new int[parts.Length];
+            for (int i = 0; i < parts.Length; ++i)
+            {
+                if (!int.TryParse(parts[i], out numbers[i]))
+                    return null;
+            }
+            return numbers;
+        }
+    }
+
     /// <summary>
     /// The path to give System.IO for a project-relative (or any) path. Unity's Mono fails on Windows paths of 260
     /// characters or more, which a kit file reaches in a project a few folders deep, though Unity itself imports it; the
