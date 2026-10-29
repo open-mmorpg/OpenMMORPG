@@ -53,6 +53,7 @@ jobs:
             PKG_NAME="OpenMMORPG.unitypackage"
           fi
           echo "PACKAGE_NAME=${PKG_NAME}" >> "$GITHUB_ENV"
+          echo "PACKAGE_REF=${REF}" >> "$GITHUB_ENV"
           echo "Built package name: ${PKG_NAME}"
 
       # The HDRP archive is made from a converted copy of the project, by hand (see Tools~/pipelines/README.md).
@@ -61,9 +62,12 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/v')
         run: python "Tools~/pipeline_packs.py" check --repo . --strict
 
+      # The kit manifest goes inside the archive and, as kit-manifest.json, beside it on the release, where an
+      # installed kit's updater finds the next version's file list without downloading the archive.
       - name: Build the package
         run: |
-          python "Tools~/build_unitypackage.py" kit . Assets/OpenMMORPG "$PACKAGE_NAME" --deps "Tools~/dependencies.json"
+          python "Tools~/build_unitypackage.py" kit . Assets/OpenMMORPG "$PACKAGE_NAME" --deps "Tools~/dependencies.json" \
+            --version "$PACKAGE_REF" --manifest-out kit-manifest.json
 
       # Same script the Checks workflow runs, so a tag build cannot pass looser
       # rules than an ordinary push.
@@ -74,7 +78,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.PACKAGE_NAME }}
-          path: ${{ env.PACKAGE_NAME }}
+          path: |
+            ${{ env.PACKAGE_NAME }}
+            kit-manifest.json
           retention-days: 14
 
       - name: Publish the release
@@ -87,7 +93,7 @@ jobs:
 
           This archive is the Asset Store build: the complete kit, with its Unity package dependencies embedded so they are added on import."
           if gh release view "$TAG" >/dev/null 2>&1; then
-            gh release upload "$TAG" "$PACKAGE_NAME" --clobber
+            gh release upload "$TAG" "$PACKAGE_NAME" kit-manifest.json --clobber
           else
-            gh release create "$TAG" --title "$TAG" --notes "$notes" "$PACKAGE_NAME"
+            gh release create "$TAG" --title "$TAG" --notes "$notes" "$PACKAGE_NAME" kit-manifest.json
           fi
