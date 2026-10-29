@@ -59,12 +59,11 @@ jobs:
           docker-images: false
           swap-storage: false
 
-      # The repository is the project's Assets/OpenMMORPG folder.
+      # GameCI needs the workspace root to be a git checkout, so the kit is checked out there and
+      # mirrored into the test project's Assets/OpenMMORPG by the next step.
       - name: Check out the kit
         if: env.UNITY_LICENSE != ''
         uses: actions/checkout@v4
-        with:
-          path: ${{ env.PROJECT }}/Assets/OpenMMORPG
 
       - name: Set up Python
         if: env.UNITY_LICENSE != ''
@@ -74,7 +73,7 @@ jobs:
 
       - name: Make the test project
         if: env.UNITY_LICENSE != ''
-        run: python "${{ env.PROJECT }}/Assets/OpenMMORPG/Tools~/run_tests.py" --prepare-only --project "${{ env.PROJECT }}"
+        run: python "Tools~/run_tests.py" --prepare-only --project "${{ env.PROJECT }}"
 
       # Importing the kit from nothing takes most of the run; later runs reuse the newest Library.
       - name: Restore the Library

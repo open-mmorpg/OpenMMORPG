@@ -12,8 +12,8 @@ The project and its Library are kept between runs: the first run imports everyth
 later ones only what changed.
 
 --prepare-only writes the project and stops, for CI, which runs Unity itself (see
-.github/workflows/tests.yml). When the kit is already the project's Assets/OpenMMORPG, as in
-CI's checkout, it is not mirrored.
+.github/workflows/tests.yml). The project may sit inside the kit checkout, as in CI; it is left
+out of the mirror. When the kit already is the project's Assets/OpenMMORPG it is not mirrored.
 
 usage: run_tests.py [--unity PATH] [--project DIR] [--platform EditMode|PlayMode]
                     [--category Logic;Harnessed] [--filter REGEX] [--nographics]
@@ -117,12 +117,18 @@ def copy_settings(project):
         shutil.copy2(os.path.join(source, name), os.path.join(target, name))
 
 
-def mirror(source, target):
-    """Make target an exact copy of source, copying only what changed (size or mtime)."""
+def mirror(source, target, project):
+    """Make target an exact copy of source, copying only what changed (size or mtime).
+
+    A project folder inside the kit checkout (as in CI, where the workspace root must be the
+    git checkout) is left out, or the kit would be copied into itself.
+    """
     copied = removed = 0
     os.makedirs(target, exist_ok=True)
+    project = os.path.normcase(os.path.abspath(project))
     for dirpath, dirnames, filenames in os.walk(source):
-        dirnames[:] = [d for d in dirnames if d not in SKIP]
+        dirnames[:] = [d for d in dirnames if d not in SKIP
+                       and os.path.normcase(os.path.abspath(os.path.join(dirpath, d))) != project]
         rel = os.path.relpath(dirpath, source)
         out_dir = os.path.normpath(os.path.join(target, rel))
         os.makedirs(out_dir, exist_ok=True)
@@ -191,7 +197,7 @@ def main():
     if os.path.exists(target) and os.path.samefile(KIT, target):
         print("Kit is already the project's Assets/OpenMMORPG; not mirrored")
     else:
-        copied, removed = mirror(KIT, target)
+        copied, removed = mirror(KIT, target, project)
         print(f"Kit mirrored: {copied} copied, {removed} removed")
     if args.prepare_only:
         return 0
