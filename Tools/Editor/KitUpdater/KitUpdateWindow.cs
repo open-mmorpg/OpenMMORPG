@@ -31,12 +31,20 @@ namespace OpenMMORPG.KitUpdater
         private Vector2 _scroll;
         private readonly HashSet<KitActionKind> _open = new HashSet<KitActionKind> { KitActionKind.EditedByYou };
 
-        [MenuItem(KitInstall.MenuRoot + "Check for Updates...", false, 99)]
+        public const string MenuPath = KitInstall.MenuRoot + "Check for Updates...";
+
+        [MenuItem(MenuPath, false, 99)]
         public static void Open()
         {
             var window = GetWindow<KitUpdateWindow>(false, "Update Open MMORPG", true);
             window.minSize = new Vector2(600f, 420f);
             window.Reload();
+        }
+
+        internal static void RepaintIfOpen()
+        {
+            foreach (KitUpdateWindow window in Resources.FindObjectsOfTypeAll<KitUpdateWindow>())
+                window.Repaint();
         }
 
         private void OnEnable()
@@ -61,13 +69,35 @@ namespace OpenMMORPG.KitUpdater
                 return;
             }
             EditorGUILayout.LabelField("Installed: Open MMORPG " + _installed.version + (_installed.tag == null ? " (test build)" : ""), EditorStyles.boldLabel);
+            string newer = KitUpdateCheck.NewerThan(_installed.version);
+            if (newer != null && _plan == null)
+                EditorGUILayout.HelpBox(newer + " is out. Check GitHub for Releases, then Compare, to see what it changes before anything is touched.", MessageType.Info);
             EditorGUILayout.Space(4f);
             DrawSource();
             if (_error != null)
                 EditorGUILayout.HelpBox(_error, MessageType.Warning);
             if (_plan != null)
                 DrawPlan();
+            DrawCheckSetting();
             EditorGUILayout.EndScrollView();
+        }
+
+        private void DrawCheckSetting()
+        {
+            EditorGUILayout.Space(10f);
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                bool on = EditorGUILayout.ToggleLeft(new GUIContent("Check for a new release once a day",
+                    "When the editor starts, ask GitHub's public release list whether a newer kit is out, at most once a day. " +
+                    "A newer one is mentioned in the Console and ticks this window's menu item; nothing is downloaded."),
+                    KitUpdateCheck.Enabled, GUILayout.Width(250f));
+                if (on != KitUpdateCheck.Enabled)
+                    KitUpdateCheck.Enabled = on;
+                KitUpdateCheck.Result last = KitUpdateCheck.Last();
+                GUILayout.Label(last == null ? "Not checked yet."
+                    : "Last checked " + last.Checked.ToLocalTime().ToString("g") + (last.error != null ? ", which failed: " + last.error : "."),
+                    EditorStyles.miniLabel);
+            }
         }
 
         // ------------------------------------------------------------------------------------------------- last update
@@ -164,7 +194,8 @@ namespace OpenMMORPG.KitUpdater
             {
                 EditorUtility.DisplayProgressBar("Update Open MMORPG", "Asking GitHub for releases", 0.5f);
                 _releases = GitHubKitSource.ListReleases();
-                _release = 0;
+                string newer = KitUpdateCheck.NewerThan(_installed.version);
+                _release = Math.Max(0, _releases.FindIndex(r => r.tag == newer));
             }
             catch (Exception ex)
             {
