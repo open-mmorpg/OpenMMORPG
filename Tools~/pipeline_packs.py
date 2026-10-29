@@ -104,10 +104,7 @@ def scan(root):
     return files, folders
 
 
-def normalised(data):
-    if b"\x00" not in data[:8000]:
-        return data.replace(b"\r\n", b"\n")
-    return data
+normalised = bu.normalised  # the kit manifest reads line endings the same way
 
 
 def read(path):
