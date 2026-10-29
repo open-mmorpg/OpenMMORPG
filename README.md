@@ -94,6 +94,8 @@ The map server build is Windows only, because the spawner launches `OpenMMORPG.e
 
 To update, import the newer version the same way you installed it, from the Asset Store or a GitHub release. Re-run **Import Project Settings** only if the release notes say the settings changed.
 
+Importing a release overwrites every kit file it ships, including any you have edited. Before you update, Tools → Open MMORPG → Update → **Changes Since Install** lists the kit files you have edited, moved or deleted since the release you installed, so you know what to keep a copy of. It compares the kit with the record each release carries in `Tools/Install/KitManifest.json`, which kits installed from older releases do not have. In a git checkout of the kit, use `git status` instead.
+
 ## Developing Open MMORPG
 
 The kit lives directly in your project's `Assets` folder, so you can work on it in place. Delete the imported `Assets/OpenMMORPG` directory and clone this repository in its place:
