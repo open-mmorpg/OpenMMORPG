@@ -13,6 +13,10 @@ Have questions or want to discuss ideas before contributing? Join our [Discord c
 
 4. When you are done working on the issue, open a Pull Request from your branch into **develop**.
 
+### Tests
+
+A bug fix comes with a test that fails without the fix. Run the tests before opening a pull request, either in the Test Runner window or with `python "Tools~/run_tests.py"`. [Tests/README.md](Tests/README.md) explains where tests go and the helpers that set up a GameInstance or a database.
+
 ### Structure
 
 Open MMORPG is assembled from many source repos. The directory structure is flattened for use with `git subtree`, instead of submodules, and placed into a sensible structure:

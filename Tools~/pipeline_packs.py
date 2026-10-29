@@ -67,7 +67,7 @@ PIPELINES = {
         "assetType": "HDRenderPipelineAsset",
         "unityPackage": "com.unity.render-pipelines.high-definition",
         "testedWith": "17.3.0",
-        # What the URP content needed and HDRP does not; the installer offers to remove them afterwards.
+        # What the URP content needed and HDRP does not; the installer lists them afterwards for the user to remove in Package Manager.
         "packagesNoLongerNeeded": [
             "com.unity.render-pipelines.universal",
             "com.unity.render-pipelines.universal-config",
@@ -104,10 +104,7 @@ def scan(root):
     return files, folders
 
 
-def normalised(data):
-    if b"\x00" not in data[:8000]:
-        return data.replace(b"\r\n", b"\n")
-    return data
+normalised = bu.normalised  # the kit manifest reads line endings the same way
 
 
 def read(path):

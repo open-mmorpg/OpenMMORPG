@@ -1,5 +1,6 @@
 {
-  "_comment": "Unity packages the kit compiles against. Embedded into the exported .unitypackage so importing it adds them to the project.",
+  "_comment": "Unity packages the kit compiles against. Embedded into the exported .unitypackage so importing it adds them to the project. \"unity\" is the editor the kit needs; the kit manifest carries it so an updater can refuse an update the editor cannot open.",
+  "unity": "6000.3",
   "dependencies": {
     "com.unity.addressables": "2.9.1",
     "com.unity.ai.navigation": "2.0.14",
@@ -16,6 +17,7 @@
     "com.unity.render-pipelines.universal-config": "17.0.3",
     "com.unity.scriptablebuildpipeline": "2.6.1",
     "com.unity.shadergraph": "17.3.0",
+    "com.unity.test-framework": "1.6.0",
     "com.unity.ugui": "2.0.0"
   }
 }
