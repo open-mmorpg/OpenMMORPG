@@ -63,7 +63,9 @@ def normalised(data):
     return data
 
 def content_hash(data):
-    return "sha256:" + hashlib.sha256(normalised(data)).hexdigest()
+    # SHA-1, as pipelines.json: this spots changes, it is not a security check, and the editor hashes SHA-1 natively
+    # but SHA-256 only in managed code, about 13 times slower over the whole kit.
+    return "sha1:" + hashlib.sha1(normalised(data)).hexdigest()
 
 def kit_manifest(entries, version, deps_file):
     """The manifest's bytes: a header, then one line per file or folder, in path order."""

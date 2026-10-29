@@ -18,7 +18,7 @@ adds them to the project.
 ## Kit manifest
 
 Every kit archive carries `Tools/Install/KitManifest.json`: each file and folder it
-ships, keyed by GUID, with its path, a SHA-256 of its contents and of its `.meta`, and
+ships, keyed by GUID, with its path, a SHA-1 of its contents and of its `.meta`, and
 its size. Text files are hashed with CRLF read as LF, the same rule as `pipelines.json`,
 so a Windows checkout matches the archive. An installed kit keeps the manifest of the
 release it came from, which is what lets an updater tell the files that changed upstream
