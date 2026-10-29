@@ -123,6 +123,7 @@ namespace MultiplayerARPG.MMO
                 playerCharacter.partyId = partyId;
                 // Not through SetSocialCharacter, which copies the cached party and guild back over the change
                 _cachedSocialCharacters[characterId] = playerCharacter;
+                return UniTask.FromResult(true);
             }
             return UniTask.FromResult(false);
         }
@@ -132,6 +133,7 @@ namespace MultiplayerARPG.MMO
             {
                 playerCharacter.guildId = guildId;
                 _cachedSocialCharacters[characterId] = playerCharacter;
+                return UniTask.FromResult(true);
             }
             return UniTask.FromResult(false);
         }
@@ -142,6 +144,7 @@ namespace MultiplayerARPG.MMO
                 playerCharacter.guildId = guildId;
                 playerCharacter.guildRole = guildRole;
                 _cachedSocialCharacters[characterId] = playerCharacter;
+                return UniTask.FromResult(true);
             }
             return UniTask.FromResult(false);
         }
