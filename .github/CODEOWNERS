@@ -1,0 +1,4 @@
+# Every pull request requests a review from the maintainers team. This only asks for
+# the review: who may approve is set by the branch rulesets (one approval from anyone
+# with write access), because code-owner approval is not required.
+* @open-mmorpg/maintainers
