@@ -345,8 +345,10 @@ namespace MultiplayerARPG.MMO
         public bool TryGetMapServer(string channelId, string mapName, out CentralServerPeerInfo peerInfo)
         {
             string key = PeerInfoExtensions.GetPeerInfoKey(channelId, mapName);
-            // The cluster server announces a map server when it registers but not when it disconnects
-            if (!ClusterServer.MapServerPeersByKey.ContainsKey(key))
+            // The cluster server announces a map server when it registers but not when it disconnects, so check its live
+            // list - only possible when it runs in this process; a login server of its own keeps the last address it heard
+            ClusterServer clusterServer = ClusterServer;
+            if (clusterServer != null && clusterServer.IsNetworkActive && !clusterServer.MapServerPeersByKey.ContainsKey(key))
             {
                 _mapServerConnectionIdsBySceneName.TryRemove(key, out _);
                 peerInfo = default;

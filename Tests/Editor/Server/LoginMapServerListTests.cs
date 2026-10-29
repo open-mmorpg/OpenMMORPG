@@ -13,7 +13,8 @@ namespace OpenMMORPG.Tests
     /// where its map is. The cluster server announces each map server as it registers, but
     /// announces nothing when one disconnects, so a map server that crashed or was stopped must
     /// still not be handed out (the player would be sent to a dead address). The login server
-    /// runs beside the cluster server, as in the kit's central server; neither is started.
+    /// runs beside the cluster server, as in the kit's central server; neither is started, the
+    /// cluster server is only marked running.
     /// </summary>
     [Category(TestCategories.Logic)]
     public class LoginMapServerListTests : KitTestFixture
@@ -30,6 +31,7 @@ namespace OpenMMORPG.Tests
             CentralNetworkManager central = Objects.NewGameObject(nameof(LoginMapServerListTests)).AddComponent<CentralNetworkManager>();
             central.channels = new List<ChannelData>() { new ChannelData() { id = "eu", title = "Europe", maxConnections = 10 } };
             _cluster = new ClusterServer(central);
+            TestReflection.SetField(_cluster, "_isNetworkActive", true);
             _login = Objects.NewGameObject(nameof(LoginNetworkManager)).AddComponent<LoginNetworkManager>();
             TestReflection.SetField(_login, "centralNetworkManager", central);
             TestReflection.SetField(_login, "clusterServer", _cluster);
@@ -94,6 +96,19 @@ namespace OpenMMORPG.Tests
 
             Assert.That(_login.TryGetMapServer("eu", "Town", out CentralServerPeerInfo town), Is.True);
             Assert.That(town.networkPort, Is.EqualTo(7003));
+        }
+
+        [Test]
+        public void ALoginServerWithoutTheClusterInItsProcessKeepsTheAddressesItWasSent()
+        {
+            // A login server of its own (-startLoginServer without -startCentralServer) has a cluster server
+            // object that never starts, so its list is always empty and must not turn every map away.
+            StartMapServer(1, "Town", 7001);
+            TestReflection.SetField(_cluster, "_isNetworkActive", false);
+            _cluster.MapServerPeersByKey.Clear();
+
+            Assert.That(_login.TryGetMapServer("eu", "Town", out CentralServerPeerInfo town), Is.True);
+            Assert.That(town.networkPort, Is.EqualTo(7001));
         }
     }
 }

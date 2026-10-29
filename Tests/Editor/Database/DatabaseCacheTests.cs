@@ -97,16 +97,17 @@ namespace OpenMMORPG.Tests
         {
             TestAsync.Wait(_cache.SetSocialCharacter(new SocialCharacterData() { id = "rowan", userId = "u1", characterName = "Rowan" }));
 
-            TestAsync.Wait(_cache.SetSocialCharacterPartyId("rowan", 5));
-            TestAsync.Wait(_cache.SetSocialCharacterGuildIdAndRole("rowan", 7, 1));
+            Assert.That(TestAsync.Wait(_cache.SetSocialCharacterPartyId("rowan", 5)), Is.True);
+            Assert.That(TestAsync.Wait(_cache.SetSocialCharacterGuildIdAndRole("rowan", 7, 1)), Is.True);
 
             SocialCharacterData read = TestAsync.Wait(_cache.GetSocialCharacter("rowan")).Value;
             Assert.That(read.partyId, Is.EqualTo(5));
             Assert.That(read.guildId, Is.EqualTo(7));
             Assert.That(read.guildRole, Is.EqualTo(1));
 
-            TestAsync.Wait(_cache.SetSocialCharacterGuildId("rowan", 0));
+            Assert.That(TestAsync.Wait(_cache.SetSocialCharacterGuildId("rowan", 0)), Is.True);
             Assert.That(TestAsync.Wait(_cache.GetSocialCharacter("rowan")).Value.guildId, Is.Zero, "leaving the guild reaches the cache too");
+            Assert.That(TestAsync.Wait(_cache.SetSocialCharacterPartyId("nobody", 5)), Is.False, "a character not in the cache is not changed");
         }
 
         [Test]

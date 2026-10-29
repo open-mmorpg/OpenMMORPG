@@ -211,8 +211,15 @@ namespace MultiplayerARPG.MMO
                     RemoveIdleEntries(GetUtcSeconds());
             }
 
+            // Each id queued now is looked at once at most, and only saves that are due count against the budget,
+            // so ids waiting out their interval neither spin round the lane nor hold up the saves behind them
+            int toInspect;
+            lock (_lock)
+            {
+                toInspect = lane.Count;
+            }
             int processed = 0;
-            while (processed < _maxSavesPerTick)
+            while (processed < _maxSavesPerTick && toInspect > 0)
             {
                 string characterId;
 
@@ -222,9 +229,18 @@ namespace MultiplayerARPG.MMO
                         break;
 
                     characterId = lane.Dequeue();
-                    // Off the lane now, so a save that is not due yet is queued again
+                    toInspect--;
                     if (_pending.TryGetValue(characterId, out PendingCharacterSave dequeued))
+                    {
+                        if (!dequeued.IsSaving && dequeued.Request.CharacterData != null && GetUtcSeconds() < dequeued.NextEligibleSaveAt)
+                        {
+                            // Not due yet: back to the end of the lane, still queued
+                            lane.Enqueue(characterId);
+                            continue;
+                        }
+                        // Off the lane now, so a save that is not due yet is queued again
                         dequeued.IsQueued = false;
+                    }
                 }
 
                 await SaveCharacterNow(characterId, false);
