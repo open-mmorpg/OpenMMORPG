@@ -16,6 +16,7 @@
     "com.unity.render-pipelines.universal-config": "17.0.3",
     "com.unity.scriptablebuildpipeline": "2.6.1",
     "com.unity.shadergraph": "17.3.0",
+    "com.unity.test-framework": "1.6.0",
     "com.unity.ugui": "2.0.0"
   }
 }

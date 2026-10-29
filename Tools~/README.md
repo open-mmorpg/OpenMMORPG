@@ -73,3 +73,36 @@ settings menu item all present, the render pipeline installer with its manifest 
 pipelines' archives, and URP among the embedded dependencies (the kit's own files are the URP
 version, so it needs URP to compile before the installer has run). The release
 workflow runs the same script, so a tag build cannot pass looser rules than a push.
+
+## Tests
+
+`run_tests.py` runs the kit's tests in Unity batch mode, in a clean project that holds only
+the kit:
+
+```sh
+python "Tools~/run_tests.py"
+python "Tools~/run_tests.py" --category "Logic;Harnessed"
+python "Tools~/run_tests.py" --filter SQLiteCharacterTests
+```
+
+The project starts as Unity's default new project, with the packages in `dependencies.json`
+(plus the test framework) merged in and the settings from `ProjectSettings/`, as an Asset
+Store user's would. That makes every run a
+clean-project compile check as well: a dependency missing from `dependencies.json` fails
+here first. The kit is mirrored into the project rather than linked, so the run can never
+write into your checkout, and it works while your own editor is open.
+
+The project is kept between runs, in `%LOCALAPPDATA%\OpenMMORPG\TestProject` on Windows and
+`~/.cache/OpenMMORPG/TestProject` elsewhere (`--project` picks another folder). The first run
+imports the whole kit and takes a while; later runs import only what changed. Unity is
+`--unity`, else `UNITY_EXE`, else the newest Unity Hub install. The exit status is 0 when
+every test passed, 1 when one failed and 2 when the run did not finish (compile errors are
+printed from the log). Where tests go and the helpers they use are in
+[`Tests/README.md`](../Tests/README.md).
+
+The [Tests](../.github/workflows/tests.yml) workflow runs the same suite on GitHub for every pull
+request and every push to `master` or `develop`. It builds the project with
+`run_tests.py --prepare-only`, which also adds the built-in modules of Unity's new-project
+template, and runs Unity through GameCI's `unity-test-runner`. It needs a Unity licence in the
+repository secrets: `UNITY_LICENSE` (the contents of `Unity_lic.ulf`), `UNITY_EMAIL` and
+`UNITY_PASSWORD`. Without them the job is skipped with a notice rather than failing.
