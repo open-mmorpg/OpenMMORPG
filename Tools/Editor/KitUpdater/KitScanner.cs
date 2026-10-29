@@ -56,6 +56,8 @@ namespace OpenMMORPG.KitUpdater
         string HashOf(string projectPath);
         /// <summary>The hash of the asset's <c>.meta</c>, or null if it has none.</summary>
         string MetaHashOf(string projectPath);
+        /// <summary>Whether a file or folder is at the project-relative path.</summary>
+        bool Exists(string projectPath);
     }
 
     /// <summary>Compares the installed kit with the manifest of the release it came from.</summary>

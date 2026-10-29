@@ -58,6 +58,22 @@ namespace OpenMMORPG.KitUpdater
     }
 
     /// <summary>
+    /// The path to give System.IO for a project-relative (or any) path. Unity's Mono fails on Windows paths of 260
+    /// characters or more, which a kit file reaches in a project a few folders deep, though Unity itself imports it; the
+    /// <c>\\?\</c> form lifts the limit.
+    /// </summary>
+    public static class KitPath
+    {
+        public static string Disk(string path)
+        {
+            string full = Path.GetFullPath(path);
+            if (Path.DirectorySeparatorChar == '\\' && full.Length >= 240 && !full.StartsWith(@"\\", StringComparison.Ordinal))
+                return @"\\?\" + full;
+            return full;
+        }
+    }
+
+    /// <summary>
     /// The hash the manifest records: SHA-1 of the file, with CRLF read as LF when it is text (no NUL in its first 8,000
     /// bytes), because a Windows working tree is CRLF and an exported package is not. The same rule as
     /// <c>Tools~/build_unitypackage.py</c> and the pipeline installer's <c>pipelines.json</c>.

@@ -92,9 +92,11 @@ The map server build is Windows only, because the spawner launches `OpenMMORPG.e
 
 ## Updating Open MMORPG
 
-To update, import the newer version the same way you installed it, from the Asset Store or a GitHub release. Re-run **Import Project Settings** only if the release notes say the settings changed.
+Tools → Open MMORPG → Update → **Check for Updates** updates the kit in place. It downloads only the files that changed since the release you installed, and it never overwrites a kit file you have edited without asking: those are listed with an **Overwrite** box, unticked, and the summary afterwards lists what was kept and links to the upstream changes. Files you deleted stay deleted, nothing is added inside a kit folder you deleted, and files you moved are updated where you put them. Everything the update changes is backed up to `OpenMMORPGBackups` beside `Assets` first, and if the result does not compile it offers to restore the backup; the window can restore the last update at any time.
 
-Importing a release overwrites every kit file it ships, including any you have edited. Before you update, Tools → Open MMORPG → Update → **Changes Since Install** lists the kit files you have edited, moved or deleted since the release you installed, so you know what to keep a copy of. It compares the kit with the record each release carries in `Tools/Install/KitManifest.json`, which kits installed from older releases do not have. In a git checkout of the kit, use `git status` instead.
+Tools → Open MMORPG → Update → **Changes Since Install** lists the kit files you have edited, moved or deleted since the release you installed. Both compare the kit with the record each release carries in `Tools/Install/KitManifest.json`. A kit installed from a release made before that record existed has none: import the newer version the same way you installed it, from the Asset Store or a GitHub release, once, which overwrites every kit file it ships. In a git checkout of the kit, use git instead.
+
+Re-run **Import Project Settings** only if the release notes say the settings changed.
 
 ## Developing Open MMORPG
 

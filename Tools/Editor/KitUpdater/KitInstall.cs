@@ -18,7 +18,7 @@ namespace OpenMMORPG.KitUpdater
             kitRoot = null;
             problem = null;
             string path = AssetDatabase.GUIDToAssetPath(KitManifest.Guid);
-            if (string.IsNullOrEmpty(path) || !File.Exists(Path.GetFullPath(path)))
+            if (string.IsNullOrEmpty(path) || !File.Exists(KitPath.Disk(path)))
             {
                 problem = "This kit has no " + Path.GetFileName(KitManifest.KitRelativePath) + ", the record of the release it was " +
                           "installed from, so there is nothing to compare it with. Kits installed from older releases do not have " +
@@ -35,7 +35,7 @@ namespace OpenMMORPG.KitUpdater
             kitRoot = path.Substring(0, path.Length - suffix.Length);
             try
             {
-                return KitManifest.Parse(File.ReadAllText(Path.GetFullPath(path)));
+                return KitManifest.Parse(File.ReadAllText(KitPath.Disk(path)));
             }
             catch (Exception ex)
             {
@@ -61,7 +61,7 @@ namespace OpenMMORPG.KitUpdater
             if (string.IsNullOrEmpty(path))
                 return null;
             // The AssetDatabase can still answer for an asset deleted outside Unity that it has not noticed yet.
-            string full = Path.GetFullPath(path);
+            string full = KitPath.Disk(path);
             return File.Exists(full) || Directory.Exists(full) ? path : null;
         }
 
@@ -73,6 +73,12 @@ namespace OpenMMORPG.KitUpdater
         public string MetaHashOf(string projectPath)
         {
             return _cache.HashOf(projectPath + ".meta");
+        }
+
+        public bool Exists(string projectPath)
+        {
+            string full = KitPath.Disk(projectPath);
+            return File.Exists(full) || Directory.Exists(full);
         }
     }
 
@@ -114,13 +120,14 @@ namespace OpenMMORPG.KitUpdater
         /// <summary>The file's hash (see <see cref="KitHash"/>), or null if there is no such file.</summary>
         public string HashOf(string projectPath)
         {
-            var info = new FileInfo(Path.GetFullPath(projectPath));
+            string disk = KitPath.Disk(projectPath);
+            var info = new FileInfo(disk);
             if (!info.Exists)
                 return null;
             long ticks = info.LastWriteTimeUtc.Ticks;
             if (!_entries.TryGetValue(projectPath, out Entry entry) || entry.length != info.Length || entry.ticks != ticks)
             {
-                entry = new Entry { length = info.Length, ticks = ticks, hash = KitHash.OfFile(info.FullName) };
+                entry = new Entry { length = info.Length, ticks = ticks, hash = KitHash.OfFile(disk) };
                 _changed = true;
             }
             _used[projectPath] = entry;

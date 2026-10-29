@@ -48,6 +48,10 @@ namespace OpenMMORPG.KitUpdater
                     _scan = KitScanner.Scan(manifest, kitRoot, project,
                         p => EditorUtility.DisplayCancelableProgressBar("Kit Changes", "Comparing the kit with the release it came from", p));
                 }
+                catch (Exception ex)
+                {
+                    _problem = "The scan stopped: " + ex.Message;
+                }
                 finally
                 {
                     EditorUtility.ClearProgressBar();

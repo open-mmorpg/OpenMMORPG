@@ -20,6 +20,7 @@ namespace OpenMMORPG.KitUpdater.Tests
             public string PathOf(string guid) { return paths.TryGetValue(guid, out string p) ? p : null; }
             public string HashOf(string projectPath) { return hashes[projectPath]; }
             public string MetaHashOf(string projectPath) { return metas.TryGetValue(projectPath, out string m) ? m : null; }
+            public bool Exists(string projectPath) { return paths.ContainsValue(projectPath) || hashes.ContainsKey(projectPath); }
         }
 
         private KitManifest _manifest;
