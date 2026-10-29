@@ -22,6 +22,8 @@ namespace OpenMMORPG.KitUpdater
         [NonSerialized] private KitScan _scan;
         [NonSerialized] private string _problem;
         [NonSerialized] private double _seconds;
+        /// <summary>The pipeline content the kit holds instead of its own, as "HDRP", or null.</summary>
+        [NonSerialized] private string _pipeline;
         [NonSerialized] private SearchField _searchField;
         private int _filter;
         private string _search = "";
@@ -38,6 +40,7 @@ namespace OpenMMORPG.KitUpdater
         private void Scan()
         {
             _scan = null;
+            _pipeline = null;
             KitManifest manifest = KitInstall.Load(out string kitRoot, out _problem);
             if (manifest != null)
             {
@@ -45,6 +48,13 @@ namespace OpenMMORPG.KitUpdater
                 var project = new AssetDatabaseKitProject();
                 try
                 {
+                    // A kit switched to another pipeline's content is compared with that content, not with the kit's own
+                    KitPipelineContent pipeline = KitPipeline.Installed(manifest, kitRoot, project);
+                    if (pipeline != null)
+                    {
+                        manifest = pipeline.Apply(manifest);
+                        _pipeline = pipeline.id.ToUpperInvariant();
+                    }
                     _scan = KitScanner.Scan(manifest, kitRoot, project,
                         p => EditorUtility.DisplayCancelableProgressBar("Kit Changes", "Comparing the kit with the release it came from", p));
                 }
@@ -80,8 +90,8 @@ namespace OpenMMORPG.KitUpdater
             }
 
             KitManifest manifest = _scan.manifest;
-            EditorGUILayout.LabelField("Installed from Open MMORPG " + manifest.version + (manifest.tag == null ? " (test build)" : ""),
-                EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("Installed from Open MMORPG " + manifest.version + (manifest.tag == null ? " (test build)" : "") +
+                                       (_pipeline == null ? "" : ", with its " + _pipeline + " content"), EditorStyles.boldLabel);
             EditorGUILayout.LabelField("Kit files that differ from that release. Files you added are not listed.",
                 EditorStyles.wordWrappedMiniLabel);
             EditorGUILayout.Space(4f);
