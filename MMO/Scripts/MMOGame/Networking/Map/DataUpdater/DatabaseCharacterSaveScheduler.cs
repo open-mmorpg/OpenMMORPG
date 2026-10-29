@@ -59,7 +59,14 @@ namespace MultiplayerARPG.MMO
             {
                 lock (_lock)
                 {
-                    return _pending.Count;
+                    // Entries kept only for their last save time are not waiting
+                    int count = 0;
+                    foreach (PendingCharacterSave pending in _pending.Values)
+                    {
+                        if (pending.IsSaving || pending.Request.CharacterData != null)
+                            count++;
+                    }
+                    return count;
                 }
             }
         }
@@ -127,6 +134,26 @@ namespace MultiplayerARPG.MMO
             }
         }
 
+        public async UniTask CancelAsync(string characterId)
+        {
+            while (true)
+            {
+                lock (_lock)
+                {
+                    if (!_pending.TryGetValue(characterId, out PendingCharacterSave pending))
+                        return;
+
+                    if (!pending.IsSaving)
+                    {
+                        _pending.Remove(characterId);
+                        return;
+                    }
+                }
+                // Let a save already being written finish first, so it cannot land after the caller's delete
+                await UniTask.Yield();
+            }
+        }
+
         public async UniTask FlushAllAsync()
         {
             while (true)
@@ -180,6 +207,8 @@ namespace MultiplayerARPG.MMO
             {
                 lane = _lanes[_nextLaneIndex];
                 _nextLaneIndex = (_nextLaneIndex + 1) % _lanes.Length;
+                if (_nextLaneIndex == 0)
+                    RemoveIdleEntries(GetUtcSeconds());
             }
 
             int processed = 0;
@@ -193,6 +222,9 @@ namespace MultiplayerARPG.MMO
                         break;
 
                     characterId = lane.Dequeue();
+                    // Off the lane now, so a save that is not due yet is queued again
+                    if (_pending.TryGetValue(characterId, out PendingCharacterSave dequeued))
+                        dequeued.IsQueued = false;
                 }
 
                 await SaveCharacterNow(characterId, false);
@@ -212,7 +244,7 @@ namespace MultiplayerARPG.MMO
                 if (!_pending.TryGetValue(characterId, out pending))
                     return false;
 
-                if (pending.IsSaving)
+                if (pending.IsSaving || pending.Request.CharacterData == null)
                     return false;
 
                 if (!ignoreInterval && now < pending.NextEligibleSaveAt)
@@ -271,13 +303,29 @@ namespace MultiplayerARPG.MMO
                         _lanes[pending.LaneIndex].Enqueue(characterId);
                     }
                 }
-                else
-                {
-                    _pending.Remove(characterId);
-                }
+                // Otherwise the entry stays idle, keeping LastSavedAt for the minimum interval, until RemoveIdleEntries
             }
 
             return true;
+        }
+
+        private void RemoveIdleEntries(double now)
+        {
+            List<string> idleIds = null;
+            foreach (PendingCharacterSave pending in _pending.Values)
+            {
+                if (!pending.IsSaving && !pending.IsQueued && pending.Request.CharacterData == null &&
+                    now >= pending.LastSavedAt + _minSaveIntervalSeconds)
+                {
+                    if (idleIds == null)
+                        idleIds = new List<string>();
+                    idleIds.Add(pending.CharacterId);
+                }
+            }
+            if (idleIds == null)
+                return;
+            for (int i = 0; i < idleIds.Count; ++i)
+                _pending.Remove(idleIds[i]);
         }
 
         private static UpdateCharacterReq MergeRequests(UpdateCharacterReq older, UpdateCharacterReq newer)
@@ -299,8 +347,8 @@ namespace MultiplayerARPG.MMO
                 for (int i = 0; i < characterId.Length; ++i)
                     hash = (hash * 31) + characterId[i];
 
-                if (hash < 0)
-                    hash = -hash;
+                // Clear the sign bit; negating int.MinValue would leave it negative
+                hash &= int.MaxValue;
 
                 return hash % _lanes.Length;
             }
