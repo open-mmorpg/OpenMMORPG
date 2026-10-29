@@ -11,8 +11,13 @@ your checkout, and it is a different project, so it works while your own editor 
 The project and its Library are kept between runs: the first run imports everything (slow),
 later ones only what changed.
 
+--prepare-only writes the project and stops, for CI, which runs Unity itself (see
+.github/workflows/tests.yml). When the kit is already the project's Assets/OpenMMORPG, as in
+CI's checkout, it is not mirrored.
+
 usage: run_tests.py [--unity PATH] [--project DIR] [--platform EditMode|PlayMode]
                     [--category Logic;Harnessed] [--filter REGEX] [--nographics]
+                    [--prepare-only]
 
 Exit status: 0 all passed, 1 a test failed, 2 the run itself failed (compile errors,
 no results).
@@ -30,6 +35,17 @@ KIT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TOOLS = os.path.join(KIT, "Tools~")
 # Always present in the test project, whatever dependencies.json says.
 TEST_FRAMEWORK = ("com.unity.test-framework", "1.6.0")
+# The built-in modules of Unity's new-project template. Every project an Asset Store user imports
+# into has them, and the kit needs some (Audio, Video) that dependencies.json does not list.
+# Unity adds them itself when it first opens a new project, but not always (CI), so add them here.
+DEFAULT_MODULES = [
+    "accessibility", "adaptiveperformance", "ai", "androidjni", "animation", "assetbundle", "audio",
+    "cloth", "director", "imageconversion", "imgui", "jsonserialize", "particlesystem", "physics",
+    "physics2d", "screencapture", "subsystems", "terrain", "terrainphysics", "tilemap", "ui",
+    "uielements", "umbra", "unityanalytics", "unitywebrequest", "unitywebrequestassetbundle",
+    "unitywebrequestaudio", "unitywebrequesttexture", "unitywebrequestwww", "vectorgraphics",
+    "vehicles", "video", "vr", "wind", "xr",
+]
 # Not part of what Unity sees; skipped when mirroring.
 SKIP = {".git"}
 
@@ -69,10 +85,8 @@ def find_unity(explicit):
 def write_manifest(project):
     """Merge the kit's packages into the project's manifest, as importing the kit does.
 
-    Never replace it: on the first run Unity treats the folder as a new project and adds its
-    default template packages (the built-in Audio and Video modules among them, which the kit
-    needs and dependencies.json does not list), just like the project an Asset Store user
-    imports into.
+    Never replace it: on the first run Unity may add its own template packages, just like the
+    project an Asset Store user imports into. The default built-in modules are added if missing.
     """
     with open(os.path.join(TOOLS, "dependencies.json"), encoding="utf-8") as f:
         kit = json.load(f)["dependencies"]
@@ -83,8 +97,11 @@ def write_manifest(project):
         with open(path, encoding="utf-8") as f:
             manifest = json.load(f)
     dependencies = manifest.setdefault("dependencies", {})
-    if all(dependencies.get(name) == version for name, version in kit.items()):
+    modules = {"com.unity.modules." + name: "1.0.0" for name in DEFAULT_MODULES}
+    if all(dependencies.get(name) == version for name, version in kit.items()) and all(name in dependencies for name in modules):
         return
+    for name, version in modules.items():
+        dependencies.setdefault(name, version)
     dependencies.update(kit)
     manifest["dependencies"] = dict(sorted(dependencies.items()))
     os.makedirs(os.path.dirname(path), exist_ok=True)
@@ -163,17 +180,24 @@ def main():
     parser.add_argument("--category", help="NUnit categories, ';'-separated, e.g. Logic;Harnessed")
     parser.add_argument("--filter", help="test name filter (regex or ';'-separated full names)")
     parser.add_argument("--nographics", action="store_true", help="run without a graphics device (CI)")
+    parser.add_argument("--prepare-only", action="store_true", help="write the project and stop, without running Unity")
     args = parser.parse_args()
 
     project = os.path.abspath(args.project)
-    unity = find_unity(args.unity)
-    print(f"Unity:   {unity}")
     print(f"Project: {project}")
-
     write_manifest(project)
     copy_settings(project)
-    copied, removed = mirror(KIT, os.path.join(project, "Assets", "OpenMMORPG"))
-    print(f"Kit mirrored: {copied} copied, {removed} removed")
+    target = os.path.join(project, "Assets", "OpenMMORPG")
+    if os.path.exists(target) and os.path.samefile(KIT, target):
+        print("Kit is already the project's Assets/OpenMMORPG; not mirrored")
+    else:
+        copied, removed = mirror(KIT, target)
+        print(f"Kit mirrored: {copied} copied, {removed} removed")
+    if args.prepare_only:
+        return 0
+
+    unity = find_unity(args.unity)
+    print(f"Unity:   {unity}")
 
     results = os.path.join(project, "TestResults.xml")
     log = os.path.join(project, "TestRun.log")

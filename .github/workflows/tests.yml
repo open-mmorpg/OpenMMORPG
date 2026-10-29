@@ -1,0 +1,107 @@
+name: Tests
+
+# Runs the kit's EditMode tests (Tests/ and Demo/Tests/, plus upstream's Core/Tests and
+# LiteNetLibManager's) in Unity, in a clean project made from Tools~/dependencies.json and
+# Tools~/ProjectSettings - the same project Tools~/run_tests.py builds locally. That also makes
+# it a clean-project compile check.
+#
+# Needs a Unity licence in the repository secrets (Settings > Secrets and variables > Actions):
+#   UNITY_LICENSE   the contents of a Unity_lic.ulf (Windows: C:\ProgramData\Unity\Unity_lic.ulf)
+#   UNITY_EMAIL     the Unity account it belongs to
+#   UNITY_PASSWORD  that account's password
+# Without them (and on pull requests from forks, which get no secrets) the job reports that it
+# was skipped instead of failing.
+
+on:
+  push:
+    branches:
+      - master
+      - develop
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  checks: write
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # The editor version the kit is developed on; the Docker image GameCI pulls is chosen by it.
+  UNITY_VERSION: 6000.3.21f1
+  PROJECT: TestProject
+
+jobs:
+  editmode:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+      UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+      UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+    steps:
+      - name: No Unity licence
+        if: env.UNITY_LICENSE == ''
+        run: echo "::notice title=Tests skipped::No UNITY_LICENSE secret is available to this run, so the Unity tests did not run."
+
+      # The Unity image is large and the kit with its demo is ~600 MB before import.
+      - name: Free disk space
+        if: env.UNITY_LICENSE != ''
+        uses: jlumbroso/free-disk-space@v1.3.1
+        with:
+          tool-cache: false
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: false
+          docker-images: false
+          swap-storage: false
+
+      # The repository is the project's Assets/OpenMMORPG folder.
+      - name: Check out the kit
+        if: env.UNITY_LICENSE != ''
+        uses: actions/checkout@v4
+        with:
+          path: ${{ env.PROJECT }}/Assets/OpenMMORPG
+
+      - name: Set up Python
+        if: env.UNITY_LICENSE != ''
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Make the test project
+        if: env.UNITY_LICENSE != ''
+        run: python "${{ env.PROJECT }}/Assets/OpenMMORPG/Tools~/run_tests.py" --prepare-only --project "${{ env.PROJECT }}"
+
+      # Importing the kit from nothing takes most of the run; later runs reuse the newest Library.
+      - name: Restore the Library
+        if: env.UNITY_LICENSE != ''
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.PROJECT }}/Library
+          key: Library-${{ env.UNITY_VERSION }}-${{ github.sha }}
+          restore-keys: |
+            Library-${{ env.UNITY_VERSION }}-
+
+      - name: Run the tests
+        if: env.UNITY_LICENSE != ''
+        id: tests
+        uses: game-ci/unity-test-runner@v4
+        with:
+          projectPath: ${{ env.PROJECT }}
+          unityVersion: ${{ env.UNITY_VERSION }}
+          testMode: editmode
+          artifactsPath: test-results
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          checkName: EditMode test results
+
+      - name: Keep the results
+        if: always() && env.UNITY_LICENSE != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: ${{ steps.tests.outputs.artifactsPath || 'test-results' }}
+          if-no-files-found: ignore

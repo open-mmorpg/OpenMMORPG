@@ -99,3 +99,10 @@ imports the whole kit and takes a while; later runs import only what changed. Un
 every test passed, 1 when one failed and 2 when the run did not finish (compile errors are
 printed from the log). Where tests go and the helpers they use are in
 [`Tests/README.md`](../Tests/README.md).
+
+The [Tests](../.github/workflows/tests.yml) workflow runs the same suite on GitHub for every pull
+request and every push to `master` or `develop`. It builds the project with
+`run_tests.py --prepare-only`, which also adds the built-in modules of Unity's new-project
+template, and runs Unity through GameCI's `unity-test-runner`. It needs a Unity licence in the
+repository secrets: `UNITY_LICENSE` (the contents of `Unity_lic.ulf`), `UNITY_EMAIL` and
+`UNITY_PASSWORD`. Without them the job is skipped with a notice rather than failing.

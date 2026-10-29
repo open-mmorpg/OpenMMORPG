@@ -6,6 +6,7 @@ demo's are in `Demo/Tests`.
 ## Running them
 
 - **In the editor:** Window > General > Test Runner, EditMode tab.
+- **On GitHub:** the Tests workflow runs them on every pull request (it needs the Unity licence secrets; see `Tools~/README.md`).
 - **From the command line:** `python "Tools~/run_tests.py"` builds a clean project that holds
   only the kit, runs the tests in Unity batch mode and prints the result. It works while your
   own editor is open. See [Tools~/README.md](../Tools~/README.md#tests).
