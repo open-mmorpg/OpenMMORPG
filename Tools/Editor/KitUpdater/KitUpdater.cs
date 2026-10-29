@@ -338,8 +338,9 @@ namespace OpenMMORPG.KitUpdater
                     {
                         if (action.kind == KitActionKind.Delete)
                         {
-                            File.Delete(D(action.currentPath));
-                            File.Delete(D(action.currentPath + ".meta"));
+                            string at = PathNow(action);
+                            File.Delete(D(at));
+                            File.Delete(D(at + ".meta"));
                             continue;
                         }
                         if (action.kind == KitActionKind.Add)
@@ -358,12 +359,12 @@ namespace OpenMMORPG.KitUpdater
                 }
 
                 // Folders removed upstream go once nothing is left in them; the user's own files keep them.
-                foreach (KitAction action in applying.Where(a => a.kind == KitActionKind.Delete && a.folder).OrderByDescending(a => Depth(a.currentPath)))
+                foreach (string at in applying.Where(a => a.kind == KitActionKind.Delete && a.folder).Select(PathNow).OrderByDescending(Depth))
                 {
-                    if (Directory.Exists(D(action.currentPath)) && !Directory.EnumerateFileSystemEntries(D(action.currentPath)).Any())
+                    if (Directory.Exists(D(at)) && !Directory.EnumerateFileSystemEntries(D(at)).Any())
                     {
-                        Directory.Delete(D(action.currentPath));
-                        File.Delete(D(action.currentPath + ".meta"));
+                        Directory.Delete(D(at));
+                        File.Delete(D(at + ".meta"));
                     }
                 }
             }
@@ -372,6 +373,14 @@ namespace OpenMMORPG.KitUpdater
                 EditorUtility.ClearProgressBar();
             }
         }
+
+        /// <summary>Where a file or folder is once the moves are done: inside a folder upstream moved, it went with the folder.</summary>
+        private static string PathNow(KitAction action)
+        {
+            string now = AssetDatabase.GUIDToAssetPath(action.guid);
+            return string.IsNullOrEmpty(now) ? action.currentPath : now;
+        }
+
 
         // ----------------------------------------------------------------------------------------------------- restore
 

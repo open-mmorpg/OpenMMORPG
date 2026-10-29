@@ -4,6 +4,7 @@ using MultiplayerARPG.MMO;
 using NUnit.Framework;
 using OpenMMORPG.Tests;
 using UnityEditor;
+using UnityEditor.Build.Profile;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -16,13 +17,19 @@ namespace OpenMMORPG.Demo.Tests
         private static string InitSingleplayerPath => DemoTestPaths.Root + "/Scenes/00Init-Singleplayer.unity";
         private static string HomeSingleplayerPath => DemoTestPaths.Root + "/Scenes/01Home-Singleplayer.unity";
 
+        private static string ClientProfilePath => DemoTestPaths.Root + "/Build Profiles/Demo Client.asset";
+
+        // The kit ships the scene list in the Demo Client build profile, not in the project's build settings,
+        // which belong to the user's project (and are empty in a clean one).
         [Test]
-        public void SingleplayerScenesAreEnabledInBuildSettings()
+        public void SingleplayerScenesAreEnabledInTheDemoClientProfile()
         {
-            Assert.That(EditorBuildSettings.scenes.Any(s => s.path == InitSingleplayerPath && s.enabled),
-                Is.True, $"{InitSingleplayerPath} must be enabled in EditorBuildSettings.");
-            Assert.That(EditorBuildSettings.scenes.Any(s => s.path == HomeSingleplayerPath && s.enabled),
-                Is.True, $"{HomeSingleplayerPath} must be enabled in EditorBuildSettings.");
+            BuildProfile profile = AssetDatabase.LoadAssetAtPath<BuildProfile>(ClientProfilePath);
+            Assert.That(profile, Is.Not.Null, $"{ClientProfilePath} must exist.");
+            Assert.That(profile.scenes.Any(s => s.path == InitSingleplayerPath && s.enabled),
+                Is.True, $"{InitSingleplayerPath} must be enabled in the Demo Client profile.");
+            Assert.That(profile.scenes.Any(s => s.path == HomeSingleplayerPath && s.enabled),
+                Is.True, $"{HomeSingleplayerPath} must be enabled in the Demo Client profile.");
         }
 
         [Test]

@@ -1,5 +1,6 @@
 #if (UNITY_EDITOR || UNITY_SERVER || !EXCLUDE_SERVER_CODES) && UNITY_STANDALONE
 using System.Collections;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using Cysharp.Threading.Tasks;
 using MultiplayerARPG;
@@ -96,6 +97,27 @@ namespace OpenMMORPG.Tests
             Assert.That(scheduler.PendingCount, Is.Zero);
             foreach (PlayerCharacterData character in characters)
                 Assert.That(Loaded(character.Id).Level, Is.EqualTo(3), character.CharacterName);
+        }
+
+        [Test]
+        public void ASaveThatIsNotDueYetNeitherUsesTheTicksShareNorHoldsUpTheOthers()
+        {
+            DatabaseCharacterSaveScheduler scheduler = _server.UseSaveScheduler(laneCount: 1, maxSavesPerTick: 1, minSaveIntervalSeconds: 60f);
+            PlayerCharacterData rowan = NewCharacter("Rowan");
+            PlayerCharacterData ash = NewCharacter("Ash");
+            scheduler.Enqueue(Save(rowan, 2));
+            TestAsync.Wait((UniTask)TestReflection.Invoke(scheduler, "ProcessNextLane"));
+            Assert.That(Loaded(rowan.Id).Level, Is.EqualTo(2));
+            // Rowan waits out the minimum interval at the front of the lane, Ash is due behind it.
+            scheduler.Enqueue(Save(rowan, 3));
+            scheduler.Enqueue(Save(ash, 4));
+
+            TestAsync.Wait((UniTask)TestReflection.Invoke(scheduler, "ProcessNextLane"));
+
+            Assert.That(Loaded(ash.Id).Level, Is.EqualTo(4), "the due save is written on this tick");
+            Assert.That(Loaded(rowan.Id).Level, Is.EqualTo(2), "the early one still waits");
+            Queue<string>[] lanes = TestReflection.GetField<Queue<string>[]>(scheduler, "_lanes");
+            Assert.That(lanes[0], Is.EqualTo(new[] { rowan.Id }), "queued once, not once per pass");
         }
 
         [Test]

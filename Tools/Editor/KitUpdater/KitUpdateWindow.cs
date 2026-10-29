@@ -242,7 +242,16 @@ namespace OpenMMORPG.KitUpdater
             {
                 EditorUtility.DisplayProgressBar("Update Open MMORPG", "Getting the release's manifest", 0f);
                 _source = open();
-                _plan = KitUpdatePlan.Make(_installed, _source.Manifest, _kitRoot, project,
+                KitManifest installed = _installed;
+                // A kit switched to another pipeline's content updates to the target release's version of that content
+                KitPipelineContent pipeline = KitPipeline.Installed(_installed, _kitRoot, project);
+                if (pipeline != null)
+                {
+                    EditorUtility.DisplayProgressBar("Update Open MMORPG", "Getting the release's " + pipeline.id.ToUpperInvariant() + " content", 0f);
+                    installed = pipeline.Apply(_installed);
+                    _source = new PipelineKitSource(_source, KitPipeline.InTarget(_source, pipeline.id));
+                }
+                _plan = KitUpdatePlan.Make(installed, _source.Manifest, _kitRoot, project,
                     p => EditorUtility.DisplayCancelableProgressBar("Update Open MMORPG", "Comparing the kit with " + _source.Manifest.version, p));
             }
             catch (Exception ex)
