@@ -86,7 +86,7 @@ The kit ships with a demo in `Assets/OpenMMORPG/Demo`: a small island with a vil
    - Open File → **Build Profiles**, select **Demo Map Server** (under `Demo/Build Profiles`), press **Switch Profile**, then **Build**, and save it as `builds/OpenMMORPG.exe` in the project folder, beside `Assets`.
    - Switch back to **Demo Client** afterwards. While the server profile is active the editor compiles as a server, and Play does not work.
    - Rebuild it whenever you change a scene, an entity or any game data the server uses. A client that disagrees with a stale server is turned away when it tries to enter the map.
-4. **Play.** Open `Demo/Scenes/00Init` and press Play. The editor runs the login, central, database (SQLite) and map spawn servers and shows the server list; register an account, create a character and start.
+4. **Play.** Open `Demo/Scenes/00Init` and press Play. The editor runs the login, central, database (SQLite) and map spawn servers and shows the server list; register an account, create a character and start. Or open `Demo/Scenes/00Init-Singleplayer` to play locally in singleplayer mode (`00Init-Singleplayer` → `01Home-Singleplayer` → `DemoMap`) without building the map server.
 
 The map server build is Windows only, because the spawner launches `OpenMMORPG.exe`. On other platforms, change the spawn path on `MMOServerInstance` in `00Init` to your own server build.
 
