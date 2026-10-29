@@ -67,7 +67,7 @@ PIPELINES = {
         "assetType": "HDRenderPipelineAsset",
         "unityPackage": "com.unity.render-pipelines.high-definition",
         "testedWith": "17.3.0",
-        # What the URP content needed and HDRP does not; the installer offers to remove them afterwards.
+        # What the URP content needed and HDRP does not; the installer lists them afterwards for the user to remove in Package Manager.
         "packagesNoLongerNeeded": [
             "com.unity.render-pipelines.universal",
             "com.unity.render-pipelines.universal-config",
