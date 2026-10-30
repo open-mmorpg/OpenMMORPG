@@ -35,7 +35,13 @@ python "Tools~/build_unitypackage.py" kit . Assets/OpenMMORPG OpenMMORPG.unitypa
 
 ## Cutting a release
 
-1. Tag the kit, for example `git tag v1.1.0 && git push origin v1.1.0`.
+1. With `master` checked out, clean and level with `origin/master`, run
+   `make -C Tools~ release patch` (or `minor`, `major`), or `python "Tools~/release.py" patch`
+   without make. It bumps the newest `vX.Y.Z` tag, runs the release checks, asks before
+   tagging, then opens your editor on the tag message: write the changelog under the
+   `Open MMORPG X.Y.Z` heading (the commits since the last release are listed as comments),
+   save, and it pushes the annotated tag. An empty message cancels. `NOTES=<file>` takes the
+   message from a file instead, and `DRY_RUN=1` stops after the checks.
 2. The workflow builds the archive, checks it, and publishes a GitHub release with
    `OpenMMORPG-v1.1.0.unitypackage` and `kit-manifest.json` attached.
 3. Upload that archive to the Asset Store through Unity's Asset Store Tools.
@@ -72,7 +78,8 @@ python "Tools~/pipeline_packs.py" check --repo .
 ## Checks
 
 [Checks](../.github/workflows/checks.yml) runs on every push and pull request, needs no
-Unity install, and finishes in seconds. Run the same checks locally before pushing:
+Unity install, and finishes in seconds. Run the same checks locally before pushing, with
+`make -C Tools~ check` or by hand (`make -C Tools~` lists the other shortcuts):
 
 ```sh
 python "Tools~/check_repo.py" .
