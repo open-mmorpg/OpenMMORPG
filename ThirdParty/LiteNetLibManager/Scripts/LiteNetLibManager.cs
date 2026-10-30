@@ -302,10 +302,85 @@ namespace LiteNetLibManager
             }
         }
 
+        // Client migration: move a running client to another server without stopping it, so its
+        // spawned objects can be kept and adopted by the new server.
+        /// <summary>True from <see cref="MigrateClient"/> until <see cref="EndMigrateClient"/>.</summary>
+        public bool IsMigratingClient { get; protected set; }
+
+        /// <summary>
+        /// Reconnects the client's transport to another server without the client teardown: IsClient and the logic
+        /// updater keep running and the client's objects are not destroyed (the game manager keeps them for adoption).
+        /// The new connection enters the game as a fresh one. False when not a pure client or the connect fails.
+        /// </summary>
+        public virtual bool MigrateClient(string networkAddress, int networkPort)
+        {
+            if (!IsClient || IsServer || Client == null)
+            {
+                if (LogError) Logging.LogError(LogTag, "Cannot migrate: not a running client.");
+                return false;
+            }
+            if (LogInfo) Logging.Log(LogTag, $"Migrating client to {networkAddress}:{networkPort}.");
+            IsMigratingClient = true;
+            OnStartMigrateClient();
+            Client.StopClient();
+            this.networkAddress = networkAddress;
+            this.networkPort = networkPort;
+            PrepareClientTransport();
+            Client.Transport = ClientTransport;
+            if (!Client.StartClient(networkAddress, networkPort))
+            {
+                if (LogError) Logging.LogError(LogTag, $"Cannot connect to {networkAddress}:{networkPort}.");
+                return false;
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// <see cref="MigrateClient(string, int)"/> on a transport that is connected to the new server already (opened
+        /// ahead of the hop, its connect event consumed by the holder): the client takes it over and enters the game at
+        /// once, with no connect round trip. The transport becomes the client's and is destroyed with it.
+        /// </summary>
+        public virtual bool MigrateClient(string networkAddress, int networkPort, ITransport connectedTransport)
+        {
+            if (!IsClient || IsServer || Client == null)
+            {
+                if (LogError) Logging.LogError(LogTag, "Cannot migrate: not a running client.");
+                return false;
+            }
+            if (connectedTransport == null || !connectedTransport.IsClientStarted)
+            {
+                if (LogError) Logging.LogError(LogTag, "Cannot migrate on a transport that is not connected.");
+                return false;
+            }
+            if (LogInfo) Logging.Log(LogTag, $"Migrating client to {networkAddress}:{networkPort} on a pre-connected transport.");
+            IsMigratingClient = true;
+            OnStartMigrateClient();
+            Client.StopClient();
+            if (_clientTransport != null && !ReferenceEquals(_clientTransport, connectedTransport))
+                _clientTransport.Destroy();
+            this.networkAddress = networkAddress;
+            this.networkPort = networkPort;
+            _clientTransport = connectedTransport;
+            if (!Client.AdoptConnectedTransport(connectedTransport))
+                return false;
+            OnClientConnected();
+            return true;
+        }
+
+        /// <summary>Called by <see cref="MigrateClient"/> before the old connection is closed.</summary>
+        protected virtual void OnStartMigrateClient() { }
+
+        /// <summary>Ends a migration started by <see cref="MigrateClient"/> (the caller decides when it is over).</summary>
+        public virtual void EndMigrateClient()
+        {
+            IsMigratingClient = false;
+        }
+
         public void StopClient()
         {
             if (!IsClient)
                 return;
+            IsMigratingClient = false;
 
             if (LogInfo) Logging.Log(LogTag, "StopClient");
             _logicUpdater.OnTick -= OnClientUpdate;
