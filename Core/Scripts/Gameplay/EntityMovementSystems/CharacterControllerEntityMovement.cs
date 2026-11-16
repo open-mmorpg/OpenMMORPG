@@ -10,7 +10,7 @@ namespace MultiplayerARPG
     [RequireComponent(typeof(CharacterController))]
     [RequireComponent(typeof(CapsuleCollider))]
     [RequireComponent(typeof(Rigidbody))]
-    public partial class CharacterControllerEntityMovement : BaseNetworkedGameEntityComponent<BaseGameEntity>, IEntityMovementComponent, IBuiltInEntityMovement3D, IManagedUpdate, IManagedLateUpdate
+    public partial class CharacterControllerEntityMovement : BaseNetworkedGameEntityComponent<BaseGameEntity>, IEntityMovementComponent, IBuiltInEntityMovement3D, IManagedUpdate, IManagedLateUpdate, IAnimatorMoveReceiver
     {
         /// <summary>
         /// Add some distant to avoid character falling under ground
@@ -287,6 +287,8 @@ namespace MultiplayerARPG
         private void Start()
         {
             Functions.EntityStart();
+            // Animators which are on children (models) cannot send `OnAnimatorMove` to this component, so relay it
+            AnimatorMoveRelay.AttachToModels(gameObject, CacheAnimator, this);
         }
 
         public override void OnSetOwnerClient(bool isOwnerClient)
@@ -321,6 +323,11 @@ namespace MultiplayerARPG
         private void OnAnimatorMove()
         {
             Functions.OnAnimatorMove();
+        }
+
+        public void OnChildAnimatorMove(Animator animator)
+        {
+            Functions.OnChildAnimatorMove(animator);
         }
 
         private void OnTriggerEnter(Collider other)

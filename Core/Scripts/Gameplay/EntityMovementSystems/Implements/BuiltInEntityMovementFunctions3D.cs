@@ -148,6 +148,11 @@ namespace MultiplayerARPG
         private bool _simulatingKeyMovement = false;
         private ExtraMovementState _previouslyExtraMovementState;
 
+        // Root motion codes (relayed from an animator which is on a child of the entity)
+        private Vector3 _pendingRootMotion;
+        private Vector3 _rootMotion;
+        private int _lastUpdateMovementFrame = -1;
+
         // Move simulate codes
         private float _pauseMovementCountDown;
         private Vector3 _moveDirection;
@@ -271,6 +276,59 @@ namespace MultiplayerARPG
                 Animator.ApplyBuiltinRootMotion();
             if (MovementState.Has(MovementState.IsClimbing) && useRootMotionClimbing)
                 Animator.ApplyBuiltinRootMotion();
+        }
+
+        /// <summary>
+        /// `OnAnimatorMove` of an animator which is on a child of the entity (relayed by `AnimatorMoveRelay`).
+        /// `ApplyBuiltinRootMotion` would move that child away from the entity,
+        /// so the motion is kept here and added to the entity's next move.
+        /// </summary>
+        public void OnChildAnimatorMove(Animator animator)
+        {
+            if (!animator || animator != GetRootMotionAnimator())
+                return;
+
+            if (Time.frameCount - _lastUpdateMovementFrame > 1)
+            {
+                // Movement is not being simulated here (it follows the synced position), so there is nothing to move
+                _pendingRootMotion = Vector3.zero;
+                return;
+            }
+
+            if (IsUsingRootMotion())
+                _pendingRootMotion += animator.deltaPosition;
+        }
+
+        /// <summary>
+        /// Animator of the model which is being shown, root motion of other models (hidden ones) is ignored
+        /// </summary>
+        private Animator GetRootMotionAnimator()
+        {
+            if (Entity.Model is IModelWithAnimator modelWithAnimator && modelWithAnimator.Animator)
+                return modelWithAnimator.Animator;
+            return Animator;
+        }
+
+        private bool IsUsingRootMotion()
+        {
+            if (alwaysUseRootMotion || Entity.ShouldUseRootMotion)
+                return true;
+            if (MovementState.Has(MovementState.IsGrounded) && useRootMotionForMovement)
+                return true;
+            if (!MovementState.Has(MovementState.IsGrounded) && useRootMotionForAirMovement)
+                return true;
+            if (MovementState.Has(MovementState.IsUnderWater) && useRootMotionUnderWater)
+                return true;
+            if (MovementState.Has(MovementState.IsClimbing) && useRootMotionClimbing)
+                return true;
+            return false;
+        }
+
+        private Vector3 TakeRootMotion()
+        {
+            Vector3 rootMotion = _rootMotion;
+            _rootMotion = Vector3.zero;
+            return rootMotion;
         }
 
         public void StopMove()
@@ -494,6 +552,11 @@ namespace MultiplayerARPG
 
         public void UpdateMovement(float deltaTime)
         {
+            // Root motion which was relayed from a child animator since the last update
+            _lastUpdateMovementFrame = Time.frameCount;
+            _rootMotion = _pendingRootMotion;
+            _pendingRootMotion = Vector3.zero;
+
             _moveDirection = Vector3.zero;
             IsUnderWater = WaterCheck(_waterCollider);
             IsClimbing = LadderComponent && LadderComponent.ClimbingLadder;
@@ -516,6 +579,9 @@ namespace MultiplayerARPG
                 UpdateClimbMovement(deltaTime);
             else
                 UpdateGenericMovement(deltaTime);
+
+            // No move was made in this frame, so drop it
+            _rootMotion = Vector3.zero;
 
             _currentInput = Entity.SetInputYAngle(_currentInput, EntityTransform.eulerAngles.y);
         }
@@ -590,7 +656,7 @@ namespace MultiplayerARPG
             _currentInput = Entity.SetInputMovementState(_currentInput, _tempMovementState);
             _currentInput = Entity.SetInputPosition(_currentInput, tempPredictPosition);
             _currentInput = Entity.SetInputIsKeyMovement(_currentInput, true);
-            _previousMovement = tempMoveVelocity * deltaTime;
+            _previousMovement = (tempMoveVelocity * deltaTime) + TakeRootMotion();
             EntityMovement.Move(_tempMovementState, _tempExtraMovementState, _previousMovement, deltaTime);
         }
 
@@ -1030,7 +1096,7 @@ namespace MultiplayerARPG
                 }
             }
             Vector3 snapToGroundMotion = EntityMovement.GetSnapToGroundMotion(tempMoveVelocity, platformMotion, forceMotion);
-            _previousMovement = ((tempMoveVelocity + platformMotion + forceMotion) * deltaTime) + snapToGroundMotion;
+            _previousMovement = ((tempMoveVelocity + platformMotion + forceMotion) * deltaTime) + snapToGroundMotion + TakeRootMotion();
             if (Entity.IsOwnerClientOrOwnedByServer && LadderComponent &&
                 LadderComponent.TriggeredLadderEntry && !LadderComponent.ClimbingLadder &&
                 LadderComponent.EnterExitState == EnterExitState.None &&

@@ -14,7 +14,7 @@ namespace MultiplayerARPG
     /// </summary>
     [RequireComponent(typeof(CharacterController))]
     [RequireComponent(typeof(LiteNetLibTransform))]
-    public class SimpleCharacterControllerEntityMovement : BaseNetworkedGameEntityComponent<BaseGameEntity>, IEntityMovementComponent, IBuiltInEntityMovement3D, IManagedUpdate, IManagedLateUpdate
+    public class SimpleCharacterControllerEntityMovement : BaseNetworkedGameEntityComponent<BaseGameEntity>, IEntityMovementComponent, IBuiltInEntityMovement3D, IManagedUpdate, IManagedLateUpdate, IAnimatorMoveReceiver
     {
         /// <summary>
         /// Add some distant to avoid character falling under ground
@@ -232,6 +232,8 @@ namespace MultiplayerARPG
         private void Start()
         {
             Functions.EntityStart();
+            // Animators which are on children (models) cannot send `OnAnimatorMove` to this component, so relay it
+            AnimatorMoveRelay.AttachToModels(gameObject, CacheAnimator, this);
         }
 
         private void OnEnable()
@@ -269,6 +271,11 @@ namespace MultiplayerARPG
         protected void OnAnimatorMove()
         {
             Functions.OnAnimatorMove();
+        }
+
+        public void OnChildAnimatorMove(Animator animator)
+        {
+            Functions.OnChildAnimatorMove(animator);
         }
 
         protected void OnTriggerEnter(Collider other)

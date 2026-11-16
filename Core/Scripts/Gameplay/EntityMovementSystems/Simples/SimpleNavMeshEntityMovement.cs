@@ -15,7 +15,7 @@ namespace MultiplayerARPG
     /// </summary>
     [RequireComponent(typeof(NavMeshAgent))]
     [RequireComponent(typeof(LiteNetLibTransform))]
-    public class SimpleNavMeshEntityMovement : BaseNetworkedGameEntityComponent<BaseGameEntity>, IEntityMovementComponent, IEntityMovementDataHandler, IManagedUpdate
+    public class SimpleNavMeshEntityMovement : BaseNetworkedGameEntityComponent<BaseGameEntity>, IEntityMovementComponent, IEntityMovementDataHandler, IManagedUpdate, IAnimatorMoveReceiver
     {
         protected const float MIN_MAGNITUDE_TO_DETERMINE_MOVING = 0.01f;
         protected const float MIN_DIRECTION_SQR_MAGNITUDE = 0.0001f;
@@ -46,6 +46,11 @@ namespace MultiplayerARPG
         protected bool _isDashing;
         protected Vector3 _inputDirection;
         protected ExtraMovementState _tempExtraMovementState;
+
+        // Root motion codes (used while playing an animation which its `shouldUseRootMotion` is `TRUE`)
+        protected Animator _cacheAnimator;
+        protected Vector3 _pendingRootMotion;
+        protected int _lastUpdateMovementFrame = -1;
 
         // Teleportation
         protected MovementTeleportState _serverTeleportState;
@@ -87,6 +92,66 @@ namespace MultiplayerARPG
             _yAngle = _targetYAngle = EntityTransform.eulerAngles.y;
             _lookRotationApplied = true;
             _clientTeleportState = MovementTeleportState.Responding;
+        }
+
+        private void Start()
+        {
+            // Prepare animator component, one which is on a child (model) cannot send `OnAnimatorMove` to this component, so relay it
+            _cacheAnimator = GetComponent<Animator>();
+            if (_cacheAnimator == null)
+                _cacheAnimator = GetComponentInChildren<Animator>(true);
+            AnimatorMoveRelay.AttachToModels(gameObject, _cacheAnimator, this);
+        }
+
+        /// <summary>
+        /// Unity sends this when the animator is on this game object
+        /// </summary>
+        protected void OnAnimatorMove()
+        {
+            if (!_cacheAnimator || _cacheAnimator.gameObject != gameObject)
+                return;
+            if (IsUsingRootMotion())
+                _pendingRootMotion += _cacheAnimator.deltaPosition;
+            else if (_cacheAnimator.applyRootMotion)
+                _cacheAnimator.ApplyBuiltinRootMotion();
+        }
+
+        /// <summary>
+        /// `OnAnimatorMove` of an animator which is on a child of the entity (relayed by `AnimatorMoveRelay`)
+        /// </summary>
+        public void OnChildAnimatorMove(Animator animator)
+        {
+            if (!animator || animator != GetRootMotionAnimator())
+                return;
+            if (IsUsingRootMotion())
+                _pendingRootMotion += animator.deltaPosition;
+        }
+
+        /// <summary>
+        /// Animator of the model which is being shown, root motion of other models (hidden ones) is ignored
+        /// </summary>
+        protected Animator GetRootMotionAnimator()
+        {
+            if (Entity.Model is IModelWithAnimator modelWithAnimator && modelWithAnimator.Animator)
+                return modelWithAnimator.Animator;
+            return _cacheAnimator;
+        }
+
+        protected bool IsUsingRootMotion()
+        {
+            // Only while movement is being simulated here, otherwise it follows the synced position
+            return Entity.ShouldUseRootMotion && CanSimulateMovement() && Time.frameCount - _lastUpdateMovementFrame <= 1;
+        }
+
+        protected void MoveByRootMotion(Vector3 rootMotion)
+        {
+            if (!CacheNavMeshAgent.isOnNavMesh)
+                return;
+            // Move by the agent to keep it on the nav mesh
+            CacheNavMeshAgent.Move(rootMotion);
+            // The agent does not write its position to the transform while it is stopped
+            if (!CacheNavMeshAgent.updatePosition)
+                EntityTransform.position = CacheNavMeshAgent.nextPosition;
         }
 
         protected override void OnDestroy()
@@ -423,8 +488,21 @@ namespace MultiplayerARPG
 
         public void UpdateMovement(float deltaTime)
         {
+            // Root motion which was kept by `OnAnimatorMove` since the last update
+            _lastUpdateMovementFrame = Time.frameCount;
+            Vector3 rootMotion = _pendingRootMotion;
+            _pendingRootMotion = Vector3.zero;
+
             if (IsPreparingToTeleport)
                 return;
+
+            // The animation moves the entity while it is using root motion, so the agent must not
+            // (it would walk back to its destination), as the other movement components do with their velocity
+            if (CacheNavMeshAgent.isOnNavMesh && !CacheNavMeshAgent.isStopped && Entity.ShouldUseRootMotion)
+                StopMove();
+
+            if (rootMotion.sqrMagnitude > 0f)
+                MoveByRootMotion(rootMotion);
 
             ApplyMovementForceMode replaceMovementForceApplierMode = ApplyMovementForceMode.Default;
             // Update force applying
