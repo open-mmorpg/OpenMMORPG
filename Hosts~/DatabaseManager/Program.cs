@@ -1,0 +1,131 @@
+using Microsoft.OpenApi.Models;
+using MultiplayerARPG.MMO;
+using Newtonsoft.Json.Serialization;
+
+var builder = WebApplication.CreateBuilder(args);
+
+// Config Manager
+if (!int.TryParse(builder.Configuration["ConfigManager"], out int configManager))
+    configManager = 0;
+switch (configManager)
+{
+    default:
+        builder.Services.AddSingleton<IConfigManager, DefaultConfigManager>();
+        break;
+}
+
+// User login manager
+if (!int.TryParse(builder.Configuration["UserLoginManager"], out int userLoginManager))
+    userLoginManager = 0;
+switch (userLoginManager)
+{
+    default:
+        DefaultDatabaseUserLoginConfig defaultUserLoginConfig = builder.Configuration.GetValue<DefaultDatabaseUserLoginConfig>("UserLoginManagerConfig");
+        builder.Services.AddSingleton<IDatabaseUserLogin>(provider => new DefaultDatabaseUserLogin(defaultUserLoginConfig));
+        break;
+}
+
+// Cache manager
+if (!int.TryParse(builder.Configuration["CacheManager"], out int cacheManager))
+    cacheManager = 0;
+switch (cacheManager)
+{
+    case 1:
+        builder.Services.AddSingleton<IDatabaseCache, RedisDatabaseCache>();
+        break;
+    default:
+        builder.Services.AddSingleton<IDatabaseCache, LocalDatabaseCache>();
+        break;
+}
+
+// Database server
+if (!int.TryParse(builder.Configuration["DatabaseServer"], out int databaseServer))
+    databaseServer = 0;
+switch (databaseServer)
+{
+    case 2:
+        builder.Services.AddSingleton<IDatabase, PostgreSQLDatabase>();
+        break;
+    case 1:
+        builder.Services.AddSingleton<IDatabase, SQLiteDatabase>();
+        break;
+    default:
+        builder.Services.AddSingleton<IDatabase, MySQLDatabase>();
+        break;
+}
+
+// Api
+builder.Services.AddControllers().AddNewtonsoftJson(options =>
+{
+    // Use the default property (Pascal) casing
+    options.SerializerSettings.ContractResolver = new DefaultContractResolver();
+    options.SerializerSettings.NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore;
+});
+
+// App secret
+string apiSecretKey = builder.Configuration["ApiSecretKey"];
+if (apiSecretKey == null)
+    apiSecretKey = string.Empty;
+builder.Services.AddAuthentication(AppSecretAuthenticationHandler.SCHEME)
+    .AddScheme<AppSecretAuthenticationSchemeOptions, AppSecretAuthenticationHandler>(AppSecretAuthenticationHandler.SCHEME, o =>
+    {
+        o.AppSecret = apiSecretKey;
+    });
+
+// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(o =>
+{
+    o.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Description = "Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",   // must be lower-case
+        BearerFormat = "Unknow"
+    });
+
+    o.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
+
+var app = builder.Build();
+
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI(o =>
+    {
+        o.SwaggerEndpoint("/swagger/v1/swagger.json", "Open MMORPG database API");
+        o.RoutePrefix = "__dev/api"; // This makes Swagger UI available at /__dev/api/index.html
+    });
+}
+
+// The routes sit at the root (/validate-user-login), but RestDatabaseClient's default apiUrl, in
+// code, prefabs and serverConfig.json, ends in /api/. Accept both. UseRouting has to come after
+// UsePathBase or the base is not stripped before route matching.
+app.UsePathBase("/api");
+app.UseRouting();
+
+app.UseAuthentication();
+app.UseAuthorization();
+app.MapControllers();
+
+IDatabase database = app.Services.GetService<IDatabase>();
+await database.DoMigration();
+
+app.Run();
