@@ -189,7 +189,11 @@ namespace MultiplayerARPG.MMO
             {
                 try
                 {
+#if NET || NETCOREAPP
+                    await System.Threading.Tasks.Task.Delay(_tickMilliseconds);
+#else
                     await UniTask.Delay(_tickMilliseconds);
+#endif
                     await ProcessNextLane();
                 }
                 catch (Exception ex)

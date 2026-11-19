@@ -5,11 +5,11 @@ using LiteNetLib.Utils;
 using LiteNetLibManager;
 using Cysharp.Threading.Tasks;
 using System.Net.Sockets;
-using UnityEngine.Serialization;
 using System.Collections.Concurrent;
 
 #if (UNITY_EDITOR || UNITY_SERVER || !EXCLUDE_SERVER_CODES) && UNITY_STANDALONE
 using UnityEngine;
+using UnityEngine.Serialization;
 #endif
 
 namespace MultiplayerARPG.MMO
@@ -34,14 +34,19 @@ namespace MultiplayerARPG.MMO
 #endif
         public string loginServerAddress = "127.0.0.1";
 
-#if NET || NETCOREAPP || ((UNITY_EDITOR || UNITY_SERVER || !EXCLUDE_SERVER_CODES) && UNITY_STANDALONE)
+#if NET || NETCOREAPP
+        // A .NET host has no MMOServerInstance: it sets these itself. The login server runs in
+        // the same process as the central server, because it reads its channels and cluster server.
+        public IDatabaseClient DatabaseClient { get; set; }
+        public ILoginServerDataManager DataManager { get; set; }
+        public ClusterClient ClusterClient { get; private set; }
+        public CentralNetworkManager CentralNetworkManager { get; set; }
+#elif (UNITY_EDITOR || UNITY_SERVER || !EXCLUDE_SERVER_CODES) && UNITY_STANDALONE
         public IDatabaseClient DatabaseClient
         {
             get { return MMOServerInstance.Singleton.DatabaseClient; }
         }
         public ILoginServerDataManager DataManager { get; set; }
-#endif
-#if NET || NETCOREAPP || ((UNITY_EDITOR || UNITY_SERVER || !EXCLUDE_SERVER_CODES) && UNITY_STANDALONE)
         public ClusterClient ClusterClient { get; private set; }
         private CentralNetworkManager centralNetworkManager = null;
         public CentralNetworkManager CentralNetworkManager
@@ -53,6 +58,8 @@ namespace MultiplayerARPG.MMO
                 return centralNetworkManager;
             }
         }
+#endif
+#if NET || NETCOREAPP || ((UNITY_EDITOR || UNITY_SERVER || !EXCLUDE_SERVER_CODES) && UNITY_STANDALONE)
         private ClusterServer clusterServer = null;
         public ClusterServer ClusterServer
         {
@@ -73,7 +80,7 @@ namespace MultiplayerARPG.MMO
         public string RefId { get { return string.Empty; } }
         public CentralServerPeerType PeerType { get { return CentralServerPeerType.LoginServer; } }
 
-#if (UNITY_EDITOR || UNITY_SERVER || !EXCLUDE_SERVER_CODES) && UNITY_STANDALONE
+#if NET || NETCOREAPP || ((UNITY_EDITOR || UNITY_SERVER || !EXCLUDE_SERVER_CODES) && UNITY_STANDALONE)
         //Login Queue
         private readonly Queue<LoginQueueEntry> loginQueue = new();
 #endif
@@ -110,7 +117,14 @@ namespace MultiplayerARPG.MMO
         public System.Action<DisconnectReason, SocketError, UITextKeys> onClientDisconnected;
         public System.Action onClientStopped;
 
-#if NET || NETCOREAPP || ((UNITY_EDITOR || UNITY_SERVER || !EXCLUDE_SERVER_CODES) && UNITY_STANDALONE)
+#if NET || NETCOREAPP
+        public LoginNetworkManager() : base()
+        {
+            Initialize();
+        }
+#endif
+
+#if (UNITY_EDITOR || UNITY_SERVER || !EXCLUDE_SERVER_CODES) && UNITY_STANDALONE
         private void Awake()
         {
             DataManager = GetComponentInChildren<ILoginServerDataManager>();
@@ -120,9 +134,7 @@ namespace MultiplayerARPG.MMO
                 DataManager = new DefaultLoginServerDataManager();
             }
         }
-#endif
 
-#if (UNITY_EDITOR || UNITY_SERVER || !EXCLUDE_SERVER_CODES) && UNITY_STANDALONE
         protected override void Start()
         {
             Initialize();
@@ -136,6 +148,17 @@ namespace MultiplayerARPG.MMO
 #if NET || NETCOREAPP || ((UNITY_EDITOR || UNITY_SERVER || !EXCLUDE_SERVER_CODES) && UNITY_STANDALONE)
             ClusterClient = new ClusterClient(this);
             ClusterClient.onResponseAppServerRegister = OnResponseAppServerRegister;
+            // Wired here, not in RegisterMessages: under .NET the base constructor calls
+            // RegisterMessages before this constructor has created the ClusterClient
+            // (MapSpawnNetworkManager does the same).
+            ClusterClient.onResponseAppServerAddress = OnResponseAppServerAddress;
+            //Responses
+            ClusterClient.RegisterResponseHandler<RequestForceDespawnCharacterMessage, EmptyMessage>(MMORequestTypes.ForceDespawnCharacter);
+            ClusterClient.RegisterResponseHandler<RequestCheckChannelsLimit, EmptyMessage>(MMORequestTypes.CheckChannelsLimit);
+            ClusterClient.RegisterResponseHandler<RequestFindOnlineUserMessage, ResponseFindOnlineUserMessage>(MMORequestTypes.FindOnlineUser);
+            ClusterClient.RegisterResponseHandler<EmptyMessage, ResponseChannelsMessage>(MMORequestTypes.Channels);
+#endif
+#if (UNITY_EDITOR || UNITY_SERVER || !EXCLUDE_SERVER_CODES) && UNITY_STANDALONE
             GameInstance.OnGameDataLoadedEvent += GameInstance_OnGameDataLoadedEvent;
 #endif
         }
@@ -153,14 +176,6 @@ namespace MultiplayerARPG.MMO
         protected override void RegisterMessages()
         {
             EnableRequestResponse(MMOMessageTypes.Request, MMOMessageTypes.Response);
-#if NET || NETCOREAPP || ((UNITY_EDITOR || UNITY_SERVER || !EXCLUDE_SERVER_CODES) && UNITY_STANDALONE)
-            ClusterClient.onResponseAppServerAddress = OnResponseAppServerAddress;
-            //Responses
-            ClusterClient.RegisterResponseHandler<RequestForceDespawnCharacterMessage, EmptyMessage>(MMORequestTypes.ForceDespawnCharacter);
-            ClusterClient.RegisterResponseHandler<RequestCheckChannelsLimit, EmptyMessage>(MMORequestTypes.CheckChannelsLimit);
-            ClusterClient.RegisterResponseHandler<RequestFindOnlineUserMessage, ResponseFindOnlineUserMessage>(MMORequestTypes.FindOnlineUser);
-            ClusterClient.RegisterResponseHandler<EmptyMessage, ResponseChannelsMessage>(MMORequestTypes.Channels);
-#endif
             // Requests
             RegisterRequestToServer<RequestUserLoginMessage, ResponseUserLoginMessage>(MMORequestTypes.UserLogin, HandleRequestUserLogin);
             RegisterRequestToServer<RequestUserRegisterMessage, ResponseUserRegisterMessage>(MMORequestTypes.UserRegister, HandleRequestUserRegister);
@@ -178,7 +193,7 @@ namespace MultiplayerARPG.MMO
             this.InvokeInstanceDevExtMethods("RegisterMessages");
         }
 
-#if (UNITY_EDITOR || UNITY_SERVER || !EXCLUDE_SERVER_CODES) && UNITY_STANDALONE
+#if NET || NETCOREAPP || ((UNITY_EDITOR || UNITY_SERVER || !EXCLUDE_SERVER_CODES) && UNITY_STANDALONE)
         private void OnResponseAppServerAddress(AckResponseCode responseCode, CentralServerPeerInfo peerInfo)
         {
             if (responseCode != AckResponseCode.Success)

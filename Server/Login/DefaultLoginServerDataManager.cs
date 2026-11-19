@@ -10,6 +10,9 @@ namespace MultiplayerARPG.MMO
             return GenericUtils.GetUniqueId();
         }
 
+#if !NET && !NETCOREAPP
+        // These two read Unity game data (GameInstance). A .NET host supplies its own versions
+        // in another part of this partial class.
         public bool CanCreateCharacter(ref int dataId, ref int entityId, ref int factionId, IList<CharacterDataBoolean> publicBools, IList<CharacterDataInt32> publicInts, IList<CharacterDataFloat32> publicFloats, out UITextKeys errorMessage)
         {
             errorMessage = UITextKeys.NONE;
@@ -75,6 +78,7 @@ namespace MultiplayerARPG.MMO
             playerCharacterData.PublicFloats = publicFloats;
 #endif
         }
+#endif
 
         public string GenerateAccessToken(string userId)
         {
