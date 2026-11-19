@@ -8,12 +8,34 @@ Unity skips folders whose name ends in `~`, and so does the Asset Store package 
 here reaches a Unity project. The projects compile the kit's own `Server/`, `Database/` and
 `SharedData/` straight from this checkout: the hosts and your Unity servers always run the same code.
 
+Reach for these when you host the game on a VPS or another machine without Unity, when you want
+PostgreSQL (only the hosts support it), or when a website or tool needs the database. For making the
+game and testing in the editor, the Unity servers are all you need. The documentation's
+[Running Servers Without Unity](https://open-mmorpg.github.io/documentation/mmo/servers-without-unity/)
+page is the step-by-step version of this README.
+
 | Folder | What it is |
 | --- | --- |
 | `MMO.NET/` | Console server: database, central, login and map-spawn servers, any mix of them, in one process |
 | `DatabaseManager/` | ASP.NET Core web API over the database. Servers reach it through `RestDatabaseClient` |
 | `SmokeClient/` | Registers, logs in and creates a character against a running login server, then reports each step |
 | `ThirdParty/` | The Unity-free code the hosts need that the kit does not ship (git subtrees, see below) |
+
+## Add it to your project
+
+The Asset Store package and the release `.unitypackage` leave `Hosts~` out. If your kit came from
+either, copy `Hosts~` from this repository, at the release tag that matches your kit, into your
+project's `Assets/OpenMMORPG/`. Unity ignores it there, and the hosts compile the kit code your game
+is actually built from, including your own edits to `Server/`, `Database/` and `SharedData/`. If you
+work in a git checkout of the kit, it is already there.
+
+- **Keep the versions together.** The hosts, the Unity server build and the game client all have to
+  come from the same kit code. Update `Hosts~` whenever you update the kit.
+- **Custom server code elsewhere is not included.** The hosts only compile those three folders. If
+  you extended the database or server code in a folder of your own, add it to
+  `MMO.NET/OpenMMORPG.MMO.NET.csproj` (and `DatabaseManager/OpenMMORPG.DatabaseManager.csproj`) with
+  another `<Compile Include="..." />` line, like the existing ones. Code that needs `UnityEngine`
+  cannot be compiled here.
 
 ## Build
 
@@ -54,7 +76,17 @@ because it has no game data: list the map ids in `spawnMaps`.
 the upstream sample data. Export your own from Unity: select your `GameInstance`, and under
 **Data Exporting** use the export buttons for minimal items, character creation data and the social
 system setting. Copy the files into `MMO.NET/Config/`, and `socialSystemSetting.json` into
-`DatabaseManager/Config/` too if you use the web API.
+`DatabaseManager/Config/` too if you use the web API. Export again whenever you change items,
+starting characters or guild settings, as you would rebuild the Unity server.
+
+### Map servers
+
+Map servers are still your Unity server build, made the same way as for the all-Unity setup (see
+the kit README's "Running the demo"). Point `spawnExePath` at it; an absolute path is safest. The
+spawner gives each map server its map, channel, ports and central's address. Everything else, such
+as where the database is, the map server reads from `./Config/serverConfig.json`. It starts in the
+host's folder, so that is the host's own `serverConfig.json`, which uses the same keys as a Unity
+server's. One file configures both.
 
 ## Run the database web API
 
@@ -74,6 +106,44 @@ Swagger UI is at `/__dev/api`.
 Before exposing it, change `ApiSecretKey` and put it behind TLS: a reverse proxy, or an `https://`
 URL in `Urls` with a certificate configured for Kestrel.
 
+## Deploy to a server
+
+`dotnet run` is for working on the hosts. To install them on a server, publish them:
+
+```
+dotnet publish "Hosts~/MMO.NET" -c Release -o publish/servers
+dotnet publish "Hosts~/DatabaseManager" -c Release -o publish/database-api
+```
+
+Each output folder is complete, `Config/` included. Copy it to the server and start the program
+from inside the folder, so it finds `./Config/`:
+
+```
+dotnet OpenMMORPG.MMO.NET.dll -startDatabaseServer -startCentralServer -startLoginServer -startMapSpawnServer
+dotnet OpenMMORPG.DatabaseManager.dll
+```
+
+That needs the .NET 9 runtime on the server (the ASP.NET Core runtime for the web API). To avoid
+installing it, publish self-contained for the server's platform instead, for example
+`-r linux-x64 --self-contained` (about 90 MB for the servers, 110 MB for the web API), and run
+`./OpenMMORPG.MMO.NET` or `./OpenMMORPG.DatabaseManager` directly.
+
+## Several machines
+
+The login server always runs in the same process as central. Everything else can move:
+
+- **One machine for the core:** `-startDatabaseServer -startCentralServer -startLoginServer`.
+- **One or more map machines:** `-startMapSpawnServer` next to a copy of the Unity server build, with
+  `centralAddress` and `databaseManagerAddress` in `serverConfig.json` pointing at the core machine
+  and `publicAddress` set to the address players reach that machine on.
+- **Optionally, the web API on its own machine**, with every server using `useCustomDatabaseClient`
+  and `dbApiUrl` pointing at it. Its cache can be Redis instead of in-process (`CacheManager` in
+  `appsettings.json`, `Config/redisConfig.json`).
+
+The game client only connects to the login server and to map servers, so players only need to reach
+the login port (7500) and the map servers' ports (8000 and up). Keep everything else private to your
+servers: central (7000), cluster (6010), database (6100), map spawn (6001) and the web API (5757).
+
 ## Smoke test
 
 With a login server running:
@@ -90,8 +160,9 @@ It exits 0 only if every step passes. The character it creates comes from the sa
 - Map servers call five "user unlock content" database operations that nothing implements, neither
   the LiteNetLib database server nor the web API. This is inherited from upstream and affects the
   Unity servers too.
-- Tested on Windows with SQLite, in both database setups, with the smoke client. Not yet tested:
-  MySQL, PostgreSQL, Redis, Linux, and Unity map servers or the game client against these hosts.
+- Tested on Windows with SQLite, in both database setups, with the smoke client, from `dotnet run`
+  and from published builds. The Linux self-contained publish builds but has not been run. Not yet
+  tested: MySQL, PostgreSQL, Redis, and Unity map servers or the game client against these hosts.
 
 ## Where this comes from
 
