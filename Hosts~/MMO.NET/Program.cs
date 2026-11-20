@@ -1,9 +1,11 @@
 ﻿using Cysharp.Threading;
+using Cysharp.Threading.Tasks;
 using LiteNetLibManager;
 using Microsoft.Extensions.Logging;
 using MultiplayerARPG;
 using MultiplayerARPG.MMO;
 using Newtonsoft.Json;
+using System.Runtime.InteropServices;
 
 using var loggerFactory = LoggerFactory.Create(builder =>
 {
@@ -493,9 +495,24 @@ if (startingMapSpawnServer)
 }
 
 // Setup process
-AppDomain.CurrentDomain.ProcessExit += CurrentDomain_ProcessExit;
+// Ctrl+C, a closed console, and SIGTERM (systemd, docker stop, a Windows shutdown) end the loop
+// below, so the servers stop in order and the database server writes the character saves it is
+// still holding. Without this the process just ends, and those saves are lost.
+using CancellationTokenSource shutdown = new CancellationTokenSource();
+bool stopped = false;
 int delay = 1000 / 60;
-while (true)
+List<PosixSignalRegistration> signalRegistrations = new List<PosixSignalRegistration>();
+foreach (PosixSignal signal in new[] { PosixSignal.SIGINT, PosixSignal.SIGTERM, PosixSignal.SIGQUIT, PosixSignal.SIGHUP })
+{
+    signalRegistrations.Add(PosixSignalRegistration.Create(signal, context =>
+    {
+        // Keep the process alive until the loop below has finished stopping the servers
+        context.Cancel = true;
+        shutdown.Cancel();
+    }));
+}
+AppDomain.CurrentDomain.ProcessExit += CurrentDomain_ProcessExit;
+while (!shutdown.IsCancellationRequested)
 {
     if (databaseNetworkManager != null && databaseNetworkManager.IsServer)
         databaseNetworkManager.ProcessUpdate();
@@ -513,17 +530,54 @@ while (true)
     await Task.Delay(delay);
 }
 
+Logging.Log("Stopping the servers");
+await StopServers(TimeSpan.FromSeconds(30));
+foreach (PosixSignalRegistration registration in signalRegistrations)
+    registration.Dispose();
+return;
+
+async Task StopServers(TimeSpan flushTimeout)
+{
+    if (stopped)
+        return;
+    stopped = true;
+
+    // Nothing new comes in while the database finishes
+    loginNetworkManager.StopHost();
+    mapSpawnNetworkManager.StopHost();
+    centralNetworkManager.StopHost();
+
+    // The database server defers character saves (DatabaseCharacterSaveScheduler), so the newest
+    // state of a character can still be waiting in memory. Write all of it before the process
+    // ends. The server keeps receiving meanwhile, for saves that map servers are still sending.
+    if (databaseNetworkManager.IsServer)
+    {
+        DateTime deadline = DateTime.UtcNow + flushTimeout;
+        do
+        {
+            Task flush = databaseNetworkManager.FlushCharacterSavesAsync().AsTask();
+            while (!flush.IsCompleted && DateTime.UtcNow < deadline)
+            {
+                databaseNetworkManager.ProcessUpdate();
+                await Task.Delay(delay);
+            }
+            if (flush.IsFaulted)
+                Logging.LogException(nameof(DatabaseNetworkManager), flush.Exception);
+            // A save that was already being written when the flush started is not waited for by it
+        } while (databaseNetworkManager.PendingCharacterSaveCount > 0 && DateTime.UtcNow < deadline);
+
+        int unsaved = databaseNetworkManager.PendingCharacterSaveCount;
+        if (unsaved > 0)
+            Logging.LogError(nameof(DatabaseNetworkManager), $"Stopped with {unsaved} character save(s) not written.");
+        else
+            Logging.Log(nameof(DatabaseNetworkManager), "All character saves are written.");
+    }
+    databaseNetworkManager.StopHost();
+}
+
 void CurrentDomain_ProcessExit(object sender, EventArgs e)
 {
-    if (loginNetworkManager != null)
-        loginNetworkManager.StopHost();
-
-    if (centralNetworkManager != null)
-        centralNetworkManager.StopHost();
-
-    if (mapSpawnNetworkManager != null)
-        mapSpawnNetworkManager.StopHost();
-
-    if (databaseNetworkManager != null)
-        databaseNetworkManager.StopHost();
+    // Only reached with the servers still running when the process ends some other way than the
+    // signals above (Environment.Exit, for one). There is little time here, so the wait is short.
+    StopServers(TimeSpan.FromSeconds(5)).GetAwaiter().GetResult();
 }
