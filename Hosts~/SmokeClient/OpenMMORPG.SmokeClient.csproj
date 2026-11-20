@@ -42,4 +42,11 @@
     <PackageReference Include="ZString" Version="2.6.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- The character the smoke test creates is read from the host's own creation data -->
+    <None Include="$(MmoHostDir)Config\characterCreationData.json" Link="Config\characterCreationData.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

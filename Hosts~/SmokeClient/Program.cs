@@ -1,14 +1,31 @@
 using LiteNetLibManager;
 using MultiplayerARPG;
 using MultiplayerARPG.MMO;
+using Newtonsoft.Json;
 
-// Usage: OpenMMORPG.SmokeClient [host] [loginPort]   (defaults: 127.0.0.1 7500)
+// Usage: OpenMMORPG.SmokeClient [host] [loginPort] [characterCreationData.json]
+//        (defaults: 127.0.0.1 7500, and the copy of MMO.NET's Config/characterCreationData.json
+//        built beside this program)
 // Against a running login server: registers a fresh user, checks a wrong password is refused,
 // logs in, validates the token, lists channels, creates a character and lists characters again.
-// Exit code 0 only if every step behaves. The character comes from MMO.NET's sample
-// Config/characterCreationData.json; change the ids below if you export your own.
+// Exit code 0 only if every step behaves. The character it creates is the first one in the
+// creation data, so it follows whatever game data the host was given.
 string host = args.Length > 0 ? args[0] : "127.0.0.1";
 int port = args.Length > 1 ? int.Parse(args[1]) : 7500;
+string creationDataPath = args.Length > 2 ? args[2] : Path.Combine(AppContext.BaseDirectory, "Config", "characterCreationData.json");
+
+// AvailableCharacters[entityId][dataId] is the character a new player of that kind starts as
+CharacterCreationData creationData = JsonConvert.DeserializeObject<CharacterCreationData>(File.ReadAllText(creationDataPath));
+if (creationData == null || creationData.AvailableCharacters.Count == 0)
+{
+    Console.WriteLine($"FAIL no characters in {creationDataPath}");
+    return 1;
+}
+int entityId = creationData.AvailableCharacters.Keys.First();
+int dataId = creationData.AvailableCharacters[entityId].Keys.First();
+PlayerCharacterData template = creationData.AvailableCharacters[entityId][dataId];
+// A game without factions exports none, and its characters have faction 0
+int factionId = creationData.AvailableFactionIds.Count > 0 ? creationData.AvailableFactionIds[0] : 0;
 string username = "smoke" + DateTime.UtcNow.ToString("HHmmssfff");
 const string password = "smoke-pass-1";
 int failures = 0;
@@ -43,14 +60,12 @@ Check(channels.code == AckResponseCode.Success, "channels",
 var before = await Ask<ResponseCharactersMessage>(cb => client.RequestCharacters(cb), "characters");
 Check(before.code == AckResponseCode.Success && (before.resp.characters?.Count ?? 0) == 0, "characters (new user has none)", $"{before.code} count={before.resp.characters?.Count}");
 
-// From the host's Config/characterCreationData.json: AvailableCharacters[entityId][dataId],
-// and the faction must be one of AvailableFactionIds
 var newCharacter = new PlayerCharacterData
 {
     CharacterName = "Smoke" + DateTime.UtcNow.ToString("mmssfff"),
-    DataId = 470176920,
-    EntityId = 958510170,
-    FactionId = -1964113514,
+    DataId = dataId,
+    EntityId = entityId,
+    FactionId = factionId,
 };
 var create = await Ask<ResponseCreateCharacterMessage>(cb => client.RequestCreateCharacter(newCharacter, cb), "create character");
 Check(create.code == AckResponseCode.Success, $"create character {newCharacter.CharacterName}", $"{create.code} {create.resp.message}");
@@ -59,6 +74,9 @@ var after = await Ask<ResponseCharactersMessage>(cb => client.RequestCharacters(
 var made = after.resp.characters?.FirstOrDefault();
 Check(after.code == AckResponseCode.Success && (after.resp.characters?.Count ?? 0) == 1, "characters (one now)",
     $"{after.code} count={after.resp.characters?.Count} name={made?.CharacterName} level={made?.Level} map={made?.CurrentMapName} gold={made?.Gold}");
+// The server built it from the same creation data, so it starts where that data says
+Check(made != null && made.DataId == dataId && made.EntityId == entityId && made.CurrentMapName == template.CurrentMapName,
+    "character matches the creation data", $"dataId={made?.DataId} entityId={made?.EntityId} map={made?.CurrentMapName} (expected {dataId} {entityId} {template.CurrentMapName})");
 
 client.StopClient();
 Console.WriteLine(failures == 0 ? "PASS all steps" : $"FAIL {failures} step(s)");
