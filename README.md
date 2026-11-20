@@ -94,7 +94,7 @@ The map server build is Windows only, because the spawner launches `OpenMMORPG.e
 
 ## Hosting servers without Unity (optional)
 
-Only map servers need a Unity build. The database, central, login and map spawn servers can also run as one small .NET 9 program, and the database can run as a web API. Both are built from the kit's own `Server/`, `Database/` and `SharedData/` code, so they behave like the Unity servers. They are useful on a VPS or another machine without Unity, when you want PostgreSQL (which only these hosts support), or when a website or tool needs the database. For making the game and testing it in the editor, the Unity servers above are all you need.
+Only map servers need a Unity build. The database, central, login and map spawn servers can also run as one small .NET 10 program, and the database can run as a web API. Both are built from the kit's own `Server/`, `Database/` and `SharedData/` code, so they behave like the Unity servers. They are useful on a VPS or another machine without Unity, when you want PostgreSQL (which only these hosts support), or when a website or tool needs the database. For making the game and testing it in the editor, the Unity servers above are all you need.
 
 The hosts live in [`Hosts~`](Hosts~/README.md), which Unity ignores. The Asset Store package and the release `.unitypackage` leave that folder out, so take it from this repository, at the release that matches your kit. [Running Servers Without Unity](https://open-mmorpg.github.io/documentation/mmo/servers-without-unity/) in the documentation walks through setting them up.
 

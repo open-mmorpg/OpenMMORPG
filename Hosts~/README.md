@@ -1,6 +1,6 @@
 # .NET hosts
 
-Run the kit's database, central, login and map-spawn servers as a plain .NET 9 program instead of a
+Run the kit's database, central, login and map-spawn servers as a plain .NET 10 program instead of a
 Unity build, and optionally the database tier as a web API. Map servers still run as your Unity
 server build, because they load scenes, physics and navmesh.
 
@@ -39,7 +39,7 @@ work in a git checkout of the kit, it is already there.
 
 ## Build
 
-Needs the [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0).
+Needs the [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0).
 
 ```
 dotnet build "Hosts~/OpenMMORPG.Hosts.sln"
@@ -70,14 +70,20 @@ the file. `databaseOptionIndex` here is 0 = SQLite, 1 = MySQL, 2 = PostgreSQL, s
 Unlike the Unity spawner, the .NET map spawner cannot fall back to every map in `GameInstance`,
 because it has no game data: list the map ids in `spawnMaps`.
 
+Stop the program with Ctrl+C, or with SIGTERM (what `systemctl stop` and `docker stop` send). The
+servers then stop in order, and the database server first writes the character saves it is still
+holding: it saves a character at most once every 20 seconds, so the newest state can be waiting in
+memory. Killing the process outright loses those.
+
 ### Your game's data
 
 `Config/items.json`, `Config/characterCreationData.json` and `Config/socialSystemSetting.json` are
-the upstream sample data. Export your own from Unity: select your `GameInstance`, and under
-**Data Exporting** use the export buttons for minimal items, character creation data and the social
-system setting. Copy the files into `MMO.NET/Config/`, and `socialSystemSetting.json` into
-`DatabaseManager/Config/` too if you use the web API. Export again whenever you change items,
-starting characters or guild settings, as you would rebuild the Unity server.
+the demo's data, so the hosts serve the demo as they are. For your own game, export yours from
+Unity: select your `GameInstance`, and under **Data Exporting** use the export buttons for minimal
+items, character creation data and the social system setting. Copy the files into
+`MMO.NET/Config/`, and `socialSystemSetting.json` into `DatabaseManager/Config/` too if you use the
+web API. Export again whenever you change items, starting characters or guild settings, as you
+would rebuild the Unity server.
 
 ### Map servers
 
@@ -123,7 +129,7 @@ dotnet OpenMMORPG.MMO.NET.dll -startDatabaseServer -startCentralServer -startLog
 dotnet OpenMMORPG.DatabaseManager.dll
 ```
 
-That needs the .NET 9 runtime on the server (the ASP.NET Core runtime for the web API). To avoid
+That needs the .NET 10 runtime on the server (the ASP.NET Core runtime for the web API). To avoid
 installing it, publish self-contained for the server's platform instead, for example
 `-r linux-x64 --self-contained` (about 90 MB for the servers, 110 MB for the web API), and run
 `./OpenMMORPG.MMO.NET` or `./OpenMMORPG.DatabaseManager` directly.
@@ -152,8 +158,19 @@ With a login server running:
 dotnet run --project "Hosts~/SmokeClient" -- 127.0.0.1 7500
 ```
 
-It exits 0 only if every step passes. The character it creates comes from the sample
-`characterCreationData.json`; change the ids in `SmokeClient/Program.cs` if you export your own.
+It exits 0 only if every step passes. The character it creates is the first one in
+`MMO.NET/Config/characterCreationData.json`, which is built beside the client, so it follows the
+data you export. A third argument names another file.
+
+`Tools~/hosts_smoke.py` does the whole round on its own: it starts the built hosts on a fresh
+database, runs the smoke client, stops the hosts and checks they stopped cleanly, once with the
+LiteNetLib database server and once with the web API. The repository's checks workflow builds the
+hosts and runs it on every push.
+
+```
+dotnet build "Hosts~/OpenMMORPG.Hosts.sln" -c Release
+python "Tools~/hosts_smoke.py" .
+```
 
 ## Known gaps
 
@@ -178,6 +195,11 @@ The hosts are adapted from SURIYUN's `UnityMultiplayerARPG_MMO.NET` and
 - The web API's settings folder is `Config/`, the name its code reads. Upstream ships `config/`,
   which only works on case-insensitive file systems such as Windows.
 - Default ports and paths follow the kit. Packages are updated past the NuGet audit advisories.
+- `MMO.NET` stops on Ctrl+C and SIGTERM, and writes the character saves the database server still
+  holds before it ends. Upstream ends the process where it stands.
+- The login server's character creation check follows the Unity one: a game without factions
+  creates characters with faction 0. Upstream's check refuses every character in such a game.
+- The shipped `Config/` data is the demo's, not upstream's sample game.
 
 ## Third-party code
 
