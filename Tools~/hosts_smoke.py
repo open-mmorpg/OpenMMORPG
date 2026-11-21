@@ -4,14 +4,17 @@
     dotnet build "Hosts~/OpenMMORPG.Hosts.sln" -c Release
     python "Tools~/hosts_smoke.py" .
 
-Two passes, each on a fresh database:
+Three passes, each on a fresh database:
 
-  litenetlib  the database, central and login servers in one process
-  rest        the database web API, with central and login reaching it through RestDatabaseClient
+  litenetlib        the database, central and login servers in one process
+  rest              the database web API, with central and login reaching it through RestDatabaseClient
+  connection-limit  the login server started with -loginMaxConnections
 
-In each pass the smoke client registers, logs in and creates a character, and then the host is
-asked to stop (SIGTERM, or Ctrl+Break on Windows). The pass fails unless the smoke client passes,
-the host exits with 0, and it reports that the character saves it held were written.
+In the first two the smoke client registers, logs in and creates a character. In the third it
+opens more connections than the login server was told to take, and checks that the extra ones are
+refused and that a place frees when a client leaves. Then the host is asked to stop (SIGTERM, or
+Ctrl+Break on Windows). A pass fails unless the smoke client passes, the host exits with 0, and
+(first pass) it reports that the character saves it held were written.
 
 Needs no Unity. The checks workflow runs it on every push.
 """
@@ -27,6 +30,7 @@ import time
 
 WINDOWS = os.name == "nt"
 READY_LINE = "App Registered successfully"      # the login server has joined the cluster
+CONNECTION_LIMIT = 2                            # -loginMaxConnections in the connection-limit pass
 STOPPED_LINE = "All character saves are written."
 
 
@@ -103,6 +107,11 @@ def run_pass(name, repo, configuration, work, offset):
             "-clusterPort", str(6010 + offset), "-databaseManagerPort", str(6100 + offset)]
     api = None
     settings = {}
+    client_args = ["127.0.0.1", str(login_port)]
+    if name == "connection-limit":
+        # Two more clients than the login server takes
+        args += ["-loginMaxConnections", str(CONNECTION_LIMIT)]
+        client_args = ["connections", "127.0.0.1", str(login_port), str(CONNECTION_LIMIT + 2), str(CONNECTION_LIMIT)]
     if name == "rest":
         api_folder = os.path.join(work, name, "database-api")
         shutil.copytree(built(repo, "DatabaseManager", "OpenMMORPG.DatabaseManager", configuration), api_folder)
@@ -119,7 +128,7 @@ def run_pass(name, repo, configuration, work, offset):
     host = start(servers, "OpenMMORPG.MMO.NET", args, os.path.join(work, name, "servers.log"), settings)
     ok = ok and wait_for("servers", lambda: READY_LINE in read(host.log_path), host)
     if ok:
-        result = subprocess.run(["dotnet", os.path.join(smoke, "OpenMMORPG.SmokeClient.dll"), "127.0.0.1", str(login_port)],
+        result = subprocess.run(["dotnet", os.path.join(smoke, "OpenMMORPG.SmokeClient.dll")] + client_args,
                                 capture_output=True, text=True)
         lines = [line for line in result.stdout.splitlines() if line.startswith(("ok ", "FAIL", "PASS"))]
         print("\n".join(lines))
@@ -152,12 +161,12 @@ def main():
     parser.add_argument("--configuration", default="Release")
     parser.add_argument("--port-offset", type=int, default=0,
                         help="added to every default port, when the defaults are in use on this machine")
-    parser.add_argument("--only", choices=["litenetlib", "rest"], help="run one pass")
+    parser.add_argument("--only", choices=["litenetlib", "rest", "connection-limit"], help="run one pass")
     options = parser.parse_args()
 
     work = tempfile.mkdtemp(prefix="hosts-smoke-")
     try:
-        passes = [options.only] if options.only else ["litenetlib", "rest"]
+        passes = [options.only] if options.only else ["litenetlib", "rest", "connection-limit"]
         results = [run_pass(name, options.repo, options.configuration, work, options.port_offset) for name in passes]
     finally:
         shutil.rmtree(work, ignore_errors=True)

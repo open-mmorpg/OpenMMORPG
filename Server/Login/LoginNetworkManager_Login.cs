@@ -60,26 +60,54 @@ namespace MultiplayerARPG.MMO
                 return;
             }
 
+            // Nowhere left to wait: say so now, not after the client has given up
+            if (activeLogins >= MaxConcurrentRequest && floodProtection.loginMaxQueue > 0 && loginQueue.Count >= floodProtection.loginMaxQueue)
+            {
+                result.InvokeError(new ResponseUserLoginMessage()
+                {
+                    message = UITextKeys.UI_ERROR_SERVICE_NOT_AVAILABLE,
+                });
+                return;
+            }
+
+            // Before anything is asked of the database
+            if (FloodGuard.TryBeginLogin(requestHandler.ConnectionId, request.username, out LoginFloodGuard.LoginTicket ticket) != LoginFloodGuard.Verdict.Allowed)
+            {
+                result.InvokeError(new ResponseUserLoginMessage()
+                {
+                    message = UITextKeys.UI_ERROR_TOO_MANY_REQUESTS,
+                });
+                return;
+            }
+
             if (activeLogins >= MaxConcurrentRequest)
             {
                 loginQueue.Enqueue(new LoginQueueEntry
                 {
                     handler = requestHandler,
                     request = request,
-                    result = result
+                    result = result,
+                    ticket = ticket,
                 });
                 return;
             }
 
-            await ProcessLogin(requestHandler, request, result);
+            await ProcessLogin(requestHandler, request, result, ticket);
 #endif
         }
 
 #if NET || NETCOREAPP || ((UNITY_EDITOR || UNITY_SERVER || !EXCLUDE_SERVER_CODES) && UNITY_STANDALONE)
+        /// <summary>
+        /// A queued login older than this is answered with an error instead of being checked: the
+        /// client stops waiting for its reply after 30 seconds.
+        /// </summary>
+        public const long LoginQueueTimeoutMilliseconds = 25000;
+
         private async UniTask ProcessLogin(
             RequestHandlerData handler,
             RequestUserLoginMessage request,
-            RequestProceedResultDelegate<ResponseUserLoginMessage> result)
+            RequestProceedResultDelegate<ResponseUserLoginMessage> result,
+            LoginFloodGuard.LoginTicket ticket)
         {
             activeLogins++;
 
@@ -103,12 +131,14 @@ namespace MultiplayerARPG.MMO
                 string accessToken = string.Empty;
                 if (string.IsNullOrEmpty(userId))
                 {
+                    FloodGuard.LoginFailed(ticket);
                     result.InvokeError(new ResponseUserLoginMessage()
                     {
                         message = UITextKeys.UI_ERROR_INVALID_USERNAME_OR_PASSWORD,
                     });
                     return;
                 }
+                FloodGuard.LoginPasswordAccepted(ticket);
                 // User already logged in
                 if (_userPeersByUserId.ContainsKey(userId) || await MapContainsUser(userId))
                 {
@@ -206,20 +236,36 @@ namespace MultiplayerARPG.MMO
             finally
             {
                 activeLogins--;
+                FloodGuard.EndLogin(ticket);
                 TryDequeue();
             }
         }
 
         private void TryDequeue()
         {
-            if (loginQueue.Count == 0)
-                return;
+            while (loginQueue.Count > 0)
+            {
+                if (activeLogins >= MaxConcurrentRequest)
+                    return;
 
-            if (activeLogins >= MaxConcurrentRequest)
+                var entry = loginQueue.Dequeue();
+                // Its connection closed while it waited. Nobody is there to answer, and the
+                // connection id may belong to another client by now.
+                if (!FloodGuard.IsStillConnected(entry.ticket))
+                    continue;
+                // It waited so long that the client is about to give up, or has
+                if (FloodGuard.Now - entry.ticket.startedAt > LoginQueueTimeoutMilliseconds)
+                {
+                    FloodGuard.EndLogin(entry.ticket);
+                    entry.result.InvokeError(new ResponseUserLoginMessage()
+                    {
+                        message = UITextKeys.UI_ERROR_SERVICE_NOT_AVAILABLE,
+                    });
+                    continue;
+                }
+                ProcessLogin(entry.handler, entry.request, entry.result, entry.ticket).Forget();
                 return;
-
-            var entry = loginQueue.Dequeue();
-            ProcessLogin(entry.handler, entry.request, entry.result).Forget();
+            }
         }
 
 #endif
@@ -239,6 +285,23 @@ namespace MultiplayerARPG.MMO
                 });
                 return;
             }
+            // Before anything is asked of the database
+            if (FloodGuard.TryBeginRegister(requestHandler.ConnectionId, out LoginFloodGuard.RegisterTicket registerTicket) != LoginFloodGuard.Verdict.Allowed)
+            {
+                result.InvokeError(new ResponseUserRegisterMessage()
+                {
+                    message = UITextKeys.UI_ERROR_TOO_MANY_REQUESTS,
+                });
+                return;
+            }
+            // The request holds one of its address's account slots. Every path below answers
+            // exactly once, so give the slot back there unless an account was made.
+            RequestProceedResultDelegate<ResponseUserRegisterMessage> answer = result;
+            result = (responseCode, response, extraResponseSerializer) =>
+            {
+                FloodGuard.EndRegister(registerTicket, responseCode == AckResponseCode.Success);
+                answer(responseCode, response, extraResponseSerializer);
+            };
             string username = request.username.Trim();
             string password = request.password.Trim();
             string email = request.email.Trim();

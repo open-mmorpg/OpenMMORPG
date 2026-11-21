@@ -728,6 +728,8 @@ namespace MultiplayerARPG
             Texts.Add(UITextKeys.UI_ERROR_CHARACTER_NOT_PLAYABLE.ToString(), "Character is not playable");
             Texts.Add(UITextKeys.UI_ERROR_USER_IS_ALREADY_ONLINE.ToString(), "User is already online");
             Texts.Add(UITextKeys.UI_ERROR_CHARACTER_IS_ALREADY_ONLINE.ToString(), "Character is already online");
+            // Open MMORPG: flood protection
+            Texts.Add(UITextKeys.UI_ERROR_TOO_MANY_REQUESTS.ToString(), "Too many attempts. Please wait a moment and try again.");
             // Recoil Yaw
             Texts.Add(UIFormatKeys.UI_FORMAT_RECOIL_YAW_MODIFIER.ToString(), "Recoil Yaw Modifier: {0}");
             Texts.Add(UIFormatKeys.UI_FORMAT_RECOIL_YAW_MODIFIER_RATE.ToString(), "% of Recoil Yaw Modifier: {0}%");
