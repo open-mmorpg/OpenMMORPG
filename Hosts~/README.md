@@ -73,8 +73,7 @@ The login server's flood limits (`loginMaxConnectionsPerAddress`, `loginFailures
 the same keys and arguments as a Unity server's; `0` turns a limit off. One key is the host's own:
 `maxCharactersPerAccount` (5), the number of characters an account may have, which a Unity server
 takes from the Game Instance's **Max Character Saves**. `loginMaxConnections` is how many clients
-can be on the login and character screens at once; a value below 50 in the file is ignored with a
-warning, because Unity builds used to write `4` there without using it.
+can be on the login and character screens at once.
 
 Unlike the Unity spawner, the .NET map spawner cannot fall back to every map in `GameInstance`,
 because it has no game data: list the map ids in `spawnMaps`.

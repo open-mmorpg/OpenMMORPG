@@ -695,54 +695,21 @@ namespace OpenMMORPG.Tests
             Assert.That(ReadLoginSetting(new[] { "-loginMaxQueue", "many" }, 500, 1000, out written), Is.EqualTo(500), "an argument that is no number is passed over");
         }
 
-        private static int ReadLoginMaxConnections(string[] args, int? configValue, out bool ignoredLeftover)
-        {
-            object[] parameters = { args, configValue, LoginNetworkManager.DefaultMaxConnections, false };
-            int value = (int)typeof(MMOServerInstance).GetMethod("ReadLoginMaxConnections", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic).Invoke(null, parameters);
-            ignoredLeftover = (bool)parameters[3];
-            return value;
-        }
-
         [Test]
-        public void AConnectionLimitAnOlderBuildLeftInTheConfigFileIsPassedOver()
+        public void StartingUpLeavesTheConfiguredConnectionLimitAlone()
         {
-            string[] none = { "-batchmode" };
-
-            // Older builds wrote the demo prefab's 4 into serverConfig.json and never applied it
-            Assert.That(ReadLoginMaxConnections(none, 4, out bool ignored), Is.EqualTo(LoginNetworkManager.DefaultMaxConnections), "or the upgraded server would take four players");
-            Assert.That(ignored, Is.True, "and the log says so");
-            Assert.That(ReadLoginMaxConnections(none, 49, out ignored), Is.EqualTo(LoginNetworkManager.DefaultMaxConnections));
-            Assert.That(ignored, Is.True);
-
-            Assert.That(ReadLoginMaxConnections(none, 50, out ignored), Is.EqualTo(50));
-            Assert.That(ignored, Is.False);
-            Assert.That(ReadLoginMaxConnections(none, 3000, out ignored), Is.EqualTo(3000));
-            Assert.That(ReadLoginMaxConnections(none, null, out ignored), Is.EqualTo(LoginNetworkManager.DefaultMaxConnections));
-            Assert.That(ignored, Is.False, "nothing to pass over");
-            Assert.That(ReadLoginMaxConnections(new[] { "-loginMaxConnections", "10" }, 4, out ignored), Is.EqualTo(10), "an argument is deliberate, however low");
-            Assert.That(ignored, Is.False);
-        }
-
-        [Test]
-        public void TheLoginServerOpensWithItsOwnConnectionLimit()
-        {
-            // The base class's field holds whatever the prefab was saved with, 4 in the demo's
-            _login.maxConnections = 4;
+            // What -loginMaxConnections, the config file or the prefab set, before the server starts
+            _login.maxConnections = 300;
             // Initialize also asks to hear when the game data has loaded; take that back afterwards
             System.Action onGameDataLoaded = (System.Action)System.Delegate.CreateDelegate(typeof(System.Action), _login, "GameInstance_OnGameDataLoadedEvent");
             try
             {
                 TestReflection.Invoke(_login, "Initialize");
 
-                Assert.That(_login.maxConnections, Is.EqualTo(LoginNetworkManager.DefaultMaxConnections));
-
-                _login.loginMaxConnections = 300;
-                TestReflection.Invoke(_login, "Initialize");
-                Assert.That(_login.maxConnections, Is.EqualTo(300), "and with the configured one when there is one");
+                Assert.That(_login.maxConnections, Is.EqualTo(300), "it used to be replaced with int.MaxValue here, so the setting never took effect");
             }
             finally
             {
-                GameInstance.OnGameDataLoadedEvent -= onGameDataLoaded;
                 GameInstance.OnGameDataLoadedEvent -= onGameDataLoaded;
             }
         }

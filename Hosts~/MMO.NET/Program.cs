@@ -238,18 +238,13 @@ if (ConfigReader.ReadArgs(args, ProcessArguments.ARG_LOGIN_PORT, out loginNetwor
 }
 serverConfig[ProcessArguments.CONFIG_LOGIN_PORT] = loginNetworkPort;
 
-// Login max connections: clients on the login and character screens, not players in the game
+// Login max connections
 int loginMaxConnections;
-if (!ConfigReader.ReadArgs(args, ProcessArguments.ARG_LOGIN_MAX_CONNECTIONS, out loginMaxConnections, loginNetworkManager.loginMaxConnections) &&
-    ConfigReader.ReadConfigs(serverConfig, ProcessArguments.CONFIG_LOGIN_MAX_CONNECTIONS, out loginMaxConnections, loginNetworkManager.loginMaxConnections) &&
-    loginMaxConnections < LoginNetworkManager.MinConfiguredMaxConnections)
+if (ConfigReader.ReadArgs(args, ProcessArguments.ARG_LOGIN_MAX_CONNECTIONS, out loginMaxConnections, loginNetworkManager.maxConnections) ||
+    ConfigReader.ReadConfigs(serverConfig, ProcessArguments.CONFIG_LOGIN_MAX_CONNECTIONS, out loginMaxConnections, loginNetworkManager.maxConnections))
 {
-    // Open MMORPG: Unity builds used to write this key without using it, usually as 4, and
-    // such a file would let four clients in. The argument is taken as given.
-    Logging.LogWarning($"Ignoring `{ProcessArguments.CONFIG_LOGIN_MAX_CONNECTIONS}` = {loginMaxConnections} from the server config: values below {LoginNetworkManager.MinConfiguredMaxConnections} are leftovers of builds that never applied this setting. Using {loginNetworkManager.loginMaxConnections}. Remove the key or raise it; to really go that low, pass {ProcessArguments.ARG_LOGIN_MAX_CONNECTIONS}.");
-    loginMaxConnections = loginNetworkManager.loginMaxConnections;
+    loginNetworkManager.maxConnections = loginMaxConnections;
 }
-loginNetworkManager.loginMaxConnections = loginNetworkManager.maxConnections = loginMaxConnections;
 serverConfig[ProcessArguments.CONFIG_LOGIN_MAX_CONNECTIONS] = loginMaxConnections;
 
 // Login max concurrent requests

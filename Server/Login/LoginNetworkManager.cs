@@ -33,18 +33,6 @@ namespace MultiplayerARPG.MMO
         [FormerlySerializedAs("machineAddress")]
 #endif
         public string loginServerAddress = "127.0.0.1";
-        /// <summary>
-        /// How many clients may be connected to the login server at once: players on the login and
-        /// character screens, not players in the game. `Initialize` copies it to `maxConnections`.
-        /// </summary>
-        public int loginMaxConnections = DefaultMaxConnections;
-        public const int DefaultMaxConnections = 2000;
-        /// <summary>
-        /// Builds before the flood protection wrote `loginMaxConnections` into serverConfig.json
-        /// without ever using it, usually as 4. A value below this in the file is taken as such a
-        /// leftover and ignored.
-        /// </summary>
-        public const int MinConfiguredMaxConnections = 50;
 
 #if NET || NETCOREAPP
         // A .NET host has no MMOServerInstance: it sets these itself. The login server runs in
@@ -184,7 +172,9 @@ namespace MultiplayerARPG.MMO
         protected virtual void Initialize()
         {
             useWebSocket = false;
-            maxConnections = loginMaxConnections;
+            // `maxConnections` stays as it was set: the prefab's Max Connections, or
+            // `loginMaxConnections` from the arguments or the config file. It is how many clients
+            // may be on the login and character screens at once, not how many may be in the game.
 #if NET || NETCOREAPP || ((UNITY_EDITOR || UNITY_SERVER || !EXCLUDE_SERVER_CODES) && UNITY_STANDALONE)
             ClusterClient = new ClusterClient(this);
             ClusterClient.onResponseAppServerRegister = OnResponseAppServerRegister;

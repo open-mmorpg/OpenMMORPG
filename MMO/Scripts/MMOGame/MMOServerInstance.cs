@@ -354,14 +354,16 @@ namespace MultiplayerARPG.MMO
                 }
                 currentServerConfig.centralPort = centralPort;
 
-                // Login max connections. The login server copies `loginMaxConnections` to its
-                // `maxConnections` when it starts.
-                int loginMaxConnections = ReadLoginMaxConnections(args, currentServerConfig.loginMaxConnections, LoginNetworkManager.loginMaxConnections, out bool ignoredLeftover);
-                if (ignoredLeftover)
+                // Login max connections
+                int loginMaxConnections;
+                if (ConfigReader.ReadArgs(args, ProcessArguments.ARG_LOGIN_MAX_CONNECTIONS, out loginMaxConnections, loginNetworkManager.maxConnections))
                 {
-                    Debug.LogWarning($"[MMOServerInstance] Ignoring `{ProcessArguments.CONFIG_LOGIN_MAX_CONNECTIONS}` = {currentServerConfig.loginMaxConnections.Value} from the server config: values below {LoginNetworkManager.MinConfiguredMaxConnections} are leftovers of builds that never applied this setting. Using {loginMaxConnections}. Remove the key or raise it; to really go that low, pass {ProcessArguments.ARG_LOGIN_MAX_CONNECTIONS}.");
+                    loginNetworkManager.maxConnections = loginMaxConnections;
                 }
-                LoginNetworkManager.loginMaxConnections = loginMaxConnections;
+                else if (currentServerConfig.loginMaxConnections.HasValue)
+                {
+                    loginNetworkManager.maxConnections = loginMaxConnections = currentServerConfig.loginMaxConnections.Value;
+                }
                 currentServerConfig.loginMaxConnections = loginMaxConnections;
 
                 // Login flood protection
@@ -944,26 +946,6 @@ namespace MultiplayerARPG.MMO
 
 #if (UNITY_EDITOR || UNITY_SERVER || !EXCLUDE_SERVER_CODES) && UNITY_STANDALONE
         #region Server functions
-
-        /// <summary>
-        /// The login server's connection limit: the argument wins, then the config file, then the
-        /// value on the prefab. Earlier builds wrote this key into the config file without using
-        /// it, usually as 4, so a value from the file below
-        /// <see cref="LoginNetworkManager.MinConfiguredMaxConnections"/> is taken as such a
-        /// leftover and passed over.
-        /// </summary>
-        private static int ReadLoginMaxConnections(string[] args, int? configValue, int prefabValue, out bool ignoredLeftover)
-        {
-            ignoredLeftover = false;
-            if (ConfigReader.ReadArgs(args, ProcessArguments.ARG_LOGIN_MAX_CONNECTIONS, out int argValue, prefabValue))
-                return argValue;
-            if (!configValue.HasValue)
-                return prefabValue;
-            if (configValue.Value >= LoginNetworkManager.MinConfiguredMaxConnections)
-                return configValue.Value;
-            ignoredLeftover = true;
-            return prefabValue;
-        }
 
         /// <summary>
         /// One number setting of the login server: the argument wins, then the config file, then

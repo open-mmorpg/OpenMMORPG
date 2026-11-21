@@ -89,7 +89,6 @@ namespace OpenMMORPG.Tests
             Assert.That(defaults.registerMaxAccountsPerAddress, Is.EqualTo(5));
             Assert.That(defaults.registerAccountWindowSeconds, Is.EqualTo(3600));
             Assert.That(defaults.loginExemptLoopback, Is.True);
-            Assert.That(LoginNetworkManager.DefaultMaxConnections, Is.EqualTo(2000));
         }
 
         [Test]
