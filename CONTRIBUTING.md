@@ -1,6 +1,6 @@
 # Contributing to Open MMORPG
 
-The master branch will always reflect the latest release, while development for the next release is queued in the develop branch. **You should create your own feature branch and pull request into develop.** All changes to develop and master (on release) branches require a pull request.
+`master` is the only long-lived branch: it holds everything merged for the next release, and each release is a `v*` tag on it. **Create your own feature branch off master and open a pull request into master.** Every change to master goes through a pull request, which needs an approving review and a passing Checks run.
 
 Have questions or want to discuss ideas before contributing? Join our [Discord community](https://discord.gg/Czgrg4YGgq) to connect with the team and other contributors.
 
@@ -9,9 +9,9 @@ Have questions or want to discuss ideas before contributing? Join our [Discord c
 
 2. Tag the issue with a label like scalability, security or stability.
 
-3. Under Development, click **Create a branch** and base it off of **develop**.
+3. Under Development, click **Create a branch** and base it off of **master**.
 
-4. When you are done working on the issue, open a Pull Request from your branch into **develop**.
+4. When you are done working on the issue, open a Pull Request from your branch into **master**.
 
 ### Tests
 
@@ -71,6 +71,6 @@ Asset Store review requires every type to be in a namespace. Upstream Core decla
 
 ### Releasing
 
-1. Merge develop into master, then tag the release from an up-to-date master with `make -C Tools~ release patch` (or `minor`, `major`), which checks the kit, writes the annotated tag with your changelog and pushes it. See [Tools~/README.md](Tools~/README.md#cutting-a-release).
+1. When master holds everything the release should contain, tag it from an up-to-date master with `make -C Tools~ release patch` (or `minor`, `major`), which checks the kit, writes the annotated tag with your changelog and pushes it. See [Tools~/README.md](Tools~/README.md#cutting-a-release).
 2. Pushing the tag runs the [Asset Store package workflow](.github/workflows/asset-store-package.yml), which builds `OpenMMORPG.unitypackage` and attaches it to a GitHub release. Upload that archive to the Asset Store with Unity's Asset Store Tools. See [Tools~/README.md](Tools~/README.md) for details, including rebuilding `OpenMMORPG_Settings.unitypackage` when the project settings change.
 3. Set the same version in **Project Settings > Player > Version**, which is what a build reports as `Application.version`.
