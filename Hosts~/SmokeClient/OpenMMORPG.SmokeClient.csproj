@@ -1,0 +1,51 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Smoke test for a running login server: the kit's own LoginNetworkManager used as a client.
+       Same sources as ../MMO.NET, without that host's Program.cs. -->
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <AssemblyName>OpenMMORPG.SmokeClient</AssemblyName>
+    <MmoHostDir>$(MSBuildThisFileDirectory)..\MMO.NET\</MmoHostDir>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="$(KitDir)Server\**\*.cs" Link="Kit\Server\%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="$(KitDir)Database\**\*.cs" Link="Kit\Database\%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="$(KitDir)SharedData\**\*.cs" Link="Kit\SharedData\%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="$(KitDir)ThirdParty\DevExtension\**\*.cs" Link="Kit\DevExtension\%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="$(HostsThirdPartyDir)LiteNetLibManager\**\*.cs" Link="ThirdParty\LiteNetLibManager\%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="$(HostsThirdPartyDir)RestClient\**\*.cs" Link="ThirdParty\RestClient\%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="$(MmoHostDir)DataTypes\**\*.cs;$(MmoHostDir)DatabaseManager\**\*.cs;$(MmoHostDir)CentralServer\**\*.cs" Link="MMO.NET\%(RecursiveDir)%(Filename)%(Extension)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ConcurrentHashSet" Version="1.3.0" />
+    <PackageReference Include="Fleck" Version="1.2.0" />
+    <PackageReference Include="JetBrains.Annotations" Version="2025.2.2" />
+    <PackageReference Include="LiteNetLib" Version="2.1.4" />
+    <PackageReference Include="MessagePack" Version="3.1.12" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.15" />
+    <!-- Pinned above what Microsoft.Data.Sqlite asks for, to clear a NuGet audit advisory on
+         the SQLite native library -->
+    <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="2.1.14" />
+    <PackageReference Include="MySqlConnector" Version="2.6.2" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="Npgsql" Version="9.0.3" />
+    <PackageReference Include="StackExchange.Redis" Version="2.9.11" />
+    <PackageReference Include="UniTask" Version="2.5.10" />
+    <PackageReference Include="ZLogger" Version="1.7.1" />
+    <PackageReference Include="ZString" Version="2.6.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- The character the smoke test creates is read from the host's own creation data -->
+    <None Include="$(MSBuildThisFileDirectory)..\Config\characterCreationData.json" Link="Config\characterCreationData.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>

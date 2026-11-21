@@ -219,6 +219,12 @@ namespace MultiplayerARPG.MMO
                 await _characterSaveScheduler.FlushAllAsync();
         }
 
+        /// <summary>Character saves the scheduler still holds: waiting to be written, or being written now.</summary>
+        public int PendingCharacterSaveCount
+        {
+            get { return _characterSaveScheduler != null ? _characterSaveScheduler.PendingCount : 0; }
+        }
+
         public bool TryGetCharactersByUserIdFromCache(string userId, out List<PlayerCharacterData> characters)
         {
             if (_charactersByUserIdCache.TryGetValue(userId, out characters))

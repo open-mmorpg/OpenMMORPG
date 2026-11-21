@@ -1,0 +1,69 @@
+{
+  "MaxPartyMember": 8,
+  "PartyMemberCanInvite": false,
+  "PartyMemberCanKick": false,
+  "PartyInvitationTimeout": 10.0,
+  "MaxGuildMember": 50,
+  "MinGuildNameLength": 2,
+  "MaxGuildNameLength": 16,
+  "MinGuildRoleNameLength": 2,
+  "MaxGuildRoleNameLength": 16,
+  "MaxGuildMessageLength": 140,
+  "MaxGuildMessage2Length": 140,
+  "GuildMemberRoles": [
+    {
+      "roleName": "Master",
+      "canInvite": true,
+      "canKick": true,
+      "canUseStorage": true,
+      "shareExpPercentage": 0
+    },
+    {
+      "roleName": "Member 1",
+      "canInvite": false,
+      "canKick": false,
+      "canUseStorage": false,
+      "shareExpPercentage": 0
+    },
+    {
+      "roleName": "Member 2",
+      "canInvite": false,
+      "canKick": false,
+      "canUseStorage": false,
+      "shareExpPercentage": 0
+    },
+    {
+      "roleName": "Member 3",
+      "canInvite": false,
+      "canKick": false,
+      "canUseStorage": false,
+      "shareExpPercentage": 0
+    },
+    {
+      "roleName": "Member 4",
+      "canInvite": false,
+      "canKick": false,
+      "canUseStorage": false,
+      "shareExpPercentage": 0
+    },
+    {
+      "roleName": "Member 5",
+      "canInvite": false,
+      "canKick": false,
+      "canUseStorage": false,
+      "shareExpPercentage": 0
+    }
+  ],
+  "MaxShareExpPercentage": 20,
+  "CreateGuildRequireItems": {},
+  "IndexedCreateGuildRequireCurrencies": {
+    "OccupiedMask": 0,
+    "IsEmpty": true
+  },
+  "CreateGuildRequiredGold": 1000,
+  "CreateGuildRequiredCash": 0,
+  "GuildExpTable": null,
+  "GuildInvitationTimeout": 10.0,
+  "name": "SocialSystemSetting",
+  "hideFlags": 0
+}

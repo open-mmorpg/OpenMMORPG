@@ -1,0 +1,12 @@
+# Build output
+bin/
+obj/
+*.user
+.vs/
+.idea/
+
+# What the hosts write while running
+*.sqlite3
+*.sqlite3-shm
+*.sqlite3-wal
+*.log
