@@ -411,5 +411,9 @@ namespace MultiplayerARPG
         UI_ERROR_CHARACTER_NOT_PLAYABLE,
         UI_ERROR_USER_IS_ALREADY_ONLINE,
         UI_ERROR_CHARACTER_IS_ALREADY_ONLINE,
+        // Open MMORPG: keys of our own carry explicit values from 10000, so keys added upstream
+        // above this line never move them.
+        // Flood protection
+        UI_ERROR_TOO_MANY_REQUESTS = 10000,
     }
 }

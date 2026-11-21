@@ -13,6 +13,39 @@ namespace MultiplayerARPG.MMO
         public const string ARG_LOGIN_MAX_CONNECTIONS = "-" + CONFIG_LOGIN_MAX_CONNECTIONS;
         public const string CONFIG_MAX_CONCURRENT_REQUEST = "maxConcurrentRequest";
         public const string ARGG_MAX_CONCURRENT_REQUEST = "-" + CONFIG_MAX_CONCURRENT_REQUEST;
+        // Login server flood protection (0 turns a limit off)
+        public const string CONFIG_LOGIN_MAX_CONNECTIONS_PER_ADDRESS = "loginMaxConnectionsPerAddress";
+        public const string ARG_LOGIN_MAX_CONNECTIONS_PER_ADDRESS = "-" + CONFIG_LOGIN_MAX_CONNECTIONS_PER_ADDRESS;
+        public const string CONFIG_LOGIN_MAX_REQUESTS_PER_CONNECTION = "loginMaxRequestsPerConnection";
+        public const string ARG_LOGIN_MAX_REQUESTS_PER_CONNECTION = "-" + CONFIG_LOGIN_MAX_REQUESTS_PER_CONNECTION;
+        public const string CONFIG_LOGIN_REQUEST_WINDOW_SECONDS = "loginRequestWindowSeconds";
+        public const string ARG_LOGIN_REQUEST_WINDOW_SECONDS = "-" + CONFIG_LOGIN_REQUEST_WINDOW_SECONDS;
+        public const string CONFIG_LOGIN_MAX_ATTEMPTS_PER_ADDRESS = "loginMaxAttemptsPerAddress";
+        public const string ARG_LOGIN_MAX_ATTEMPTS_PER_ADDRESS = "-" + CONFIG_LOGIN_MAX_ATTEMPTS_PER_ADDRESS;
+        public const string CONFIG_LOGIN_ATTEMPT_WINDOW_SECONDS = "loginAttemptWindowSeconds";
+        public const string ARG_LOGIN_ATTEMPT_WINDOW_SECONDS = "-" + CONFIG_LOGIN_ATTEMPT_WINDOW_SECONDS;
+        public const string CONFIG_LOGIN_FAILURES_PER_ADDRESS = "loginFailuresPerAddress";
+        public const string ARG_LOGIN_FAILURES_PER_ADDRESS = "-" + CONFIG_LOGIN_FAILURES_PER_ADDRESS;
+        public const string CONFIG_LOGIN_FAILURES_PER_USERNAME = "loginFailuresPerUsername";
+        public const string ARG_LOGIN_FAILURES_PER_USERNAME = "-" + CONFIG_LOGIN_FAILURES_PER_USERNAME;
+        public const string CONFIG_LOGIN_FAILURE_WINDOW_SECONDS = "loginFailureWindowSeconds";
+        public const string ARG_LOGIN_FAILURE_WINDOW_SECONDS = "-" + CONFIG_LOGIN_FAILURE_WINDOW_SECONDS;
+        public const string CONFIG_LOGIN_BACKOFF_SECONDS = "loginBackoffSeconds";
+        public const string ARG_LOGIN_BACKOFF_SECONDS = "-" + CONFIG_LOGIN_BACKOFF_SECONDS;
+        public const string CONFIG_LOGIN_BACKOFF_MAX_SECONDS = "loginBackoffMaxSeconds";
+        public const string ARG_LOGIN_BACKOFF_MAX_SECONDS = "-" + CONFIG_LOGIN_BACKOFF_MAX_SECONDS;
+        public const string CONFIG_LOGIN_MAX_QUEUE = "loginMaxQueue";
+        public const string ARG_LOGIN_MAX_QUEUE = "-" + CONFIG_LOGIN_MAX_QUEUE;
+        public const string CONFIG_REGISTER_MAX_ATTEMPTS_PER_ADDRESS = "registerMaxAttemptsPerAddress";
+        public const string ARG_REGISTER_MAX_ATTEMPTS_PER_ADDRESS = "-" + CONFIG_REGISTER_MAX_ATTEMPTS_PER_ADDRESS;
+        public const string CONFIG_REGISTER_ATTEMPT_WINDOW_SECONDS = "registerAttemptWindowSeconds";
+        public const string ARG_REGISTER_ATTEMPT_WINDOW_SECONDS = "-" + CONFIG_REGISTER_ATTEMPT_WINDOW_SECONDS;
+        public const string CONFIG_REGISTER_MAX_ACCOUNTS_PER_ADDRESS = "registerMaxAccountsPerAddress";
+        public const string ARG_REGISTER_MAX_ACCOUNTS_PER_ADDRESS = "-" + CONFIG_REGISTER_MAX_ACCOUNTS_PER_ADDRESS;
+        public const string CONFIG_REGISTER_ACCOUNT_WINDOW_SECONDS = "registerAccountWindowSeconds";
+        public const string ARG_REGISTER_ACCOUNT_WINDOW_SECONDS = "-" + CONFIG_REGISTER_ACCOUNT_WINDOW_SECONDS;
+        public const string CONFIG_LOGIN_EXEMPT_LOOPBACK = "loginExemptLoopback";
+        public const string ARG_LOGIN_EXEMPT_LOOPBACK = "-" + CONFIG_LOGIN_EXEMPT_LOOPBACK;
 
         //Channels
         public const string CONFIG_DEFAULT_CHANNEL_MAX_CONNECTIONS = "defaultChannelMaxConnections";

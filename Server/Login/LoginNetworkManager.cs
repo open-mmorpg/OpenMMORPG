@@ -33,6 +33,18 @@ namespace MultiplayerARPG.MMO
         [FormerlySerializedAs("machineAddress")]
 #endif
         public string loginServerAddress = "127.0.0.1";
+        /// <summary>
+        /// How many clients may be connected to the login server at once: players on the login and
+        /// character screens, not players in the game. `Initialize` copies it to `maxConnections`.
+        /// </summary>
+        public int loginMaxConnections = DefaultMaxConnections;
+        public const int DefaultMaxConnections = 2000;
+        /// <summary>
+        /// Builds before the flood protection wrote `loginMaxConnections` into serverConfig.json
+        /// without ever using it, usually as 4. A value below this in the file is taken as such a
+        /// leftover and ignored.
+        /// </summary>
+        public const int MinConfiguredMaxConnections = 50;
 
 #if NET || NETCOREAPP
         // A .NET host has no MMOServerInstance: it sets these itself. The login server runs in
@@ -112,6 +124,34 @@ namespace MultiplayerARPG.MMO
         public int maxCharacterNameLength = 16;
         public bool requireEmail = false;
         public bool requireEmailVerification = false;
+        /// <summary>
+        /// How many characters one account may have, 0 for no limit. In Unity it follows
+        /// `GameInstance.maxCharacterSaves`, which is also what the client's character list goes by.
+        /// </summary>
+        public int maxCharactersPerAccount = 5;
+
+#if (UNITY_EDITOR || UNITY_SERVER || !EXCLUDE_SERVER_CODES) && UNITY_STANDALONE
+        [Header("Flood Protection")]
+#endif
+        public LoginFloodProtectionSettings floodProtection = new LoginFloodProtectionSettings();
+
+#if NET || NETCOREAPP || ((UNITY_EDITOR || UNITY_SERVER || !EXCLUDE_SERVER_CODES) && UNITY_STANDALONE)
+        private LoginFloodGuard _floodGuard;
+        /// <summary>Applies the `floodProtection` limits. Made on first use and thrown away when the server stops.</summary>
+        public LoginFloodGuard FloodGuard
+        {
+            get
+            {
+                if (_floodGuard == null)
+                    _floodGuard = new LoginFloodGuard(floodProtection);
+                return _floodGuard;
+            }
+            set { _floodGuard = value; }
+        }
+        private readonly int[] _floodRefusals = new int[LoginFloodGuard.VerdictCount];
+        private long _floodReportedAt;
+        private const long FloodReportIntervalMilliseconds = 60000;
+#endif
 
         public System.Action onClientConnected;
         public System.Action<DisconnectReason, SocketError, UITextKeys> onClientDisconnected;
@@ -144,7 +184,7 @@ namespace MultiplayerARPG.MMO
         protected virtual void Initialize()
         {
             useWebSocket = false;
-            maxConnections = int.MaxValue;
+            maxConnections = loginMaxConnections;
 #if NET || NETCOREAPP || ((UNITY_EDITOR || UNITY_SERVER || !EXCLUDE_SERVER_CODES) && UNITY_STANDALONE)
             ClusterClient = new ClusterClient(this);
             ClusterClient.onResponseAppServerRegister = OnResponseAppServerRegister;
@@ -169,6 +209,7 @@ namespace MultiplayerARPG.MMO
             GameInstance.OnGameDataLoadedEvent -= GameInstance_OnGameDataLoadedEvent;
             minCharacterNameLength = GameInstance.Singleton.minCharacterNameLength;
             maxCharacterNameLength = GameInstance.Singleton.maxCharacterNameLength;
+            maxCharactersPerAccount = GameInstance.Singleton.maxCharacterSaves;
         }
 #endif
 
@@ -177,15 +218,16 @@ namespace MultiplayerARPG.MMO
         {
             EnableRequestResponse(MMOMessageTypes.Request, MMOMessageTypes.Response);
             // Requests
-            RegisterRequestToServer<RequestUserLoginMessage, ResponseUserLoginMessage>(MMORequestTypes.UserLogin, HandleRequestUserLogin);
-            RegisterRequestToServer<RequestUserRegisterMessage, ResponseUserRegisterMessage>(MMORequestTypes.UserRegister, HandleRequestUserRegister);
-            RegisterRequestToServer<EmptyMessage, EmptyMessage>(MMORequestTypes.UserLogout, HandleRequestUserLogout);
-            RegisterRequestToServer<EmptyMessage, ResponseCharactersMessage>(MMORequestTypes.Characters, HandleRequestCharacters);
-            RegisterRequestToServer<RequestCreateCharacterMessage, ResponseCreateCharacterMessage>(MMORequestTypes.CreateCharacter, HandleRequestCreateCharacter);
-            RegisterRequestToServer<RequestDeleteCharacterMessage, ResponseDeleteCharacterMessage>(MMORequestTypes.DeleteCharacter, HandleRequestDeleteCharacter);
-            RegisterRequestToServer<RequestSelectCharacterMessage, ResponseSelectCharacterMessage>(MMORequestTypes.SelectCharacter, HandleRequestSelectCharacter);
-            RegisterRequestToServer<RequestValidateAccessTokenMessage, ResponseValidateAccessTokenMessage>(MMORequestTypes.ValidateAccessToken, HandleRequestValidateAccessToken);
-            RegisterRequestToServer<EmptyMessage, ResponseChannelsMessage>(MMORequestTypes.Channels, HandleRequestChannels);
+            // Every handler goes through WithRequestLimit, which holds a connection to its request budget
+            RegisterRequestToServer(MMORequestTypes.UserLogin, WithRequestLimit<RequestUserLoginMessage, ResponseUserLoginMessage>(HandleRequestUserLogin, () => new ResponseUserLoginMessage() { message = UITextKeys.UI_ERROR_TOO_MANY_REQUESTS }));
+            RegisterRequestToServer(MMORequestTypes.UserRegister, WithRequestLimit<RequestUserRegisterMessage, ResponseUserRegisterMessage>(HandleRequestUserRegister, () => new ResponseUserRegisterMessage() { message = UITextKeys.UI_ERROR_TOO_MANY_REQUESTS }));
+            RegisterRequestToServer(MMORequestTypes.UserLogout, WithRequestLimit<EmptyMessage, EmptyMessage>(HandleRequestUserLogout, () => EmptyMessage.Value));
+            RegisterRequestToServer(MMORequestTypes.Characters, WithRequestLimit<EmptyMessage, ResponseCharactersMessage>(HandleRequestCharacters, () => new ResponseCharactersMessage() { message = UITextKeys.UI_ERROR_TOO_MANY_REQUESTS }));
+            RegisterRequestToServer(MMORequestTypes.CreateCharacter, WithRequestLimit<RequestCreateCharacterMessage, ResponseCreateCharacterMessage>(HandleRequestCreateCharacter, () => new ResponseCreateCharacterMessage() { message = UITextKeys.UI_ERROR_TOO_MANY_REQUESTS }));
+            RegisterRequestToServer(MMORequestTypes.DeleteCharacter, WithRequestLimit<RequestDeleteCharacterMessage, ResponseDeleteCharacterMessage>(HandleRequestDeleteCharacter, () => new ResponseDeleteCharacterMessage() { message = UITextKeys.UI_ERROR_TOO_MANY_REQUESTS }));
+            RegisterRequestToServer(MMORequestTypes.SelectCharacter, WithRequestLimit<RequestSelectCharacterMessage, ResponseSelectCharacterMessage>(HandleRequestSelectCharacter, () => new ResponseSelectCharacterMessage() { message = UITextKeys.UI_ERROR_TOO_MANY_REQUESTS }));
+            RegisterRequestToServer(MMORequestTypes.ValidateAccessToken, WithRequestLimit<RequestValidateAccessTokenMessage, ResponseValidateAccessTokenMessage>(HandleRequestValidateAccessToken, () => new ResponseValidateAccessTokenMessage() { message = UITextKeys.UI_ERROR_TOO_MANY_REQUESTS }));
+            RegisterRequestToServer(MMORequestTypes.Channels, WithRequestLimit<EmptyMessage, ResponseChannelsMessage>(HandleRequestChannels, () => new ResponseChannelsMessage() { message = UITextKeys.UI_ERROR_TOO_MANY_REQUESTS }));
 
             // Keeping `RegisterClientMessages` and `RegisterServerMessages` for backward compatibility, can use any of below dev extension methods
             this.InvokeInstanceDevExtMethods("RegisterClientMessages");
@@ -222,6 +264,65 @@ namespace MultiplayerARPG.MMO
         }
 #endif
 
+        /// <summary>
+        /// Wraps a request handler so a connection that has used up its request budget is answered
+        /// with <paramref name="refusal"/> instead of reaching the handler.
+        /// </summary>
+        protected RequestDelegate<TRequest, TResponse> WithRequestLimit<TRequest, TResponse>(RequestDelegate<TRequest, TResponse> handler, System.Func<TResponse> refusal)
+            where TRequest : INetSerializable, new()
+            where TResponse : INetSerializable, new()
+        {
+#if NET || NETCOREAPP || ((UNITY_EDITOR || UNITY_SERVER || !EXCLUDE_SERVER_CODES) && UNITY_STANDALONE)
+            return (requestHandler, request, result) =>
+            {
+                if (FloodGuard.AllowRequest(requestHandler.ConnectionId) != LoginFloodGuard.Verdict.Allowed)
+                {
+                    result.InvokeError(refusal());
+                    return default;
+                }
+                return handler(requestHandler, request, result);
+            };
+#else
+            return handler;
+#endif
+        }
+
+#if NET || NETCOREAPP || ((UNITY_EDITOR || UNITY_SERVER || !EXCLUDE_SERVER_CODES) && UNITY_STANDALONE)
+        /// <summary>
+        /// The address a client connected from, or null when the transport cannot tell (the
+        /// WebSocket transport keeps it to itself). The flood limits then count each such
+        /// connection on its own.
+        /// </summary>
+        protected virtual System.Net.IPAddress GetRemoteAddress(long connectionId)
+        {
+            LiteNetLibTransport transport = ServerTransport as LiteNetLibTransport;
+            if (transport == null || transport.Server == null)
+                return null;
+            System.Net.IPEndPoint peer = transport.Server.GetPeerById((int)connectionId);
+            return peer == null ? null : peer.Address;
+        }
+
+        /// <summary>Once a minute, one log line saying how many requests the flood limits turned away.</summary>
+        private void ReportFloodRefusals()
+        {
+            if (_floodGuard == null)
+                return;
+            long now = _floodGuard.Now;
+            if (now - _floodReportedAt < FloodReportIntervalMilliseconds)
+                return;
+            _floodReportedAt = now;
+            if (!_floodGuard.TakeRefusals(_floodRefusals) || !LogWarn)
+                return;
+            System.Text.StringBuilder text = new System.Text.StringBuilder("Flood protection refused in the last minute:");
+            for (int i = 0; i < _floodRefusals.Length; ++i)
+            {
+                if (_floodRefusals[i] > 0)
+                    text.Append(' ').Append((LoginFloodGuard.Verdict)i).Append(' ').Append(_floodRefusals[i]);
+            }
+            Logging.LogWarning(LogTag, text.ToString());
+        }
+#endif
+
         public async void KickClient(long connectionId, byte[] data)
         {
             if (!IsServer)
@@ -244,6 +345,7 @@ namespace MultiplayerARPG.MMO
             _userPeersByUserId.Clear();
             _mapServerConnectionIdsBySceneName.Clear();
             _instanceMapServerConnectionIdsByInstanceId.Clear();
+            _floodGuard = null;
 #endif
         }
 
@@ -289,6 +391,7 @@ namespace MultiplayerARPG.MMO
             if (IsServer)
             {
                 ClusterClient.Update();
+                ReportFloodRefusals();
                 //Leave this to add LoginNetworkManager main thread actions in future
                 if (ClusterClient.IsAppRegistered)
                 {
@@ -336,9 +439,22 @@ namespace MultiplayerARPG.MMO
                 onClientDisconnected.Invoke(reason, socketError, message);
         }
 
+        public override void OnPeerConnected(long connectionId)
+        {
+            base.OnPeerConnected(connectionId);
+#if NET || NETCOREAPP || ((UNITY_EDITOR || UNITY_SERVER || !EXCLUDE_SERVER_CODES) && UNITY_STANDALONE)
+            // Its address already has its share of connections: drop it
+            if (!FloodGuard.ConnectionOpened(connectionId, GetRemoteAddress(connectionId)))
+                ServerTransport.ServerDisconnect(connectionId);
+#endif
+        }
+
         public override void OnPeerDisconnected(long connectionId, DisconnectReason reason, SocketError socketError)
         {
             RemoveUserPeerByConnectionId(connectionId, out _);
+#if NET || NETCOREAPP || ((UNITY_EDITOR || UNITY_SERVER || !EXCLUDE_SERVER_CODES) && UNITY_STANDALONE)
+            FloodGuard.ConnectionClosed(connectionId);
+#endif
         }
 
         public void KickClient(long connectionId, UITextKeys message)

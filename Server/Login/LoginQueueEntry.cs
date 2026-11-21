@@ -9,6 +9,7 @@ namespace MultiplayerARPG.MMO
         public RequestHandlerData handler;
         public RequestUserLoginMessage request;
         public RequestProceedResultDelegate<ResponseUserLoginMessage> result;
+        public LoginFloodGuard.LoginTicket ticket;
     }
 #endif
 }
