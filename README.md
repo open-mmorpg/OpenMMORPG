@@ -118,6 +118,8 @@ The kit lives directly in your project's `Assets` folder, so you can work on it 
 git clone https://github.com/open-mmorpg/OpenMMORPG.git Assets/OpenMMORPG
 ```
 
+The clone checks out `master`, which carries everything merged since the last release. To match a released version instead, check out its tag (`git checkout v1.4.2`, say).
+
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the branch model and how the kit is assembled from its source repositories.
 
 ## License
