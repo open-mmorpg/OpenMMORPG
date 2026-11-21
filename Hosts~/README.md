@@ -174,10 +174,18 @@ It exits 0 only if every step passes. The character it creates is the first one 
 `Config/characterCreationData.json`, which is built beside the client, so it follows the
 data you export. A third argument names another file.
 
+A second mode checks the login server's connection limit. Against a login server started with
+`-loginMaxConnections 2`, this opens four connections and passes only if two are let in, two are
+refused, and a newcomer gets in once one of the two has left:
+
+```
+dotnet run --project SmokeClient -- connections 127.0.0.1 7500 4 2
+```
+
 `Tools~/hosts_smoke.py` does the whole round on its own: it starts the built hosts on a fresh
 database, runs the smoke client, stops the hosts and checks they stopped cleanly, once with the
-LiteNetLib database server and once with the web API. The repository's checks workflow builds the
-hosts and runs it on every push.
+LiteNetLib database server, once with the web API, and once for the connection limit. The
+repository's checks workflow builds the hosts and runs it on every push.
 
 ```
 dotnet build OpenMMORPG.Hosts.sln -c Release
