@@ -238,13 +238,18 @@ if (ConfigReader.ReadArgs(args, ProcessArguments.ARG_LOGIN_PORT, out loginNetwor
 }
 serverConfig[ProcessArguments.CONFIG_LOGIN_PORT] = loginNetworkPort;
 
-// Login max connections
+// Login max connections: clients on the login and character screens, not players in the game
 int loginMaxConnections;
-if (ConfigReader.ReadArgs(args, ProcessArguments.ARG_LOGIN_MAX_CONNECTIONS, out loginMaxConnections, loginNetworkManager.maxConnections) ||
-    ConfigReader.ReadConfigs(serverConfig, ProcessArguments.CONFIG_LOGIN_MAX_CONNECTIONS, out loginMaxConnections, loginNetworkManager.maxConnections))
+if (!ConfigReader.ReadArgs(args, ProcessArguments.ARG_LOGIN_MAX_CONNECTIONS, out loginMaxConnections, loginNetworkManager.loginMaxConnections) &&
+    ConfigReader.ReadConfigs(serverConfig, ProcessArguments.CONFIG_LOGIN_MAX_CONNECTIONS, out loginMaxConnections, loginNetworkManager.loginMaxConnections) &&
+    loginMaxConnections < LoginNetworkManager.MinConfiguredMaxConnections)
 {
-    loginNetworkManager.maxConnections = loginMaxConnections;
+    // Open MMORPG: Unity builds used to write this key without using it, usually as 4, and
+    // such a file would let four clients in. The argument is taken as given.
+    Logging.LogWarning($"Ignoring `{ProcessArguments.CONFIG_LOGIN_MAX_CONNECTIONS}` = {loginMaxConnections} from the server config: values below {LoginNetworkManager.MinConfiguredMaxConnections} are leftovers of builds that never applied this setting. Using {loginNetworkManager.loginMaxConnections}. Remove the key or raise it; to really go that low, pass {ProcessArguments.ARG_LOGIN_MAX_CONNECTIONS}.");
+    loginMaxConnections = loginNetworkManager.loginMaxConnections;
 }
+loginNetworkManager.loginMaxConnections = loginNetworkManager.maxConnections = loginMaxConnections;
 serverConfig[ProcessArguments.CONFIG_LOGIN_MAX_CONNECTIONS] = loginMaxConnections;
 
 // Login max concurrent requests
@@ -255,6 +260,46 @@ if (ConfigReader.ReadArgs(args, ProcessArguments.ARGG_MAX_CONCURRENT_REQUEST, ou
     loginNetworkManager.MaxConcurrentRequest = loginMaxConcurrentRequest;
 }
 serverConfig[ProcessArguments.CONFIG_MAX_CONCURRENT_REQUEST] = loginMaxConcurrentRequest;
+
+// Open MMORPG: the login server's flood limits (0 turns a limit off). Argument, then
+// environment variable or config file, then the default.
+LoginFloodProtectionSettings floodProtection = loginNetworkManager.floodProtection;
+void ReadLoginSetting(string configName, ref int value)
+{
+    int read;
+    if (ConfigReader.ReadArgs(args, "-" + configName, out read, value) ||
+        ConfigReader.ReadConfigs(serverConfig, configName, out read, value))
+    {
+        value = read;
+    }
+    serverConfig[configName] = value;
+}
+ReadLoginSetting(ProcessArguments.CONFIG_LOGIN_MAX_CONNECTIONS_PER_ADDRESS, ref floodProtection.loginMaxConnectionsPerAddress);
+ReadLoginSetting(ProcessArguments.CONFIG_LOGIN_MAX_REQUESTS_PER_CONNECTION, ref floodProtection.loginMaxRequestsPerConnection);
+ReadLoginSetting(ProcessArguments.CONFIG_LOGIN_REQUEST_WINDOW_SECONDS, ref floodProtection.loginRequestWindowSeconds);
+ReadLoginSetting(ProcessArguments.CONFIG_LOGIN_MAX_ATTEMPTS_PER_ADDRESS, ref floodProtection.loginMaxAttemptsPerAddress);
+ReadLoginSetting(ProcessArguments.CONFIG_LOGIN_ATTEMPT_WINDOW_SECONDS, ref floodProtection.loginAttemptWindowSeconds);
+ReadLoginSetting(ProcessArguments.CONFIG_LOGIN_FAILURES_PER_ADDRESS, ref floodProtection.loginFailuresPerAddress);
+ReadLoginSetting(ProcessArguments.CONFIG_LOGIN_FAILURES_PER_USERNAME, ref floodProtection.loginFailuresPerUsername);
+ReadLoginSetting(ProcessArguments.CONFIG_LOGIN_FAILURE_WINDOW_SECONDS, ref floodProtection.loginFailureWindowSeconds);
+ReadLoginSetting(ProcessArguments.CONFIG_LOGIN_BACKOFF_SECONDS, ref floodProtection.loginBackoffSeconds);
+ReadLoginSetting(ProcessArguments.CONFIG_LOGIN_BACKOFF_MAX_SECONDS, ref floodProtection.loginBackoffMaxSeconds);
+ReadLoginSetting(ProcessArguments.CONFIG_LOGIN_MAX_QUEUE, ref floodProtection.loginMaxQueue);
+ReadLoginSetting(ProcessArguments.CONFIG_REGISTER_MAX_ATTEMPTS_PER_ADDRESS, ref floodProtection.registerMaxAttemptsPerAddress);
+ReadLoginSetting(ProcessArguments.CONFIG_REGISTER_ATTEMPT_WINDOW_SECONDS, ref floodProtection.registerAttemptWindowSeconds);
+ReadLoginSetting(ProcessArguments.CONFIG_REGISTER_MAX_ACCOUNTS_PER_ADDRESS, ref floodProtection.registerMaxAccountsPerAddress);
+ReadLoginSetting(ProcessArguments.CONFIG_REGISTER_ACCOUNT_WINDOW_SECONDS, ref floodProtection.registerAccountWindowSeconds);
+bool loginExemptLoopback;
+if (ConfigReader.ReadArgs(args, ProcessArguments.ARG_LOGIN_EXEMPT_LOOPBACK, out loginExemptLoopback, floodProtection.loginExemptLoopback) ||
+    ConfigReader.ReadConfigs(serverConfig, ProcessArguments.CONFIG_LOGIN_EXEMPT_LOOPBACK, out loginExemptLoopback, floodProtection.loginExemptLoopback))
+{
+    floodProtection.loginExemptLoopback = loginExemptLoopback;
+}
+serverConfig[ProcessArguments.CONFIG_LOGIN_EXEMPT_LOOPBACK] = floodProtection.loginExemptLoopback;
+
+// Characters one account may have, 0 for no limit. A Unity server takes it from the Game
+// Instance's Max Character Saves; here it is a setting.
+ReadLoginSetting(ProcessArguments.CONFIG_MAX_CHARACTERS_PER_ACCOUNT, ref loginNetworkManager.maxCharactersPerAccount);
 
 // Central map spawn timeout (milliseconds)
 int mapSpawnMillisecondsTimeout;

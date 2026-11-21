@@ -68,6 +68,14 @@ command-line arguments are the same as a Unity server's, for example `-loginPort
 the file. `databaseOptionIndex` here is 0 = SQLite, 1 = MySQL, 2 = PostgreSQL, set up in the matching
 `Config/*Config.json`. In Unity it is the position in the prefab's database options list instead.
 
+The login server's flood limits (`loginMaxConnectionsPerAddress`, `loginFailuresPerUsername`,
+`registerMaxAccountsPerAddress` and the rest, listed with their defaults in `serverConfig.json`) are
+the same keys and arguments as a Unity server's; `0` turns a limit off. One key is the host's own:
+`maxCharactersPerAccount` (5), the number of characters an account may have, which a Unity server
+takes from the Game Instance's **Max Character Saves**. `loginMaxConnections` is how many clients
+can be on the login and character screens at once; a value below 50 in the file is ignored with a
+warning, because Unity builds used to write `4` there without using it.
+
 Unlike the Unity spawner, the .NET map spawner cannot fall back to every map in `GameInstance`,
 because it has no game data: list the map ids in `spawnMaps`.
 

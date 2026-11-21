@@ -46,6 +46,9 @@ namespace MultiplayerARPG.MMO
         public const string ARG_REGISTER_ACCOUNT_WINDOW_SECONDS = "-" + CONFIG_REGISTER_ACCOUNT_WINDOW_SECONDS;
         public const string CONFIG_LOGIN_EXEMPT_LOOPBACK = "loginExemptLoopback";
         public const string ARG_LOGIN_EXEMPT_LOOPBACK = "-" + CONFIG_LOGIN_EXEMPT_LOOPBACK;
+        // Characters one account may have. The .NET host reads it; a Unity server follows GameInstance's maxCharacterSaves
+        public const string CONFIG_MAX_CHARACTERS_PER_ACCOUNT = "maxCharactersPerAccount";
+        public const string ARG_MAX_CHARACTERS_PER_ACCOUNT = "-" + CONFIG_MAX_CHARACTERS_PER_ACCOUNT;
 
         //Channels
         public const string CONFIG_DEFAULT_CHANNEL_MAX_CONNECTIONS = "defaultChannelMaxConnections";
