@@ -607,7 +607,7 @@ namespace MultiplayerARPG.MMO
     RequestFindOnlineUserMessage request,
     RequestProceedResultDelegate<ResponseFindOnlineUserMessage> result)
         {
-#if (UNITY_EDITOR || UNITY_SERVER || !EXCLUDE_SERVER_CODES) && UNITY_STANDALONE
+#if NET || NETCOREAPP || ((UNITY_EDITOR || UNITY_SERVER || !EXCLUDE_SERVER_CODES) && UNITY_STANDALONE)
             bool despawned = true;
             if (!string.IsNullOrEmpty(request.userId))
                 despawned = await MapContainsUser(request.userId);
@@ -626,7 +626,7 @@ RequestHandlerData requestHandler,
 EmptyMessage request,
 RequestProceedResultDelegate<ResponseChannelsMessage> result)
         {
-#if (UNITY_EDITOR || UNITY_SERVER || !EXCLUDE_SERVER_CODES) && UNITY_STANDALONE
+#if NET || NETCOREAPP || ((UNITY_EDITOR || UNITY_SERVER || !EXCLUDE_SERVER_CODES) && UNITY_STANDALONE)
             result.InvokeSuccess(new ResponseChannelsMessage()
             {
                 channels = GetChannels()
@@ -640,7 +640,7 @@ RequestProceedResultDelegate<ResponseChannelsMessage> result)
             RequestForceDespawnCharacterMessage request,
             RequestProceedResultDelegate<EmptyMessage> result)
         {
-#if (UNITY_EDITOR || UNITY_SERVER || !EXCLUDE_SERVER_CODES) && UNITY_STANDALONE
+#if NET || NETCOREAPP || ((UNITY_EDITOR || UNITY_SERVER || !EXCLUDE_SERVER_CODES) && UNITY_STANDALONE)
             bool despawned = true;
             if (!string.IsNullOrEmpty(request.userId))
                 despawned = await ConfirmDespawnCharacter(request.userId, request.characterId, request.channelId);
@@ -659,7 +659,7 @@ RequestProceedResultDelegate<ResponseChannelsMessage> result)
     RequestCheckChannelsLimit request,
     RequestProceedResultDelegate<EmptyMessage> result)
         {
-#if (UNITY_EDITOR || UNITY_SERVER || !EXCLUDE_SERVER_CODES) && UNITY_STANDALONE
+#if NET || NETCOREAPP || ((UNITY_EDITOR || UNITY_SERVER || !EXCLUDE_SERVER_CODES) && UNITY_STANDALONE)
             string channelId = request.channelId;
             if (_centralNetworkManager.Channels.TryGetValue(channelId, out ChannelData channelData))
             {
