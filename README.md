@@ -92,6 +92,12 @@ The map server build is Windows only, because the spawner launches `OpenMMORPG.e
 
 `Demo/README.md` describes how the demo is put together, and `Demo/CREDITS.md` lists where every asset comes from.
 
+## Hosting servers without Unity (optional)
+
+Only map servers need a Unity build. The database, central, login and map spawn servers can also run as one small .NET 10 program, and the database can run as a web API. Both are built from the kit's own `Server/`, `Database/` and `SharedData/` code, so they behave like the Unity servers. They are useful on a VPS or another machine without Unity, when you want PostgreSQL (which only these hosts support), or when a website or tool needs the database. For making the game and testing it in the editor, the Unity servers above are all you need.
+
+The hosts live in [`Hosts~`](Hosts~/README.md), which Unity ignores. The Asset Store package and the release `.unitypackage` leave that folder out, so take it from this repository, at the release that matches your kit. [Running Servers Without Unity](https://open-mmorpg.github.io/documentation/mmo/servers-without-unity/) in the documentation walks through setting them up.
+
 ## Updating Open MMORPG
 
 Tools → Open MMORPG → Update → **Check for Updates** updates the kit in place. It downloads only the files that changed since the release you installed, and it never overwrites a kit file you have edited without asking: those are listed with an **Overwrite** box, unticked, and the summary afterwards lists what was kept and links to the upstream changes. Files you deleted stay deleted, nothing is added inside a kit folder you deleted, and files you moved are updated where you put them. Everything the update changes is backed up to `OpenMMORPGBackups` beside `Assets` first, and if the result does not compile it offers to restore the backup; the window can restore the last update at any time. A project switched to the HDRP content counts that content as the kit's own: its HDRP files are not listed as your edits, and they are updated to the new release's HDRP versions, never to its URP ones.

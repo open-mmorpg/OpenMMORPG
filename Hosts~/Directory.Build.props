@@ -1,0 +1,8 @@
+<Project>
+  <!-- Shared by every project under Hosts~: where the kit's own sources and the hosts'
+       Unity-free third-party code live. -->
+  <PropertyGroup>
+    <KitDir>$(MSBuildThisFileDirectory)..\</KitDir>
+    <HostsThirdPartyDir>$(MSBuildThisFileDirectory)ThirdParty\</HostsThirdPartyDir>
+  </PropertyGroup>
+</Project>
