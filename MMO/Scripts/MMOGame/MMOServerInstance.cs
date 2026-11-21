@@ -44,6 +44,9 @@ namespace MultiplayerARPG.MMO
         private string webSocketCertPath = string.Empty;
         [SerializeField]
         private string webSocketCertPassword = string.Empty;
+        [SerializeField]
+        [Tooltip("The secret which every server of one deployment shares, without it the cluster and database ports accept servers on this machine only. This field is for testing: it is saved in the project and ships inside every client build. For a real deployment set `serverSecret` in Config/serverConfig.json, in the `serverSecret` environment variable or with -serverSecret.")]
+        private string serverSecret = string.Empty;
 
 
         public LoginNetworkManager LoginNetworkManager
@@ -120,6 +123,14 @@ namespace MultiplayerARPG.MMO
         {
             get => webSocketCertPassword;
             set => webSocketCertPassword = value;
+        }
+        /// <summary>
+        /// The inspector's server secret, which is for testing only. What the servers use is `ServerSecret.Value`
+        /// </summary>
+        public string ServerSecretForTesting
+        {
+            get => serverSecret;
+            set => serverSecret = value;
         }
 
         private LogGUI _cacheLogGUI;
@@ -301,6 +312,12 @@ namespace MultiplayerARPG.MMO
                     this.webSocketCertPassword = webSocketCertPassword = currentServerConfig.webSocketCertPassword;
                 }
                 currentServerConfig.webSocketCertPassword = webSocketCertPassword;
+
+                // The secret which the servers of this deployment share: command line, environment, config file, then the inspector.
+                // It is not written to a new config file, only its key is, so that it can be found there
+                ServerSecret.Apply(args, currentServerConfig.serverSecret, serverSecret);
+                if (currentServerConfig.serverSecret == null)
+                    currentServerConfig.serverSecret = string.Empty;
 
                 // Central network address
                 string centralAddress;
@@ -749,6 +766,8 @@ namespace MultiplayerARPG.MMO
             }
             else
             {
+                ServerSecret.Set(serverSecret, ServerSecretSource.Inspector);
+
                 if (!useCustomDatabaseClient)
                     databaseNetworkManager.SetDatabaseByOptionIndex(databaseOptionIndex);
 
@@ -840,6 +859,16 @@ namespace MultiplayerARPG.MMO
             DatabaseNetworkManager.GuildMemberRoles = GameInstance.Singleton.SocialSystemSetting.GuildMemberRoles;
             DatabaseNetworkManager.GuildExpTree = GameInstance.Singleton.SocialSystemSetting.GuildExpTable.expTree;
 
+            // Say what was left at the kit's defaults. Not in the editor, where the servers are for testing
+            bool startingAnyServer = _startingDatabaseServer || _startingCentralServer || _startingLoginServer || _startingMapSpawnServer || _startingMapServer;
+            if (startingAnyServer && !Application.isEditor)
+            {
+                ServerSecurityWarnings.Log(nameof(MMOServerInstance), ServerSecurityWarnings.ForServerSecret(ServerSecret.Value, ServerSecret.Source));
+                RestDatabaseClient restDatabaseClient = _customDatabaseClient as RestDatabaseClient;
+                if (useCustomDatabaseClient && restDatabaseClient != null)
+                    ServerSecurityWarnings.Log(nameof(MMOServerInstance), ServerSecurityWarnings.ForDatabaseApiKey(restDatabaseClient.secretKey));
+            }
+
             if (_startingDatabaseServer)
             {
                 // Start database manager server
@@ -927,6 +956,8 @@ namespace MultiplayerARPG.MMO
             loginNetworkManager.webSocketCertificateFilePath = WebSocketCertificateFilePath;
             loginNetworkManager.webSocketCertificatePassword = WebSocketCertificatePassword;
             loginNetworkManager.StartServer();
+            if (!Application.isEditor)
+                ServerSecurityWarnings.Log(nameof(MMOServerInstance), ServerSecurityWarnings.ForConnectKey("login", loginNetworkManager.ServerTransport));
         }
         public void StartCentralServer()
         {
@@ -953,6 +984,8 @@ namespace MultiplayerARPG.MMO
             MapNetworkManager.ChannelId = startingChannelId;
 #endif
             MapNetworkManager.StartServer();
+            if (!Application.isEditor)
+                ServerSecurityWarnings.Log(nameof(MMOServerInstance), ServerSecurityWarnings.ForConnectKey("map", MapNetworkManager.ServerTransport));
         }
 
         public void StartDatabaseManagerServer()

@@ -420,6 +420,11 @@ namespace MultiplayerARPG.MMO
                     $" {ProcessArguments.ARG_START_MAP_SERVER}",
             };
 
+            // The map server must have this deployment's secret to register and to use the database.
+            // It gets it in its environment, never in its arguments, which are logged and visible in the process list
+            if (ServerSecret.IsSet)
+                startProcessInfo.EnvironmentVariables[ProcessArguments.CONFIG_SERVER_SECRET] = ServerSecret.Value;
+
             if (LogInfo)
                 Logging.Log(LogTag, "Starting process with args: " + startProcessInfo.Arguments);
 

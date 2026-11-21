@@ -7,6 +7,9 @@ using Insthync.DevExtension;
 using LiteNetLibManager;
 using Cysharp.Threading.Tasks;
 using System.Collections.Generic;
+using System.Net.Sockets;
+using LiteNetLib;
+using LiteNetLib.Utils;
 
 #if (UNITY_EDITOR || UNITY_SERVER || !EXCLUDE_SERVER_CODES) && UNITY_STANDALONE
 using UnityEngine;
@@ -303,10 +306,148 @@ namespace MultiplayerARPG.MMO
         }
 #endif
 
+#if NET || NETCOREAPP || ((UNITY_EDITOR || UNITY_SERVER || !EXCLUDE_SERVER_CODES) && UNITY_STANDALONE)
+        /// <summary>
+        /// Client: set while connected, tells whether the database server accepted this server
+        /// </summary>
+        private UniTaskCompletionSource<bool> _clientAuthentication;
+        private bool _clientAuthenticationAnswered;
+
+        protected override void OnServerUpdate(LogicUpdater updater)
+        {
+            base.OnServerUpdate(updater);
+            DatabaseServerHandler serverHandler = Server as DatabaseServerHandler;
+            if (serverHandler != null)
+                serverHandler.DisconnectUnauthenticatedPeers();
+        }
+
+        public override void OnClientConnected()
+        {
+            base.OnClientConnected();
+            // Requests wait for the answer to this one, see `WaitForServerAuthentication`
+            UniTaskCompletionSource<bool> authentication = new UniTaskCompletionSource<bool>();
+            _clientAuthentication = authentication;
+            _clientAuthenticationAnswered = false;
+            AuthenticateToServer(authentication).Forget();
+        }
+
+        public override void OnClientDisconnected(DisconnectReason reason, SocketError socketError, byte[] data)
+        {
+            base.OnClientDisconnected(reason, socketError, data);
+            UniTaskCompletionSource<bool> authentication = _clientAuthentication;
+            _clientAuthentication = null;
+            if (authentication != null)
+            {
+                if (!_clientAuthenticationAnswered && reason == DisconnectReason.RemoteConnectionClose)
+                    Logging.LogError(nameof(DatabaseNetworkManager), $"The database server closed the connection before it accepted this server. The database server's log has the reason. If it runs on another machine, both need the same `{ProcessArguments.CONFIG_SERVER_SECRET}`.");
+                authentication.TrySetResult(false);
+            }
+        }
+
+        /// <summary>
+        /// Client: prove to the database server that this server has the deployment's secret
+        /// </summary>
+        private async UniTaskVoid AuthenticateToServer(UniTaskCompletionSource<bool> authentication)
+        {
+            AsyncResponseData<EmptyMessage> response = await Client.SendRequestAsync<DbServerAuthenticateMessage, EmptyMessage>(
+                DatabaseRequestTypes.ServerAuthenticate,
+                DbServerAuthenticateMessage.Create(ServerSecret.Value, ServerSecret.Now));
+            bool accepted;
+            if (_clientAuthentication == authentication)
+                _clientAuthenticationAnswered = true;
+            switch (response.ResponseCode)
+            {
+                case AckResponseCode.Success:
+                    accepted = true;
+                    Logging.Log(nameof(DatabaseNetworkManager), "The database server accepted this server");
+                    break;
+                case AckResponseCode.Unimplemented:
+                    // A database server from before the secret existed, it serves anyone
+                    accepted = true;
+                    if (ServerSecret.IsSet)
+                        Logging.LogWarning(nameof(DatabaseNetworkManager), $"The database server is an older build which does not check `{ProcessArguments.CONFIG_SERVER_SECRET}`, so its port is open to anyone who can reach it. Update it.");
+                    break;
+                default:
+                    accepted = false;
+                    Logging.LogError(nameof(DatabaseNetworkManager), $"The database server did not accept this server ({response.ResponseCode}). Give this server the same `{ProcessArguments.CONFIG_SERVER_SECRET}` as the database server, and keep both machines' clocks within {ServerSecret.MaxClockDifferenceSeconds} seconds. The database server's log has the reason.");
+                    break;
+            }
+            authentication.TrySetResult(accepted);
+        }
+
+        /// <summary>
+        /// Client: wait until the database server answered <see cref="AuthenticateToServer"/>, returns `FALSE` if it refused.
+        /// A request sent before that answer could overtake it and be dropped by the server.
+        /// </summary>
+        private async UniTask<bool> WaitForServerAuthentication(string functionName)
+        {
+            UniTaskCompletionSource<bool> authentication = _clientAuthentication;
+            if (authentication == null)
+            {
+                // Not connected, the request fails by itself
+                return true;
+            }
+            if (await authentication.Task)
+                return true;
+            Logging.LogError(nameof(DatabaseNetworkManager), $"Cannot {functionName}: the database server did not accept this server.");
+            return false;
+        }
+#endif
+
+        /// <summary>
+        /// Server: a connecting server proves that it has the deployment's secret, its other requests are not read before this one passed.
+        /// </summary>
+        protected UniTaskVoid HandleServerAuthenticate(RequestHandlerData requestHandler, DbServerAuthenticateMessage request, RequestProceedResultDelegate<EmptyMessage> result)
+        {
+#if NET || NETCOREAPP || ((UNITY_EDITOR || UNITY_SERVER || !EXCLUDE_SERVER_CODES) && UNITY_STANDALONE)
+            long connectionId = requestHandler.ConnectionId;
+            DatabaseServerHandler serverHandler = Server as DatabaseServerHandler;
+            if (serverHandler == null)
+            {
+                result.InvokeError(EmptyMessage.Value);
+                return default;
+            }
+            ServerPeerGate gate = serverHandler.Gate;
+            if (!ServerSecret.IsSet)
+            {
+                // Nothing to prove, the gate lets a connection from this machine in as it connects
+                if (!string.IsNullOrEmpty(request.hash))
+                    Logging.LogWarning(nameof(DatabaseNetworkManager), $"Connection {connectionId} has a `{ProcessArguments.CONFIG_SERVER_SECRET}` but this database server has none. Set the same here, until then this port serves this machine only.");
+                if (gate.IsAuthorized(connectionId))
+                    result.InvokeSuccess(EmptyMessage.Value);
+                else
+                    result.InvokeError(EmptyMessage.Value);
+                return default;
+            }
+            long now = ServerSecret.Now;
+            ServerSecretCheck check = request.Check(ServerSecret.Value, now);
+            if (check == ServerSecretCheck.Valid)
+            {
+                gate.Authorize(connectionId);
+                result.InvokeSuccess(EmptyMessage.Value);
+                return default;
+            }
+            string reason;
+            if (check == ServerSecretCheck.WrongTime)
+                reason = $"its clock differs from this server's by {Math.Abs(now - request.time)} seconds, the limit is {ServerSecret.MaxClockDifferenceSeconds}. Synchronise the clocks of both machines.";
+            else
+                reason = $"it does not have this server's `{ProcessArguments.CONFIG_SERVER_SECRET}`. Every server of one deployment must be given the same one.";
+            Logging.LogError(nameof(DatabaseNetworkManager), $"Refused connection {connectionId}: {reason}");
+            result.InvokeError(EmptyMessage.Value);
+#endif
+            return default;
+        }
+
         protected override void RegisterMessages()
         {
+#if NET || NETCOREAPP || ((UNITY_EDITOR || UNITY_SERVER || !EXCLUDE_SERVER_CODES) && UNITY_STANDALONE)
+            // Every packet to the database server passes a gate before any handler sees it, see `DatabaseServerHandler`.
+            // The handlers below, and the ones addons add, are registered to it
+            Server = new DatabaseServerHandler(this);
+#endif
             base.RegisterMessages();
             EnableRequestResponse(MMOMessageTypes.Request, MMOMessageTypes.Response);
+            RegisterRequestToServer<DbServerAuthenticateMessage, EmptyMessage>(DatabaseRequestTypes.ServerAuthenticate, HandleServerAuthenticate);
             RegisterRequestToServer<DbRequestMessage<ValidateUserLoginReq>, ValidateUserLoginResp>(DatabaseRequestTypes.ValidateUserLogin, ValidateUserLogin);
             RegisterRequestToServer<DbRequestMessage<ValidateAccessTokenReq>, ValidateAccessTokenResp>(DatabaseRequestTypes.ValidateAccessToken, ValidateAccessToken);
             RegisterRequestToServer<DbRequestMessage<GetUserLevelReq>, GetUserLevelResp>(DatabaseRequestTypes.GetUserLevel, GetUserLevel);

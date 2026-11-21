@@ -121,6 +121,7 @@ namespace MultiplayerARPG.MMO
             if (IsServer)
             {
                 ClusterServer.Update();
+                ClusterServer.DisconnectUnregisteredPeers();
                 long currentTime = System.DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
                 if (currentTime - _lastUserCountUpdateTime > updateUserCountInterval * 1000)
                 {

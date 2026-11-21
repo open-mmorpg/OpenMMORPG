@@ -1,11 +1,14 @@
 #if (UNITY_EDITOR || UNITY_SERVER || !EXCLUDE_SERVER_CODES) && UNITY_STANDALONE
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using LiteNetLib.Utils;
 using LiteNetLibManager;
 using MultiplayerARPG;
 using MultiplayerARPG.MMO;
 using NUnit.Framework;
+using UnityEngine;
+using UnityEngine.TestTools;
 
 namespace OpenMMORPG.Tests
 {
@@ -149,6 +152,9 @@ namespace OpenMMORPG.Tests
         [Test]
         public void AServerWithABadHashIsNotRegistered()
         {
+            // Each refusal is logged as an error, with the reason
+            LogAssert.Expect(LogType.Error, new Regex("Register Server Failed"));
+            LogAssert.Expect(LogType.Error, new Regex("Register Server Failed"));
             Assert.That(Register(1, Peer(CentralServerPeerType.MapServer, "eu", "Town", 7001), validHash: false), Is.EqualTo(UITextKeys.UI_ERROR_INVALID_SERVER_HASH));
             Assert.That(Register(2, Peer(CentralServerPeerType.LoginServer), validHash: false), Is.EqualTo(UITextKeys.UI_ERROR_INVALID_SERVER_HASH));
 

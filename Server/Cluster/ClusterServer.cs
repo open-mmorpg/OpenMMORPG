@@ -56,6 +56,12 @@ namespace MultiplayerARPG.MMO
         // entries are removed when that connection disconnects (before its ID can be reused)
         private Dictionary<string, SocialCharacterData> _mapUsersByUserId = new Dictionary<string, SocialCharacterData>();
         private Dictionary<string, long> _mapUserConnectionIds = new Dictionary<string, long>();
+
+        // Which connections are served, see `ServerPeerGate`: a connection is a server of this deployment
+        // once it registered with a valid hash, until then only its register request is read
+        private readonly ServerPeerGate _gate = new ServerPeerGate(nameof(ClusterServer), "cluster");
+        private readonly List<long> _timedOutConnectionIds = new List<long>();
+        public ServerPeerGate Gate => _gate;
 #endif
 
         public ClusterServer(CentralNetworkManager centralNetworkManager) : base(new LiteNetLibTransport("CLUSTER", 16, 16))
@@ -99,9 +105,16 @@ namespace MultiplayerARPG.MMO
 #endif
 
 #if NET || NETCOREAPP || ((UNITY_EDITOR || UNITY_SERVER || !EXCLUDE_SERVER_CODES) && UNITY_STANDALONE)
+        protected override void OnStartServer()
+        {
+            base.OnStartServer();
+            ServerPeerGate.PinPeerAddresses(Transport);
+        }
+
         protected override void OnStopServer()
         {
             base.OnStopServer();
+            _gate.Clear();
             _loginServerPeers.Clear();
             _mapSpawnServerPeers.Clear();
             _mapServerPeers.Clear();
@@ -122,13 +135,19 @@ namespace MultiplayerARPG.MMO
                 case ENetworkEvent.ConnectEvent:
                     Logging.Log(LogTag, $"OnPeerConnected peer.ConnectionId: {eventData.connectionId}");
                     ConnectionIds.Add(eventData.connectionId);
+                    if (!_gate.OnPeerConnected(eventData.connectionId, Transport))
+                        Transport.ServerDisconnect(eventData.connectionId);
                     break;
                 case ENetworkEvent.DataEvent:
+                    // Kicking players, chat, spawning maps and the rest are for registered servers only
+                    if (!_gate.Accepts(eventData.connectionId, eventData.reader, RequestMessageType, MMORequestTypes.AppServerRegister))
+                        break;
                     ReadPacket(eventData.connectionId, eventData.reader);
                     break;
                 case ENetworkEvent.DisconnectEvent:
                     Logging.Log(LogTag, $"OnPeerDisconnected peer.ConnectionId: {eventData.connectionId} disconnectInfo.Reason: {eventData.disconnectInfo.Reason}");
                     ConnectionIds.Remove(eventData.connectionId);
+                    _gate.OnPeerDisconnected(eventData.connectionId);
                     // Remove disconnect login server
                     _loginServerPeers.Remove(eventData.connectionId);
                     // Remove disconnect map spawn server
@@ -149,6 +168,24 @@ namespace MultiplayerARPG.MMO
                 case ENetworkEvent.ErrorEvent:
                     Logging.LogError(LogTag, $"OnPeerNetworkError endPoint: {eventData.endPoint} socketErrorCode {eventData.socketError} errorMessage {eventData.errorMessage}");
                     break;
+            }
+        }
+#endif
+
+#if NET || NETCOREAPP || ((UNITY_EDITOR || UNITY_SERVER || !EXCLUDE_SERVER_CODES) && UNITY_STANDALONE)
+        /// <summary>
+        /// Disconnect connections which did not register in time, call it every frame
+        /// </summary>
+        public void DisconnectUnregisteredPeers()
+        {
+            if (!IsNetworkActive)
+                return;
+            _timedOutConnectionIds.Clear();
+            _gate.TakeTimedOut(ServerPeerGate.NowMilliseconds, _timedOutConnectionIds);
+            for (int i = 0; i < _timedOutConnectionIds.Count; ++i)
+            {
+                Logging.Log(LogTag, $"Disconnecting [{_timedOutConnectionIds[i]}]: it did not register within {ServerPeerGate.AuthorizeTimeoutSeconds} seconds");
+                Transport.ServerDisconnect(_timedOutConnectionIds[i]);
             }
         }
 #endif
@@ -180,8 +217,12 @@ namespace MultiplayerARPG.MMO
         {
             long connectionId = requestHandler.ConnectionId;
             UITextKeys message = UITextKeys.NONE;
-            if (request.ValidateHash())
+            long now = ServerSecret.Now;
+            ServerSecretCheck check = request.CheckHash(ServerSecret.Value, now);
+            if (check == ServerSecretCheck.Valid)
             {
+                // It is a server of this deployment, whether or not what it registers is accepted below
+                _gate.Authorize(connectionId);
                 CentralServerPeerInfo peerInfo = request.peerInfo;
                 string key = peerInfo.GetPeerInfoKey();
                 peerInfo.connectionId = connectionId;
@@ -256,7 +297,14 @@ namespace MultiplayerARPG.MMO
             else
             {
                 message = UITextKeys.UI_ERROR_INVALID_SERVER_HASH;
-                Logging.Log(LogTag, $"Register Server Failed: [{connectionId}] [{message}]");
+                string reason;
+                if (check == ServerSecretCheck.WrongTime)
+                    reason = $"its clock differs from this server's by {System.Math.Abs(now - request.time)} seconds, the limit is {ServerSecret.MaxClockDifferenceSeconds}. Synchronise the clocks of both machines.";
+                else if (ServerSecret.IsSet)
+                    reason = $"it does not have this server's `{ProcessArguments.CONFIG_SERVER_SECRET}`. Every server of one deployment must be given the same one.";
+                else
+                    reason = $"its hash is wrong. This server has no `{ProcessArguments.CONFIG_SERVER_SECRET}`, if the other server has one, set the same here.";
+                Logging.LogError(LogTag, $"Register Server Failed: [{connectionId}] [{message}] {reason}");
             }
             // Response
             result.Invoke(

@@ -28,6 +28,9 @@ namespace MultiplayerARPG.MMO
         public string webSocketCertPath;
         public string webSocketCertPassword;
 
+        // The secret which every server of one deployment shares, see `ServerSecret`
+        public string serverSecret;
+
         // Cluster server
         public int? clusterPort;
         [System.Obsolete("Use `publicAddress` instead.")]
