@@ -39,18 +39,19 @@ work in a git checkout of the kit, it is already there.
 
 ## Build
 
-Needs the [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0).
+Needs the [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0). Run every command in
+this README from the `Hosts~` folder.
 
 ```
-dotnet build "Hosts~/OpenMMORPG.Hosts.sln"
+dotnet build OpenMMORPG.Hosts.sln
 ```
 
 ## Run the servers
 
-From `Hosts~/MMO.NET` (the host reads `./Config/` from the folder it runs in):
+The host reads `./Config/` from the folder it runs in, so from `Hosts~` it uses `Hosts~/Config/`:
 
 ```
-dotnet run -- -startDatabaseServer -startCentralServer -startLoginServer -startMapSpawnServer
+dotnet run --project MMO.NET -- -startDatabaseServer -startCentralServer -startLoginServer -startMapSpawnServer
 ```
 
 | Flag | Starts |
@@ -81,8 +82,7 @@ memory. Killing the process outright loses those.
 the demo's data, so the hosts serve the demo as they are. For your own game, export yours from
 Unity: select your `GameInstance`, and under **Data Exporting** use the export buttons for minimal
 items, character creation data and the social system setting. Copy the files into
-`MMO.NET/Config/`, and `socialSystemSetting.json` into `DatabaseManager/Config/` too if you use the
-web API. Export again whenever you change items, starting characters or guild settings, as you
+`Hosts~/Config/`. The servers, the web API and the smoke client all use that one folder. Export again whenever you change items, starting characters or guild settings, as you
 would rebuild the Unity server.
 
 ### Map servers
@@ -96,10 +96,10 @@ server's. One file configures both.
 
 ## Run the database web API
 
-From `Hosts~/DatabaseManager`:
+From `Hosts~`:
 
 ```
-dotnet run
+dotnet run --project DatabaseManager
 ```
 
 It listens on `http://localhost:5757`, uses SQLite by default and checks every call for the
@@ -117,15 +117,20 @@ URL in `Urls` with a certificate configured for Kestrel.
 `dotnet run` is for working on the hosts. To install them on a server, publish them:
 
 ```
-dotnet publish "Hosts~/MMO.NET" -c Release -o publish/servers
-dotnet publish "Hosts~/DatabaseManager" -c Release -o publish/database-api
+dotnet publish MMO.NET -c Release -o publish/servers
+dotnet publish DatabaseManager -c Release -o publish/database-api
 ```
 
-Each output folder is complete, `Config/` included. Copy it to the server and start the program
-from inside the folder, so it finds `./Config/`:
+Each output folder is complete, with a copy of `Hosts~/Config/`. Copy it to the server and start the
+program from inside the folder, so it finds `./Config/`:
 
 ```
+cd publish/servers
 dotnet OpenMMORPG.MMO.NET.dll -startDatabaseServer -startCentralServer -startLoginServer -startMapSpawnServer
+```
+
+```
+cd publish/database-api
 dotnet OpenMMORPG.DatabaseManager.dll
 ```
 
@@ -155,11 +160,11 @@ servers: central (7000), cluster (6010), database (6100), map spawn (6001) and t
 With a login server running:
 
 ```
-dotnet run --project "Hosts~/SmokeClient" -- 127.0.0.1 7500
+dotnet run --project SmokeClient -- 127.0.0.1 7500
 ```
 
 It exits 0 only if every step passes. The character it creates is the first one in
-`MMO.NET/Config/characterCreationData.json`, which is built beside the client, so it follows the
+`Config/characterCreationData.json`, which is built beside the client, so it follows the
 data you export. A third argument names another file.
 
 `Tools~/hosts_smoke.py` does the whole round on its own: it starts the built hosts on a fresh
@@ -168,8 +173,8 @@ LiteNetLib database server and once with the web API. The repository's checks wo
 hosts and runs it on every push.
 
 ```
-dotnet build "Hosts~/OpenMMORPG.Hosts.sln" -c Release
-python "Tools~/hosts_smoke.py" .
+dotnet build OpenMMORPG.Hosts.sln -c Release
+python ../Tools~/hosts_smoke.py ..
 ```
 
 ## Known gaps
