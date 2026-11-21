@@ -155,6 +155,15 @@ The game client only connects to the login server and to map servers, so players
 the login port (7500) and the map servers' ports (8000 and up). Keep everything else private to your
 servers: central (7000), cluster (6010), database (6100), map spawn (6001) and the web API (5757).
 
+As soon as servers run on more than one machine, set the same `serverSecret` on all of them: in
+each `Config/serverConfig.json`, in an environment variable named `serverSecret`, or with
+`-serverSecret <value>`. Without it the cluster and database ports accept servers on the same
+machine only, and the map machines above are refused. With it they serve only peers that have the
+secret. Map servers get it from the spawner that starts them. Use a long random value
+(`openssl rand -hex 32`), restart every server to change it, and keep the machines' clocks within a
+minute of each other. It is the second line of defence after a firewall, and it does not encrypt
+anything: see "Deploying servers" in the kit README.
+
 ## Smoke test
 
 With a login server running:
@@ -169,8 +178,10 @@ data you export. A third argument names another file.
 
 `Tools~/hosts_smoke.py` does the whole round on its own: it starts the built hosts on a fresh
 database, runs the smoke client, stops the hosts and checks they stopped cleanly, once with the
-LiteNetLib database server and once with the web API. The repository's checks workflow builds the
-hosts and runs it on every push.
+LiteNetLib database server and once with the web API. A third round sets a `serverSecret` and
+checks that another process with the same secret is served, and that ones with another secret
+or none are refused by the cluster and database ports. The repository's checks workflow builds
+the hosts and runs it on every push.
 
 ```
 dotnet build OpenMMORPG.Hosts.sln -c Release

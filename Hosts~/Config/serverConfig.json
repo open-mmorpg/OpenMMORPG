@@ -24,6 +24,7 @@
   "webSocketSecure": false,
   "webSocketCertPath": "",
   "webSocketCertPassword": "",
+  "serverSecret": "",
   "clusterPort": 6010,
   "machineAddress": null,
   "publicAddress": "127.0.0.1",
