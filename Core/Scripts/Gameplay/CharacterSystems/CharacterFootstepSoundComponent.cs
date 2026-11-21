@@ -345,7 +345,7 @@ namespace MultiplayerARPG
                 return;
 
             // Don't play sound while passenging vehicle
-            if (Entity.PassengingVehicleEntity != null)
+            if (!Entity.PassengingVehicleEntity.IsNull())
                 return;
 
             if (currentFootstepSettings == null)
