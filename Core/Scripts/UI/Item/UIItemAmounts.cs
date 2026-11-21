@@ -73,6 +73,8 @@ namespace MultiplayerARPG
             }
         }
 
+        private readonly Dictionary<BaseItem, int> _currentAmounts = new Dictionary<BaseItem, int>();
+
         protected override void OnDestroy()
         {
             base.OnDestroy();
@@ -84,13 +86,39 @@ namespace MultiplayerARPG
             _cacheList = null;
             _data?.Clear();
         }
-        
+
         protected override void UpdateData()
         {
             // Reset number
             foreach (UIItemTextPair entry in CacheTextAmounts.Values)
             {
                 SetDefaultValue(entry);
+            }
+            BaseItem tempData;
+            int tempCurrentAmount;
+            // Set current amounts
+            _currentAmounts.Clear();
+            // Data can be null: the empty check below used to be the first thing to read it
+            Dictionary<BaseItem, int> ownedAmountsOf = Data ?? new Dictionary<BaseItem, int>();
+            foreach (KeyValuePair<BaseItem, int> dataEntry in ownedAmountsOf)
+            {
+                if (dataEntry.Key == null)
+                    continue;
+                tempData = dataEntry.Key;
+                // Get item amount from character
+                tempCurrentAmount = 0;
+                if (GameInstance.Singleton != null && GameInstance.PlayingCharacter != null)
+                {
+                    if (GameInstance.Singleton.IsExpDropRepresentItem(tempData))
+                        tempCurrentAmount = GameInstance.PlayingCharacter.Exp;
+                    else if (GameInstance.Singleton.IsGoldDropRepresentItem(tempData))
+                        tempCurrentAmount = GameInstance.PlayingCharacter.Gold;
+                    else if (GameInstance.Singleton.IsCurrencyDropRepresentItem(tempData, out Currency currency))
+                        tempCurrentAmount = GameInstance.PlayingCharacter.GetCurrencyAmount(currency);
+                    else
+                        tempCurrentAmount = GameInstance.PlayingCharacter.CountNonEquipItems(tempData.DataId);
+                }
+                _currentAmounts[tempData] = tempCurrentAmount;
             }
             // Set number by updated data
             if (Data == null || Data.Count == 0)
@@ -102,8 +130,6 @@ namespace MultiplayerARPG
             {
                 using (Utf16ValueStringBuilder tempAllText = ZString.CreateStringBuilder(false))
                 {
-                    BaseItem tempData;
-                    int tempCurrentAmount;
                     int tempTargetAmount;
                     bool tempAmountEnough;
                     string tempCurrentValue;
@@ -119,14 +145,13 @@ namespace MultiplayerARPG
                         tempData = dataEntry.Key;
                         tempTargetAmount = dataEntry.Value;
                         tempCurrentAmount = 0;
-                        // Get item amount from character
-                        if (GameInstance.PlayingCharacter != null)
-                            tempCurrentAmount = GameInstance.PlayingCharacter.CountNonEquipItems(tempData.DataId);
                         // Use difference format by option 
                         switch (displayType)
                         {
                             case DisplayType.Requirement:
                                 // This will show both current character item amount and target amount
+                                if (!_currentAmounts.TryGetValue(tempData, out tempCurrentAmount))
+                                    tempCurrentAmount = 0;
                                 tempAmountEnough = tempCurrentAmount >= tempTargetAmount;
                                 tempFormat = LanguageManager.GetText(tempAmountEnough ? formatKeyAmount : formatKeyAmountNotEnough);
                                 tempCurrentValue = tempCurrentAmount.ToString(numberFormatSimple);
@@ -214,7 +239,24 @@ namespace MultiplayerARPG
             CacheList.Generate(Data, (index, data, ui) =>
             {
                 tempUI = ui.GetComponent<UICharacterItem>();
-                tempUI.Data = new UICharacterItemData(CharacterItem.Create(data.Key, 1, data.Value), InventoryType.Unknow);
+                switch (displayType)
+                {
+                    case DisplayType.Requirement:
+                        tempUI.stackDisplayType = UICharacterItem.StackDisplayType.Requirement;
+                        int currentAmount;
+                        if (!_currentAmounts.TryGetValue(data.Key, out currentAmount))
+                            currentAmount = 0;
+                        tempUI.RequiredAmount = data.Value;
+                        tempUI.OwnedAmount = currentAmount;
+                        // The entry keeps the required amount: an item with amount 0 is an empty slot, which draws no icon
+                        tempUI.Data = new UICharacterItemData(CharacterItem.Create(data.Key, 1, data.Value), InventoryType.Unknow);
+                        break;
+                    case DisplayType.Simple:
+                        tempUI.stackDisplayType = UICharacterItem.StackDisplayType.Simple;
+                        tempUI.Data = new UICharacterItemData(CharacterItem.Create(data.Key, 1, data.Value), InventoryType.Unknow);
+                        break;
+                }
+
             });
         }
     }
