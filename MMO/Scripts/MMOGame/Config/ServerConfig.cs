@@ -12,6 +12,24 @@ namespace MultiplayerARPG.MMO
         public int? loginMaxConnections;
         public int? MaxConcurrentRequest;
 
+        // Login server flood protection (0 turns a limit off)
+        public int? loginMaxConnectionsPerAddress;
+        public int? loginMaxRequestsPerConnection;
+        public int? loginRequestWindowSeconds;
+        public int? loginMaxAttemptsPerAddress;
+        public int? loginAttemptWindowSeconds;
+        public int? loginFailuresPerAddress;
+        public int? loginFailuresPerUsername;
+        public int? loginFailureWindowSeconds;
+        public int? loginBackoffSeconds;
+        public int? loginBackoffMaxSeconds;
+        public int? loginMaxQueue;
+        public int? registerMaxAttemptsPerAddress;
+        public int? registerAttemptWindowSeconds;
+        public int? registerMaxAccountsPerAddress;
+        public int? registerAccountWindowSeconds;
+        public bool? loginExemptLoopback;
+
         // Central server
         public string centralAddress;
         public int? centralPort;

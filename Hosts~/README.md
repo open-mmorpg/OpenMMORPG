@@ -68,6 +68,13 @@ command-line arguments are the same as a Unity server's, for example `-loginPort
 the file. `databaseOptionIndex` here is 0 = SQLite, 1 = MySQL, 2 = PostgreSQL, set up in the matching
 `Config/*Config.json`. In Unity it is the position in the prefab's database options list instead.
 
+The login server's flood limits (`loginMaxConnectionsPerAddress`, `loginFailuresPerUsername`,
+`registerMaxAccountsPerAddress` and the rest, listed with their defaults in `serverConfig.json`) are
+the same keys and arguments as a Unity server's; `0` turns a limit off. One key is the host's own:
+`maxCharactersPerAccount` (5), the number of characters an account may have, which a Unity server
+takes from the Game Instance's **Max Character Saves**. `loginMaxConnections` is how many clients
+can be on the login and character screens at once.
+
 Unlike the Unity spawner, the .NET map spawner cannot fall back to every map in `GameInstance`,
 because it has no game data: list the map ids in `spawnMaps`.
 
@@ -176,12 +183,20 @@ It exits 0 only if every step passes. The character it creates is the first one 
 `Config/characterCreationData.json`, which is built beside the client, so it follows the
 data you export. A third argument names another file.
 
+A second mode checks the login server's connection limit. Against a login server started with
+`-loginMaxConnections 2`, this opens four connections and passes only if two are let in, two are
+refused, and a newcomer gets in once one of the two has left:
+
+```
+dotnet run --project SmokeClient -- connections 127.0.0.1 7500 4 2
+```
+
 `Tools~/hosts_smoke.py` does the whole round on its own: it starts the built hosts on a fresh
 database, runs the smoke client, stops the hosts and checks they stopped cleanly, once with the
-LiteNetLib database server and once with the web API. A third round sets a `serverSecret` and
-checks that another process with the same secret is served, and that ones with another secret
-or none are refused by the cluster and database ports. The repository's checks workflow builds
-the hosts and runs it on every push.
+LiteNetLib database server, once with the web API, and once for the connection limit. A fourth
+round sets a `serverSecret` and checks that another process with the same secret is served, and
+that ones with another secret or none are refused by the cluster and database ports. The
+repository's checks workflow builds the hosts and runs it on every push.
 
 ```
 dotnet build OpenMMORPG.Hosts.sln -c Release

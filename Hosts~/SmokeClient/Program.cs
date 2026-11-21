@@ -10,6 +10,22 @@ using Newtonsoft.Json;
 // logs in, validates the token, lists channels, creates a character and lists characters again.
 // Exit code 0 only if every step behaves. The character it creates is the first one in the
 // creation data, so it follows whatever game data the host was given.
+//
+// Usage: OpenMMORPG.SmokeClient connections <host> <loginPort> <clients> <expected>
+// Opens that many connections to the login server, one after another, and holds them open.
+// Exit code 0 only if exactly <expected> of them are let in and, when some were refused, a
+// newcomer gets in once one of the connected clients has left. For a login server started with
+// -loginMaxConnections <expected>.
+if (args.Length > 0 && args[0] == "connections")
+{
+    if (args.Length < 5)
+    {
+        Console.WriteLine("FAIL usage: connections <host> <loginPort> <clients> <expected>");
+        return 1;
+    }
+    return await ConnectionLimit(args[1], int.Parse(args[2]), int.Parse(args[3]), int.Parse(args[4]));
+}
+
 string host = args.Length > 0 ? args[0] : "127.0.0.1";
 int port = args.Length > 1 ? int.Parse(args[1]) : 7500;
 string creationDataPath = args.Length > 2 ? args[2] : Path.Combine(AppContext.BaseDirectory, "Config", "characterCreationData.json");
@@ -100,6 +116,80 @@ async Task Pump(Func<bool> done, string what)
     }
 }
 
+async Task<int> ConnectionLimit(string limitHost, int limitPort, int clients, int expected)
+{
+    var connections = new List<Connection>();
+    int failed = 0;
+
+    // Starts one more client and waits until the server has let it in or turned it away
+    async Task<Connection> Open()
+    {
+        var connection = new Connection();
+        connection.Manager.onClientConnected = () => connection.State = "connected";
+        connection.Manager.onClientDisconnected = (reason, socketError, message) => connection.State = $"refused ({reason})";
+        connections.Add(connection);
+        if (!connection.Manager.StartClient(limitHost, limitPort))
+        {
+            connection.State = "could not start";
+            return connection;
+        }
+        // An unanswered connect gives up by itself after a few seconds, so this ends either way
+        DateTime deadline = DateTime.UtcNow.AddSeconds(15);
+        while (connection.State == Connection.NoAnswer && DateTime.UtcNow < deadline)
+            await PumpAll(0.05);
+        return connection;
+    }
+
+    // Keeps every client's connection alive
+    async Task PumpAll(double seconds)
+    {
+        DateTime until = DateTime.UtcNow.AddSeconds(seconds);
+        do
+        {
+            foreach (Connection connection in connections)
+                connection.Manager.ProcessUpdate();
+            await Task.Delay(16);
+        } while (DateTime.UtcNow < until);
+    }
+
+    void CheckLimit(bool ok, string step, string detail)
+    {
+        if (!ok) failed++;
+        Console.WriteLine($"{(ok ? "ok  " : "FAIL")} {step}: {detail}");
+    }
+
+    for (int i = 0; i < clients; ++i)
+        await Open();
+    // Still connected a moment later, not let in and then dropped
+    await PumpAll(1);
+    int connected = connections.Count(c => c.State == "connected");
+    CheckLimit(connected == expected, $"{expected} of {clients} connections are let in",
+        $"{connected} connected [{string.Join(", ", connections.Select(c => c.State))}]");
+
+    if (expected < clients)
+    {
+        Connection leaving = connections.FirstOrDefault(c => c.State == "connected");
+        if (leaving == null)
+        {
+            CheckLimit(false, "a place frees when a client leaves", "no client was connected");
+        }
+        else
+        {
+            leaving.Manager.StopClient();
+            connections.Remove(leaving);
+            await PumpAll(1);
+            Connection late = await Open();
+            await PumpAll(1);
+            CheckLimit(late.State == "connected", "a place frees when a client leaves", $"the newcomer is {late.State}");
+        }
+    }
+
+    foreach (Connection connection in connections)
+        connection.Manager.StopClient();
+    Console.WriteLine(failed == 0 ? "PASS all steps" : $"FAIL {failed} step(s)");
+    return failed == 0 ? 0 : 1;
+}
+
 async Task<(AckResponseCode code, T resp)> Ask<T>(Func<ResponseDelegate<T>, bool> send, string what)
     where T : LiteNetLib.Utils.INetSerializable
 {
@@ -108,4 +198,11 @@ async Task<(AckResponseCode code, T resp)> Ask<T>(Func<ResponseDelegate<T>, bool
         throw new Exception(what + ": request was not sent");
     await Pump(() => result.HasValue, what);
     return result.Value;
+}
+
+class Connection
+{
+    public const string NoAnswer = "no answer";
+    public readonly LoginNetworkManager Manager = new LoginNetworkManager();
+    public string State = NoAnswer;
 }

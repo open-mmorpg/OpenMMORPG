@@ -383,6 +383,33 @@ namespace MultiplayerARPG.MMO
                 }
                 currentServerConfig.loginMaxConnections = loginMaxConnections;
 
+                // Login flood protection
+                LoginFloodProtectionSettings floodProtection = LoginNetworkManager.floodProtection;
+                ReadLoginSetting(args, ProcessArguments.ARG_LOGIN_MAX_CONNECTIONS_PER_ADDRESS, ref currentServerConfig.loginMaxConnectionsPerAddress, ref floodProtection.loginMaxConnectionsPerAddress);
+                ReadLoginSetting(args, ProcessArguments.ARG_LOGIN_MAX_REQUESTS_PER_CONNECTION, ref currentServerConfig.loginMaxRequestsPerConnection, ref floodProtection.loginMaxRequestsPerConnection);
+                ReadLoginSetting(args, ProcessArguments.ARG_LOGIN_REQUEST_WINDOW_SECONDS, ref currentServerConfig.loginRequestWindowSeconds, ref floodProtection.loginRequestWindowSeconds);
+                ReadLoginSetting(args, ProcessArguments.ARG_LOGIN_MAX_ATTEMPTS_PER_ADDRESS, ref currentServerConfig.loginMaxAttemptsPerAddress, ref floodProtection.loginMaxAttemptsPerAddress);
+                ReadLoginSetting(args, ProcessArguments.ARG_LOGIN_ATTEMPT_WINDOW_SECONDS, ref currentServerConfig.loginAttemptWindowSeconds, ref floodProtection.loginAttemptWindowSeconds);
+                ReadLoginSetting(args, ProcessArguments.ARG_LOGIN_FAILURES_PER_ADDRESS, ref currentServerConfig.loginFailuresPerAddress, ref floodProtection.loginFailuresPerAddress);
+                ReadLoginSetting(args, ProcessArguments.ARG_LOGIN_FAILURES_PER_USERNAME, ref currentServerConfig.loginFailuresPerUsername, ref floodProtection.loginFailuresPerUsername);
+                ReadLoginSetting(args, ProcessArguments.ARG_LOGIN_FAILURE_WINDOW_SECONDS, ref currentServerConfig.loginFailureWindowSeconds, ref floodProtection.loginFailureWindowSeconds);
+                ReadLoginSetting(args, ProcessArguments.ARG_LOGIN_BACKOFF_SECONDS, ref currentServerConfig.loginBackoffSeconds, ref floodProtection.loginBackoffSeconds);
+                ReadLoginSetting(args, ProcessArguments.ARG_LOGIN_BACKOFF_MAX_SECONDS, ref currentServerConfig.loginBackoffMaxSeconds, ref floodProtection.loginBackoffMaxSeconds);
+                ReadLoginSetting(args, ProcessArguments.ARG_LOGIN_MAX_QUEUE, ref currentServerConfig.loginMaxQueue, ref floodProtection.loginMaxQueue);
+                ReadLoginSetting(args, ProcessArguments.ARG_REGISTER_MAX_ATTEMPTS_PER_ADDRESS, ref currentServerConfig.registerMaxAttemptsPerAddress, ref floodProtection.registerMaxAttemptsPerAddress);
+                ReadLoginSetting(args, ProcessArguments.ARG_REGISTER_ATTEMPT_WINDOW_SECONDS, ref currentServerConfig.registerAttemptWindowSeconds, ref floodProtection.registerAttemptWindowSeconds);
+                ReadLoginSetting(args, ProcessArguments.ARG_REGISTER_MAX_ACCOUNTS_PER_ADDRESS, ref currentServerConfig.registerMaxAccountsPerAddress, ref floodProtection.registerMaxAccountsPerAddress);
+                ReadLoginSetting(args, ProcessArguments.ARG_REGISTER_ACCOUNT_WINDOW_SECONDS, ref currentServerConfig.registerAccountWindowSeconds, ref floodProtection.registerAccountWindowSeconds);
+                if (ConfigReader.ReadArgs(args, ProcessArguments.ARG_LOGIN_EXEMPT_LOOPBACK, out bool loginExemptLoopback, floodProtection.loginExemptLoopback))
+                {
+                    floodProtection.loginExemptLoopback = loginExemptLoopback;
+                }
+                else if (currentServerConfig.loginExemptLoopback.HasValue)
+                {
+                    floodProtection.loginExemptLoopback = currentServerConfig.loginExemptLoopback.Value;
+                }
+                currentServerConfig.loginExemptLoopback = floodProtection.loginExemptLoopback;
+
                 // Central map spawn timeout (milliseconds)
                 int mapSpawnMillisecondsTimeout;
                 if (ConfigReader.ReadArgs(args, ProcessArguments.ARG_MAP_SPAWN_MILLISECONDS_TIMEOUT, out mapSpawnMillisecondsTimeout, CentralNetworkManager.mapSpawnMillisecondsTimeout))
@@ -948,6 +975,19 @@ namespace MultiplayerARPG.MMO
 
 #if (UNITY_EDITOR || UNITY_SERVER || !EXCLUDE_SERVER_CODES) && UNITY_STANDALONE
         #region Server functions
+
+        /// <summary>
+        /// One number setting of the login server: the argument wins, then the config file, then
+        /// the value on the prefab. The value in use is written back for the config file.
+        /// </summary>
+        private static void ReadLoginSetting(string[] args, string argName, ref int? configValue, ref int value)
+        {
+            if (ConfigReader.ReadArgs(args, argName, out int argValue, value))
+                value = argValue;
+            else if (configValue.HasValue)
+                value = configValue.Value;
+            configValue = value;
+        }
 
         public void StartLoginServer()
         {
