@@ -172,15 +172,9 @@ namespace MultiplayerARPG.MMO
         protected virtual void Initialize()
         {
             useWebSocket = false;
-            // `maxConnections` stays as it was set: the prefab's Max Connections, or
-            // `loginMaxConnections` from the arguments or the config file. It is how many clients
-            // may be on the login and character screens at once, not how many may be in the game.
 #if NET || NETCOREAPP || ((UNITY_EDITOR || UNITY_SERVER || !EXCLUDE_SERVER_CODES) && UNITY_STANDALONE)
             ClusterClient = new ClusterClient(this);
             ClusterClient.onResponseAppServerRegister = OnResponseAppServerRegister;
-            // Wired here, not in RegisterMessages: under .NET the base constructor calls
-            // RegisterMessages before this constructor has created the ClusterClient
-            // (MapSpawnNetworkManager does the same).
             ClusterClient.onResponseAppServerAddress = OnResponseAppServerAddress;
             //Responses
             ClusterClient.RegisterResponseHandler<RequestForceDespawnCharacterMessage, EmptyMessage>(MMORequestTypes.ForceDespawnCharacter);
