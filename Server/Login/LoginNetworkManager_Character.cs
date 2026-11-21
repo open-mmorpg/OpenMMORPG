@@ -95,7 +95,43 @@ namespace MultiplayerARPG.MMO
             RequestProceedResultDelegate<ResponseCreateCharacterMessage> result)
         {
 #if NET || NETCOREAPP || ((UNITY_EDITOR || UNITY_SERVER || !EXCLUDE_SERVER_CODES) && UNITY_STANDALONE)
-            long connectionId = requestHandler.ConnectionId;
+            // Logged in first: a connection that is not may not have the database asked anything
+            if (!_userPeers.TryGetValue(requestHandler.ConnectionId, out CentralUserPeerInfo userPeerInfo))
+            {
+                result.InvokeError(new ResponseCreateCharacterMessage()
+                {
+                    message = UITextKeys.UI_ERROR_NOT_LOGGED_IN,
+                });
+                return;
+            }
+            // One at a time per account, or two requests could both pass the character limit
+            LoginFloodGuard floodGuard = FloodGuard;
+            if (!floodGuard.TryBeginCreateCharacter(userPeerInfo.userId))
+            {
+                result.InvokeError(new ResponseCreateCharacterMessage()
+                {
+                    message = UITextKeys.UI_ERROR_TOO_MANY_REQUESTS,
+                });
+                return;
+            }
+            try
+            {
+                await CreateCharacter(requestHandler, request, result, userPeerInfo);
+            }
+            finally
+            {
+                floodGuard.EndCreateCharacter(userPeerInfo.userId);
+            }
+#endif
+        }
+
+#if NET || NETCOREAPP || ((UNITY_EDITOR || UNITY_SERVER || !EXCLUDE_SERVER_CODES) && UNITY_STANDALONE)
+        private async UniTask CreateCharacter(
+            RequestHandlerData requestHandler,
+            RequestCreateCharacterMessage request,
+            RequestProceedResultDelegate<ResponseCreateCharacterMessage> result,
+            CentralUserPeerInfo userPeerInfo)
+        {
             NetDataReader reader = requestHandler.Reader;
             string characterName = request.characterName.Trim();
             int dataId = request.dataId;
@@ -131,6 +167,32 @@ namespace MultiplayerARPG.MMO
                 return;
             }
 
+            // The account's character limit. The client's character list hides its create button at
+            // the same number, so only a client that ignores it gets this answer.
+            if (maxCharactersPerAccount > 0)
+            {
+                DatabaseApiResult<CharactersResp> charactersResp = await DatabaseClient.GetCharactersAsync(new GetCharactersReq()
+                {
+                    UserId = userPeerInfo.userId
+                });
+                if (!charactersResp.IsSuccess)
+                {
+                    result.InvokeError(new ResponseCreateCharacterMessage()
+                    {
+                        message = UITextKeys.UI_ERROR_INTERNAL_SERVER_ERROR,
+                    });
+                    return;
+                }
+                if (charactersResp.Response.List != null && charactersResp.Response.List.Count >= maxCharactersPerAccount)
+                {
+                    result.InvokeError(new ResponseCreateCharacterMessage()
+                    {
+                        message = UITextKeys.UI_ERROR_SERVICE_NOT_AVAILABLE,
+                    });
+                    return;
+                }
+            }
+
             // Validate character name
             DatabaseApiResult<FindCharacterNameResp> findCharacterNameResp = await DatabaseClient.FindCharacterNameAsync(new FindCharacterNameReq()
             {
@@ -149,14 +211,6 @@ namespace MultiplayerARPG.MMO
                 result.InvokeError(new ResponseCreateCharacterMessage()
                 {
                     message = UITextKeys.UI_ERROR_CHARACTER_NAME_EXISTED,
-                });
-                return;
-            }
-            if (!_userPeers.TryGetValue(connectionId, out CentralUserPeerInfo userPeerInfo))
-            {
-                result.InvokeError(new ResponseCreateCharacterMessage()
-                {
-                    message = UITextKeys.UI_ERROR_NOT_LOGGED_IN,
                 });
                 return;
             }
@@ -205,8 +259,8 @@ namespace MultiplayerARPG.MMO
             }
             // Response
             result.InvokeSuccess(new ResponseCreateCharacterMessage());
-#endif
         }
+#endif
 
         private void DeserializeCreateCharacterExtra(PlayerCharacterData characterData, NetDataReader reader)
         {

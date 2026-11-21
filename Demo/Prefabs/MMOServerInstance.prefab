@@ -435,7 +435,7 @@ MonoBehaviour:
   webSocketCertificateFilePath: 
   webSocketCertificatePassword: 
   updateFps: 20
-  maxConnections: 4
+  maxConnections: 2000
   transportFactory: {fileID: 0}
   clusterServerAddress: 127.0.0.1
   clusterServerPort: 6010
