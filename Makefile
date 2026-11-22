@@ -1,12 +1,13 @@
-# Shortcuts for the scripts in this folder. It lives in Tools~ so Unity ignores it and it never
-# ships; run it from the kit root with either of:
+# Shortcuts for the release tooling in Tools~. Run them from the kit root:
 #
-#   make -C Tools~ check
-#   make -f Tools~/Makefile check
+#   make check
 #
-# Every target is a thin wrapper around a command in README.md, so CI and a bare shell stay the
-# reference. Builds land in Tools~/build, not the kit root: an archive there would be imported by
-# the Unity project around the checkout.
+# Unity imports this file like any other in the kit, so it has a .meta, and build_unitypackage.py
+# leaves it out of the archive: buyers get no Tools~, so every target would fail for them.
+#
+# Every target is a thin wrapper around a command in Tools~/README.md, so CI and a bare shell stay
+# the reference. Builds land in Tools~/build, not the kit root: an archive there would be imported
+# by the Unity project around the checkout.
 #
 # Recipes are single commands with no shell-specific syntax, so they work under sh and cmd.exe.
 # Paths are relative because the checkout path may contain spaces, which make's path functions
@@ -14,14 +15,8 @@
 
 PYTHON ?= python
 
-# Works from the kit root (-f) or from Tools~ (-C).
-ifneq ($(wildcard check_repo.py),)
-TOOLS := .
-KIT := ..
-else
 TOOLS := Tools~
 KIT := .
-endif
 
 BUILD := $(TOOLS)/build
 PACKAGE := $(BUILD)/OpenMMORPG.unitypackage

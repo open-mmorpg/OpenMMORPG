@@ -3,6 +3,10 @@
 Ignored by Unity because of the trailing `~`, and excluded from the exported
 package, so nothing here ships to users.
 
+The [Makefile](../Makefile) at the kit root has shortcuts for the commands below: run
+`make` there to list them, `make check` to run what CI runs. It sits where Unity imports
+it, so it has a `.meta`, and the builder leaves it out of the package.
+
 `build_unitypackage.py` writes a `.unitypackage` without opening the editor. The
 [Asset Store package workflow](../.github/workflows/asset-store-package.yml) runs it
 on every `v*` tag:
@@ -36,12 +40,13 @@ python "Tools~/build_unitypackage.py" kit . Assets/OpenMMORPG OpenMMORPG.unitypa
 ## Cutting a release
 
 1. With `master` checked out, clean and level with `origin/master`, run
-   `make -C Tools~ release patch` (or `minor`, `major`), or `python "Tools~/release.py" patch`
-   without make. It bumps the newest `vX.Y.Z` tag, runs the release checks, asks before
-   tagging, then opens your editor on the tag message: write the changelog under the
-   `Open MMORPG X.Y.Z` heading (the commits since the last release are listed as comments),
-   save, and it pushes the annotated tag. An empty message cancels. `NOTES=<file>` takes the
-   message from a file instead, and `DRY_RUN=1` stops after the checks.
+   `make release patch` (or `minor`, `major`) from the kit root, or
+   `python "Tools~/release.py" patch` without make. It bumps the newest `vX.Y.Z` tag, runs
+   the release checks, asks before tagging, then opens your editor on the tag message: write
+   the changelog under the `Open MMORPG X.Y.Z` heading (the commits since the last release
+   are listed as comments), save, and it pushes the annotated tag. An empty message cancels.
+   `NOTES=<file>` (`--notes`) takes the message from a file instead, and `DRY_RUN=1`
+   (`--dry-run`) stops after the checks.
 2. The workflow builds the archive, checks it, and publishes a GitHub release with
    `OpenMMORPG-v1.1.0.unitypackage` and `kit-manifest.json` attached.
 3. Upload that archive to the Asset Store through Unity's Asset Store Tools.
@@ -79,14 +84,18 @@ python "Tools~/pipeline_packs.py" check --repo .
 
 [Checks](../.github/workflows/checks.yml) runs on every push and pull request, needs no
 Unity install, and finishes in seconds. Run the same checks locally before pushing, with
-`make -C Tools~ check` or by hand (`make -C Tools~` lists the other shortcuts):
+`make check` from the kit root or by hand:
 
 ```sh
 python "Tools~/check_repo.py" .
 python "Tools~/pipeline_packs.py" check --repo .
-python "Tools~/build_unitypackage.py" kit . Assets/OpenMMORPG OpenMMORPG.unitypackage --deps "Tools~/dependencies.json"
-python "Tools~/check_package.py" OpenMMORPG.unitypackage
+mkdir -p "Tools~/build"
+python "Tools~/build_unitypackage.py" kit . Assets/OpenMMORPG "Tools~/build/OpenMMORPG.unitypackage" --deps "Tools~/dependencies.json"
+python "Tools~/check_package.py" "Tools~/build/OpenMMORPG.unitypackage"
 ```
+
+The archive goes in `Tools~/build`, which git ignores. Built at the kit root instead, it would be
+imported by the Unity project around the checkout.
 
 `check_repo.py` catches an asset with no `.meta`, which the exporter skips so the file
 silently never ships, plus orphan `.meta` files, duplicate GUIDs, names differing only
@@ -97,7 +106,7 @@ prefab, and one more per material variation (skin) the kit uses, e.g.
 `Demo/Art/Characters/Prefabs/Outfits/Female_Ranger_Body_Bandit.prefab`.
 
 `check_package.py` inspects a built archive: everything under `Assets/OpenMMORPG`, no
-build tooling or CI config inside, no licence file (the Asset Store EULA covers the package, so
+build tooling (`Tools~`, the root `Makefile`) or CI config inside, no licence file (the Asset Store EULA covers the package, so
 the builder leaves every `LICENSE` out; the repository keeps them, and `Third-Party Notices.txt`
 reproduces the bundled components' licences), the notices, project settings archive and
 settings menu item all present, the render pipeline installer with its manifest and both

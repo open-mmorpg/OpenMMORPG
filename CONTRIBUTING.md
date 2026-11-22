@@ -71,6 +71,6 @@ Asset Store review requires every type to be in a namespace. Upstream Core decla
 
 ### Releasing
 
-1. When master holds everything the release should contain, tag it from an up-to-date master with `make -C Tools~ release patch` (or `minor`, `major`), which checks the kit, writes the annotated tag with your changelog and pushes it. See [Tools~/README.md](Tools~/README.md#cutting-a-release).
+1. When master holds everything the release should contain, tag it from an up-to-date master with `make release patch` (or `minor`, `major`) from the kit root, which checks the kit, writes the annotated tag with your changelog and pushes it. See [Tools~/README.md](Tools~/README.md#cutting-a-release).
 2. Pushing the tag runs the [Asset Store package workflow](.github/workflows/asset-store-package.yml), which builds `OpenMMORPG.unitypackage` and attaches it to a GitHub release. Upload that archive to the Asset Store with Unity's Asset Store Tools. See [Tools~/README.md](Tools~/README.md) for details, including rebuilding `OpenMMORPG_Settings.unitypackage` when the project settings change.
 3. Set the same version in **Project Settings > Player > Version**, which is what a build reports as `Application.version`.

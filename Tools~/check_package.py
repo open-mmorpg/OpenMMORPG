@@ -103,7 +103,7 @@ def main():
     if len(paths) < MIN_ENTRIES:
         failures.append(f"only {len(paths)} entries, fewer than the {MIN_ENTRIES} expected; the kit looks incomplete")
 
-    leaked = [p for p in paths if "/Tools~/" in p or "/.github/" in p]
+    leaked = [p for p in paths if "/Tools~/" in p or "/.github/" in p or p == PREFIX + "Makefile"]
     if leaked:
         failures.append(f"build tooling or CI config leaked into the package: {leaked[:5]}")
 
