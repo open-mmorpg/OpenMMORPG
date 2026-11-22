@@ -4,20 +4,23 @@
     dotnet build "Hosts~/OpenMMORPG.Hosts.sln" -c Release
     python "Tools~/hosts_smoke.py" .
 
-Four passes, each on a fresh database:
+Five passes, each on a fresh database:
 
   litenetlib        the database, central and login servers in one process
   rest              the database web API, with central and login reaching it through RestDatabaseClient
   connection-limit  the login server started with -loginMaxConnections
+  malformed         as litenetlib, with packets no server can read sent to every port first
   secret            as litenetlib, then other processes try to join
 
 Every host gets a serverSecret, as a server outside the editor will not start without one.
 In the first two and the last the smoke client registers, logs in and creates a character. In the
 third it opens more connections than the login server was told to take, and checks that the extra
-ones are refused and that a place frees when a client leaves. Then the host is asked to stop
-(SIGTERM, or Ctrl+Break on Windows). A pass fails unless the smoke client passes, the host exits
-with 0, and (every pass that runs the database server) it reports that the character saves it held
-were written.
+ones are refused and that a place frees when a client leaves. In the fourth it sends empty, cut-off
+and random packets to the login, central, cluster and database ports, checks after each that the
+server still lets a client in, and then registers, logs in and creates a character as in the
+first. Then the host is asked to stop (SIGTERM, or Ctrl+Break on Windows). A pass fails unless the
+smoke client passes, the host is still running when asked to stop and exits with 0, and (every
+pass that runs the database server) it reports that the character saves it held were written.
 
 The secret pass also starts servers in other processes against the first one's cluster and
 database ports: one with the same secret, which must be accepted, one with another secret, which
@@ -160,11 +163,18 @@ def run_pass(name, repo, configuration, work, offset):
             "-clusterPort", str(6010 + offset), "-databaseManagerPort", str(6100 + offset)]
     api = None
     settings = {}
-    client_args = ["127.0.0.1", str(login_port)]
+    clients = [("", ["127.0.0.1", str(login_port)])]
     if name == "connection-limit":
         # Two more clients than the login server takes
         args += ["-loginMaxConnections", str(CONNECTION_LIMIT)]
-        client_args = ["connections", "127.0.0.1", str(login_port), str(CONNECTION_LIMIT + 2), str(CONNECTION_LIMIT)]
+        clients = [("", ["connections", "127.0.0.1", str(login_port), str(CONNECTION_LIMIT + 2), str(CONNECTION_LIMIT)])]
+    if name == "malformed":
+        # Every port of the process, the ones players cannot reach too. Then the usual smoke test:
+        # the servers are not only up, they still work. The cluster server has its own connect key
+        ports = [("login", login_port, []), ("central", 7000 + offset, []),
+                 ("cluster", 6010 + offset, ["CLUSTER"]), ("database", 6100 + offset, [])]
+        clients = [(f"malformed packets to the {port_name} port", ["malformed", "127.0.0.1", str(port)] + key)
+                   for port_name, port, key in ports] + clients
     if name == "rest":
         api_folder = os.path.join(work, name, "database-api")
         shutil.copytree(built(repo, "DatabaseManager", "OpenMMORPG.DatabaseManager", configuration), api_folder)
@@ -181,7 +191,11 @@ def run_pass(name, repo, configuration, work, offset):
 
     host = start(servers, "OpenMMORPG.MMO.NET", args, os.path.join(work, name, "servers.log"), settings)
     ok = ok and wait_for("servers", lambda: READY_LINE in read(host.log_path), host)
-    if ok:
+    for what, client_args in clients:
+        if not ok:
+            break
+        if what:
+            print(f"-- {what}")
         result = subprocess.run(["dotnet", os.path.join(smoke, "OpenMMORPG.SmokeClient.dll")] + client_args,
                                 capture_output=True, text=True)
         lines = [line for line in result.stdout.splitlines() if line.startswith(("ok ", "FAIL", "PASS"))]
@@ -192,6 +206,9 @@ def run_pass(name, repo, configuration, work, offset):
     if ok and name == "secret":
         ok = run_outsiders(servers, work, offset)
 
+    if ok and host.poll() is not None:
+        print(f"FAIL the servers ended by themselves (exit code {host.returncode})")
+        ok = False
     code = stop(host)
     log = read(host.log_path)
     if code != 0:
@@ -217,12 +234,12 @@ def main():
     parser.add_argument("--configuration", default="Release")
     parser.add_argument("--port-offset", type=int, default=0,
                         help="added to every default port, when the defaults are in use on this machine")
-    parser.add_argument("--only", choices=["litenetlib", "rest", "connection-limit", "secret"], help="run one pass")
+    parser.add_argument("--only", choices=["litenetlib", "rest", "connection-limit", "malformed", "secret"], help="run one pass")
     options = parser.parse_args()
 
     work = tempfile.mkdtemp(prefix="hosts-smoke-")
     try:
-        passes = [options.only] if options.only else ["litenetlib", "rest", "connection-limit", "secret"]
+        passes = [options.only] if options.only else ["litenetlib", "rest", "connection-limit", "malformed", "secret"]
         results = [run_pass(name, options.repo, options.configuration, work, options.port_offset) for name in passes]
     finally:
         shutil.rmtree(work, ignore_errors=True)
