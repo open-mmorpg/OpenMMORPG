@@ -13,25 +13,6 @@ namespace MultiplayerARPG.MMO
         public const string DefaultDatabaseApiKey = "secret";
 
         /// <summary>
-        /// About <see cref="ServerSecret"/>: missing, short, or taken from the inspector by a build.
-        /// </summary>
-        public static List<string> ForServerSecret(string secret, ServerSecretSource source)
-        {
-            List<string> warnings = new List<string>();
-            string key = ProcessArguments.CONFIG_SERVER_SECRET;
-            if (string.IsNullOrEmpty(secret))
-            {
-                warnings.Add($"No `{key}` is set. The central server's cluster port and the database server's port accept servers on this machine only (127.0.0.1). To run servers on more than one machine, give every server the same `{key}` in Config/serverConfig.json, in the `{key}` environment variable or with -{key}. Either way, keep those ports closed to the internet.");
-                return warnings;
-            }
-            if (secret.Length < ServerSecret.RecommendedLength)
-                warnings.Add($"`{key}` is only {secret.Length} characters long. Use a long random value, {ServerSecret.RecommendedLength} characters or more.");
-            if (source == ServerSecretSource.Inspector)
-                warnings.Add($"`{key}` comes from the MMOServerInstance inspector. That value is saved in the project and ships inside every client build, so players can read it. Use it for testing only, and set the real one in Config/serverConfig.json, in the `{key}` environment variable or with -{key}.");
-            return warnings;
-        }
-
-        /// <summary>
         /// About a player-facing server (login, map) whose transport still has the connect key the kit ships with.
         /// </summary>
         public static string ForConnectKey(string serverName, ITransport transport)

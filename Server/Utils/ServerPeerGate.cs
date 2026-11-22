@@ -11,7 +11,8 @@ namespace MultiplayerARPG.MMO
     /// Decides which connections a server-to-server port (cluster, database) serves.
     /// With a <see cref="ServerSecret"/>: a connection is served after it proved that it has the secret,
     /// until then only the one request which carries the proof is read, and it is dropped if the proof does not come.
-    /// Without a secret: only a connection from this machine (loopback) is served, any other is dropped as it connects.
+    /// Without a secret (only in the editor, servers outside it refuse to start, see <see cref="ServerSecret.Problem"/>):
+    /// only a connection from this machine (loopback) is served, any other is dropped as it connects.
     /// </summary>
     public sealed class ServerPeerGate
     {
@@ -29,6 +30,10 @@ namespace MultiplayerARPG.MMO
         // Connections which were refused as they connected. Their packets can already be waiting behind the
         // connect event, so they stay refused until the disconnect event comes
         private readonly HashSet<long> _refused = new HashSet<long>();
+        // Proofs which were accepted, with the time they carry. A proof is accepted once, so a copy of it
+        // which someone captured on the network is refused. They only get here with a valid hash, so a peer without the secret cannot grow this
+        private readonly Dictionary<string, long> _usedProofs = new Dictionary<string, long>();
+        private readonly List<string> _expiredProofs = new List<string>();
 
         public ServerPeerGate(string logTag, string portName)
         {
@@ -132,8 +137,34 @@ namespace MultiplayerARPG.MMO
             }
         }
 
+        /// <summary>
+        /// Call with a proof whose hash is valid and say `FALSE` if this one was accepted before (a replay).
+        /// A proof is not kept longer than <see cref="ServerSecret.MaxClockDifferenceSeconds"/> after its time,
+        /// as <see cref="ServerSecret.Check"/> refuses it by then.
+        /// It does not stop someone who blocks the original packet and sends the copy instead: nothing stops
+        /// that without encrypting the traffic.
+        /// </summary>
+        public bool TryUseProof(string hash, long proofTime, long now)
+        {
+            _expiredProofs.Clear();
+            foreach (KeyValuePair<string, long> used in _usedProofs)
+            {
+                if (now - used.Value > ServerSecret.MaxClockDifferenceSeconds)
+                    _expiredProofs.Add(used.Key);
+            }
+            for (int i = 0; i < _expiredProofs.Count; ++i)
+            {
+                _usedProofs.Remove(_expiredProofs[i]);
+            }
+            if (_usedProofs.ContainsKey(hash))
+                return false;
+            _usedProofs[hash] = proofTime;
+            return true;
+        }
+
         public void Clear()
         {
+            _usedProofs.Clear();
             _authorized.Clear();
             _waiting.Clear();
             _reported.Clear();

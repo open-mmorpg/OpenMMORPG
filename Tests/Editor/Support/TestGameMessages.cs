@@ -65,6 +65,25 @@ namespace OpenMMORPG.Tests
         public void SendSetGuildGold(long connectionId, int id, int gold) { }
         public void SendSetGuildLevelExpSkillPoint(long connectionId, int id, int level, int exp, int skillPoint) { }
         public void SendNotifyGuildInvitation(long connectionId, GuildInvitationData invitation) { }
+        public void SendGameMessageCustom(long connectionId, string message)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SendGameFormattedMessageCustom(long connectionId, string message, string[] args)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SendPartyList(long connectionId, ushort PartyListing, Dictionary<int, PartyMatchMakingDataExtenden> partiesCustom)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SendSocialMembers(long connectionId, ushort msgType, List<SocialCharacterData> members)
+        {
+            throw new NotImplementedException();
+        }
 
         private sealed class Restore : IDisposable
         {

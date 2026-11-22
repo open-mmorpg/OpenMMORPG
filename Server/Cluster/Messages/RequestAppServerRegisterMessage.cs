@@ -8,21 +8,29 @@ namespace MultiplayerARPG.MMO
         public CentralServerPeerInfo peerInfo;
         public long time { get; private set; }
         public string hash { get; private set; }
+        /// <summary>
+        /// Random, new for every registration and part of the hash, so that two registrations never have the same hash
+        /// and the server can refuse one which it has seen (see <see cref="ServerPeerGate.TryUseProof"/>)
+        /// </summary>
+        public string nonce { get; private set; }
 
         public void Deserialize(NetDataReader reader)
         {
             peerInfo.Deserialize(reader);
             time = reader.GetPackedLong();
             hash = reader.GetString();
+            nonce = reader.GetString();
         }
 
         public void Serialize(NetDataWriter writer)
         {
             time = ServerSecret.Now;
-            hash = ComputeHash(ServerSecret.Value, time);
+            nonce = ServerSecret.NewNonce();
+            hash = ComputeHash(ServerSecret.Value, time, nonce);
             peerInfo.Serialize(writer);
             writer.PutPackedLong(time);
             writer.Put(hash);
+            writer.Put(nonce ?? string.Empty);
         }
 
         /// <summary>
@@ -30,7 +38,7 @@ namespace MultiplayerARPG.MMO
         /// players will be sent, so a captured registration cannot be changed to point at another machine.
         /// Without a secret: the old hash, which any build of the kit can make, so builds from before the secret existed still register.
         /// </summary>
-        public string ComputeHash(string secret, long atTime)
+        public string ComputeHash(string secret, long atTime, string atNonce)
         {
             if (string.IsNullOrEmpty(secret))
                 return ClusterServer.GetAppServerRegisterHash(peerInfo.peerType, atTime);
@@ -39,7 +47,8 @@ namespace MultiplayerARPG.MMO
                 peerInfo.networkAddress,
                 peerInfo.networkPort.ToString(CultureInfo.InvariantCulture),
                 peerInfo.channelId,
-                peerInfo.refId);
+                peerInfo.refId,
+                atNonce);
         }
 
         public bool ValidateHash()
@@ -54,14 +63,15 @@ namespace MultiplayerARPG.MMO
             if (string.IsNullOrEmpty(secret))
             {
                 // No secret to prove, this only tells that the peer is a build of the kit, as it always did
-                return hash.Equals(ComputeHash(secret, time)) ? ServerSecretCheck.Valid : ServerSecretCheck.WrongHash;
+                return hash.Equals(ComputeHash(secret, time, nonce)) ? ServerSecretCheck.Valid : ServerSecretCheck.WrongHash;
             }
             return ServerSecret.Check(secret, hash, ServerSecret.PurposeClusterRegister, time, now,
                 ((byte)peerInfo.peerType).ToString(CultureInfo.InvariantCulture),
                 peerInfo.networkAddress,
                 peerInfo.networkPort.ToString(CultureInfo.InvariantCulture),
                 peerInfo.channelId,
-                peerInfo.refId);
+                peerInfo.refId,
+                nonce);
         }
     }
 }

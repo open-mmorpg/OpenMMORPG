@@ -9,8 +9,9 @@ Four passes, each on a fresh database:
   litenetlib        the database, central and login servers in one process
   rest              the database web API, with central and login reaching it through RestDatabaseClient
   connection-limit  the login server started with -loginMaxConnections
-  secret            as litenetlib, with a serverSecret set, then other processes try to join
+  secret            as litenetlib, then other processes try to join
 
+Every host gets a serverSecret, as a server outside the editor will not start without one.
 In the first two and the last the smoke client registers, logs in and creates a character. In the
 third it opens more connections than the login server was told to take, and checks that the extra
 ones are refused and that a place frees when a client leaves. Then the host is asked to stop
@@ -19,8 +20,8 @@ with 0, and (every pass that runs the database server) it reports that the chara
 were written.
 
 The secret pass also starts servers in other processes against the first one's cluster and
-database ports: one with the same secret, which must be accepted, and ones with another secret
-or none, which must be refused.
+database ports: one with the same secret, which must be accepted, one with another secret, which
+must be refused, and ones with none or a short one, which must not start.
 
 Needs no Unity. The checks workflow runs it on every push.
 """
@@ -42,6 +43,7 @@ SECRET = "hosts-smoke-secret-5f2c9a1e77"
 DATABASE_ACCEPTED_LINE = "The database server accepted this server"
 DATABASE_REFUSED_LINE = "The database server did not accept this server"
 CLUSTER_REFUSED_LINE = "The cluster server refused this server"
+NOT_STARTING_LINE = "Not starting: "
 
 
 def built(repo, project, assembly, configuration):
@@ -136,12 +138,12 @@ def run_outsiders(servers, work, offset):
                  {"serverSecret": SECRET}, DATABASE_ACCEPTED_LINE, DATABASE_REFUSED_LINE),
         outsider("a server with another secret is refused by the database", servers, work, database_client,
                  other, DATABASE_REFUSED_LINE, DATABASE_ACCEPTED_LINE),
-        outsider("a server with no secret is refused by the database", servers, work, database_client,
-                 {}, DATABASE_REFUSED_LINE, DATABASE_ACCEPTED_LINE),
+        outsider("a server with no secret does not start", servers, work, database_client,
+                 {}, NOT_STARTING_LINE + "No `serverSecret` is set", DATABASE_ACCEPTED_LINE),
+        outsider("a server with a short secret does not start", servers, work, database_client,
+                 {"serverSecret": "hunter2"}, NOT_STARTING_LINE + "`serverSecret` is only 7 characters", DATABASE_ACCEPTED_LINE),
         outsider("a server with another secret is refused by the cluster", servers, work, spawner,
                  other, CLUSTER_REFUSED_LINE, READY_LINE),
-        outsider("a server with no secret is refused by the cluster", servers, work, spawner,
-                 {}, CLUSTER_REFUSED_LINE, READY_LINE),
     ]
     return all(results)
 
@@ -175,8 +177,7 @@ def run_pass(name, repo, configuration, work, offset):
         settings["dbApiUrl"] = f"http://localhost:{api_port}/api/"
     else:
         args += ["-startDatabaseServer"]
-    if name == "secret":
-        settings["serverSecret"] = SECRET
+    settings["serverSecret"] = SECRET
 
     host = start(servers, "OpenMMORPG.MMO.NET", args, os.path.join(work, name, "servers.log"), settings)
     ok = ok and wait_for("servers", lambda: READY_LINE in read(host.log_path), host)

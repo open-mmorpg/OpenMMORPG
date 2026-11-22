@@ -199,7 +199,7 @@ if (!ConfigReader.ReadArgs(args, ProcessArguments.ARG_WEB_SOCKET_CERT_PASSWORD, 
 serverConfig[ProcessArguments.CONFIG_WEB_SOCKET_CERT_PASSWORD] = webSocketCertPassword;
 
 // The secret which the servers of this deployment share: command line, environment, then the config file.
-// Without it the cluster and database ports accept servers on this machine only.
+// Every server needs it: without one, or with a short one, the host does not start.
 // It is not written to a new config file, only its key is, so that it can be found there
 string serverSecretFromConfigFile = null;
 if (serverConfig.TryGetValue(ProcessArguments.CONFIG_SERVER_SECRET, out object serverSecretInConfigFile))
@@ -482,9 +482,16 @@ if (startingLoginServer && !startingCentralServer)
     startingLoginServer = false;
 }
 
-// Say what was left at the kit's defaults
+// Every server needs the deployment's secret, and a short one can be guessed
 if (startingDatabaseServer || startingCentralServer || startingLoginServer || startingMapSpawnServer)
-    ServerSecurityWarnings.Log("Security", ServerSecurityWarnings.ForServerSecret(ServerSecret.Value, ServerSecret.Source));
+{
+    string serverSecretProblem = ServerSecret.Problem(ServerSecret.Value);
+    if (serverSecretProblem != null)
+    {
+        Logging.LogError("Security", "Not starting: " + serverSecretProblem);
+        System.Environment.Exit(1);
+    }
+}
 
 // Start database server
 if (useCustomDatabaseClient)

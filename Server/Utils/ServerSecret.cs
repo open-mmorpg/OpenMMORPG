@@ -14,6 +14,8 @@ namespace MultiplayerARPG.MMO
         WrongHash,
         /// <summary>The hash is right, but it was made too long ago or too far in the future: the clocks differ, or it is a replay</summary>
         WrongTime,
+        /// <summary>The hash is right and fresh, but this deployment's server already accepted it once: it is a replay</summary>
+        Replayed,
     }
 
     public enum ServerSecretSource : byte
@@ -40,7 +42,11 @@ namespace MultiplayerARPG.MMO
         /// so a captured hash is useless soon after. Machines of one deployment must keep their clocks within it.
         /// </summary>
         public const int MaxClockDifferenceSeconds = 60;
-        public const int RecommendedLength = 16;
+        /// <summary>
+        /// A shorter secret is refused at start: one captured hash, with its time and fields, lets anyone try secrets offline until the hash matches
+        /// </summary>
+        public const int MinimumLength = 16;
+        public const int RecommendedLength = MinimumLength;
         public const string PurposeClusterRegister = "cluster-register";
         public const string PurposeDatabaseClient = "database-client";
 
@@ -54,6 +60,39 @@ namespace MultiplayerARPG.MMO
             // White space around it is never meant, it comes from how the value was written (a trailing new line in a file or a variable)
             Value = string.IsNullOrWhiteSpace(secret) ? string.Empty : secret.Trim();
             Source = Value.Length > 0 ? source : ServerSecretSource.None;
+        }
+
+        /// <summary>
+        /// Why servers must not start with this secret, or `NULL` if it is fine.
+        /// Without a secret nothing can tell a server of this deployment from anyone else who reaches the port,
+        /// not even by address (a forwarder on this machine makes every outside peer look local).
+        /// </summary>
+        public static string Problem(string secret)
+        {
+            string key = ProcessArguments.CONFIG_SERVER_SECRET;
+            if (string.IsNullOrEmpty(secret))
+                return $"No `{key}` is set. Every server needs one, the same on all of them: set it in Config/serverConfig.json, in the `{key}` environment variable or with -{key} (for example the output of `openssl rand -hex 32`).";
+            if (secret.Length < MinimumLength)
+                return $"`{key}` is only {secret.Length} characters long, the least is {MinimumLength}. Use a long random value, for example the output of `openssl rand -hex 32`.";
+            return null;
+        }
+
+        /// <summary>
+        /// A random value which one proof carries, so that no two proofs are the same
+        /// </summary>
+        public static string NewNonce()
+        {
+            byte[] bytes = new byte[16];
+            using (RandomNumberGenerator random = RandomNumberGenerator.Create())
+            {
+                random.GetBytes(bytes);
+            }
+            StringBuilder hex = new StringBuilder(bytes.Length * 2);
+            for (int i = 0; i < bytes.Length; ++i)
+            {
+                hex.Append(bytes[i].ToString("x2", CultureInfo.InvariantCulture));
+            }
+            return hex.ToString();
         }
 
         public static void Clear()

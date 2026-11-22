@@ -219,6 +219,9 @@ namespace MultiplayerARPG.MMO
             UITextKeys message = UITextKeys.NONE;
             long now = ServerSecret.Now;
             ServerSecretCheck check = request.CheckHash(ServerSecret.Value, now);
+            // With a secret a proof is accepted once. Without one the hash is the old kind, the same for every registration of a type
+            if (check == ServerSecretCheck.Valid && ServerSecret.IsSet && !_gate.TryUseProof(request.hash, request.time, now))
+                check = ServerSecretCheck.Replayed;
             if (check == ServerSecretCheck.Valid)
             {
                 // It is a server of this deployment, whether or not what it registers is accepted below
@@ -298,7 +301,9 @@ namespace MultiplayerARPG.MMO
             {
                 message = UITextKeys.UI_ERROR_INVALID_SERVER_HASH;
                 string reason;
-                if (check == ServerSecretCheck.WrongTime)
+                if (check == ServerSecretCheck.Replayed)
+                    reason = "this exact registration was accepted before. Someone is replaying a captured one, or two servers send the same one.";
+                else if (check == ServerSecretCheck.WrongTime)
                     reason = $"its clock differs from this server's by {System.Math.Abs(now - request.time)} seconds, the limit is {ServerSecret.MaxClockDifferenceSeconds}. Synchronise the clocks of both machines.";
                 else if (ServerSecret.IsSet)
                     reason = $"it does not have this server's `{ProcessArguments.CONFIG_SERVER_SECRET}`. Every server of one deployment must be given the same one.";

@@ -72,9 +72,13 @@ namespace OpenMMORPG.Tests
         /// <summary>Sends the proof of the secret and returns the answer's code.</summary>
         private AckResponseCode Authenticate(long connectionId, string secret, long? time = null)
         {
+            return Authenticate(connectionId, DbServerAuthenticateMessage.Create(secret, time ?? ServerSecret.Now));
+        }
+
+        private AckResponseCode Authenticate(long connectionId, DbServerAuthenticateMessage proof)
+        {
             int before = Responses(connectionId).Count;
-            _handler.OnServerReceive(TestTransport.Request(connectionId, MMOMessageTypes.Request, DatabaseRequestTypes.ServerAuthenticate, ++_requestId,
-                DbServerAuthenticateMessage.Create(secret, time ?? ServerSecret.Now)));
+            _handler.OnServerReceive(TestTransport.Request(connectionId, MMOMessageTypes.Request, DatabaseRequestTypes.ServerAuthenticate, ++_requestId, proof));
             List<AckResponseCode> responses = Responses(connectionId);
             Assert.That(responses, Has.Count.EqualTo(before + 1), "the proof is always answered");
             return responses[responses.Count - 1];
@@ -137,6 +141,22 @@ namespace OpenMMORPG.Tests
             long captured = ServerSecret.Now - ServerSecret.MaxClockDifferenceSeconds - 5;
 
             Assert.That(Authenticate(Stranger, Secret, captured), Is.EqualTo(AckResponseCode.Error));
+            Assert.That(AskForAUsername(Stranger), Is.EqualTo(new[] { AckResponseCode.Error }));
+        }
+
+        [Test]
+        public void AProofWhichWasAcceptedAlreadyIsRefusedWhenItIsSentAgain()
+        {
+            // What the server logs about each refusal, in order. An error nobody expected fails the test
+            LogAssert.Expect(LogType.Error, new Regex("Refused connection 2: this exact proof was accepted before"));
+            LogAssert.Expect(LogType.Error, new Regex("Ignoring connection 2 on the database port"));
+            Connect(Server);
+            Connect(Stranger);
+            DbServerAuthenticateMessage proof = DbServerAuthenticateMessage.Create(Secret, ServerSecret.Now);
+
+            Assert.That(Authenticate(Server, proof), Is.EqualTo(AckResponseCode.Success));
+            // A copy which someone captured on the network
+            Assert.That(Authenticate(Stranger, proof), Is.EqualTo(AckResponseCode.Error));
             Assert.That(AskForAUsername(Stranger), Is.EqualTo(new[] { AckResponseCode.Error }));
         }
 

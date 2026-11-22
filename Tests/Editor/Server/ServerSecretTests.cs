@@ -56,11 +56,13 @@ namespace OpenMMORPG.Tests
         /// <summary>A registration as it arrives at the central server: made with <paramref name="secret"/> at <paramref name="time"/>.</summary>
         private static RequestAppServerRegisterMessage Registration(CentralServerPeerInfo signedPeer, string secret, long time, CentralServerPeerInfo? sentPeer = null)
         {
-            string hash = new RequestAppServerRegisterMessage() { peerInfo = signedPeer }.ComputeHash(secret, time);
+            string nonce = ServerSecret.NewNonce();
+            string hash = new RequestAppServerRegisterMessage() { peerInfo = signedPeer }.ComputeHash(secret, time, nonce);
             NetDataWriter writer = new NetDataWriter();
             (sentPeer ?? signedPeer).Serialize(writer);
             writer.PutPackedLong(time);
             writer.Put(hash);
+            writer.Put(nonce);
             RequestAppServerRegisterMessage received = new RequestAppServerRegisterMessage();
             received.Deserialize(new NetDataReader(writer.CopyData()));
             return received;
@@ -251,27 +253,45 @@ namespace OpenMMORPG.Tests
         }
 
         [Test]
-        public void AServerWithoutASecretSaysSoAtStart()
+        public void AServerWithoutASecretOrWithAShortOneDoesNotStart()
         {
-            List<string> warnings = ServerSecurityWarnings.ForServerSecret(string.Empty, ServerSecretSource.None);
-
-            Assert.That(warnings, Has.Count.EqualTo(1));
-            Assert.That(warnings[0], Does.Contain("this machine only"));
+            Assert.That(ServerSecret.Problem(string.Empty), Does.Contain("No `serverSecret` is set"));
+            Assert.That(ServerSecret.Problem(null), Does.Contain("No `serverSecret` is set"));
+            Assert.That(ServerSecret.Problem("hunter2"), Does.Contain("7 characters"));
+            Assert.That(ServerSecret.Problem(new string('a', ServerSecret.MinimumLength - 1)), Is.Not.Null);
+            Assert.That(ServerSecret.Problem(new string('a', ServerSecret.MinimumLength)), Is.Null);
+            Assert.That(ServerSecret.Problem(Secret), Is.Null);
         }
 
         [Test]
-        public void AShortSecretAndOneFromTheInspectorAreWarnedAbout()
+        public void EveryProofHasItsOwnNonce()
         {
-            Assert.That(ServerSecurityWarnings.ForServerSecret(Secret, ServerSecretSource.ConfigFile), Is.Empty);
-            Assert.That(ServerSecurityWarnings.ForServerSecret(Secret, ServerSecretSource.Environment), Is.Empty);
+            string first = ServerSecret.NewNonce();
+            Assert.That(first, Has.Length.EqualTo(32));
+            Assert.That(ServerSecret.NewNonce(), Is.Not.EqualTo(first));
+            Assert.That(DbServerAuthenticateMessage.Create(Secret, Noon).hash, Is.Not.EqualTo(DbServerAuthenticateMessage.Create(Secret, Noon).hash),
+                "two proofs made in the same second differ, so a repeat of one is a replay");
+        }
 
-            List<string> shortOne = ServerSecurityWarnings.ForServerSecret("hunter2", ServerSecretSource.ConfigFile);
-            Assert.That(shortOne, Has.Count.EqualTo(1));
-            Assert.That(shortOne[0], Does.Contain("7 characters"));
+        [Test]
+        public void ANonceIsPartOfTheHash()
+        {
+            DbServerAuthenticateMessage proof = DbServerAuthenticateMessage.Create(Secret, Noon);
+            Assert.That(proof.Check(Secret, Noon), Is.EqualTo(ServerSecretCheck.Valid));
+            proof.nonce = ServerSecret.NewNonce();
+            Assert.That(proof.Check(Secret, Noon), Is.EqualTo(ServerSecretCheck.WrongHash));
+        }
 
-            List<string> fromInspector = ServerSecurityWarnings.ForServerSecret(Secret, ServerSecretSource.Inspector);
-            Assert.That(fromInspector, Has.Count.EqualTo(1));
-            Assert.That(fromInspector[0], Does.Contain("client build"));
+        [Test]
+        public void AProofIsAcceptedOnceAndForgottenWhenItIsTooOldToBeValid()
+        {
+            ServerPeerGate gate = new ServerPeerGate("test", "test");
+            Assert.That(gate.TryUseProof("a", Noon, Noon), Is.True);
+            Assert.That(gate.TryUseProof("a", Noon, Noon + 5), Is.False, "a copy of it");
+            Assert.That(gate.TryUseProof("b", Noon, Noon + 5), Is.True, "another proof");
+            // Past the limit Check refuses it by its time, so it need not be kept
+            Assert.That(gate.TryUseProof("c", Noon + 100, Noon + 100), Is.True);
+            Assert.That(gate.TryUseProof("a", Noon, Noon + 100), Is.True);
         }
 
         [Test]

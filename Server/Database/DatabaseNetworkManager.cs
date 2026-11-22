@@ -421,6 +421,8 @@ namespace MultiplayerARPG.MMO
             }
             long now = ServerSecret.Now;
             ServerSecretCheck check = request.Check(ServerSecret.Value, now);
+            if (check == ServerSecretCheck.Valid && !gate.TryUseProof(request.hash, request.time, now))
+                check = ServerSecretCheck.Replayed;
             if (check == ServerSecretCheck.Valid)
             {
                 gate.Authorize(connectionId);
@@ -428,7 +430,9 @@ namespace MultiplayerARPG.MMO
                 return default;
             }
             string reason;
-            if (check == ServerSecretCheck.WrongTime)
+            if (check == ServerSecretCheck.Replayed)
+                reason = "this exact proof was accepted before. Someone is replaying a captured one.";
+            else if (check == ServerSecretCheck.WrongTime)
                 reason = $"its clock differs from this server's by {Math.Abs(now - request.time)} seconds, the limit is {ServerSecret.MaxClockDifferenceSeconds}. Synchronise the clocks of both machines.";
             else
                 reason = $"it does not have this server's `{ProcessArguments.CONFIG_SERVER_SECRET}`. Every server of one deployment must be given the same one.";

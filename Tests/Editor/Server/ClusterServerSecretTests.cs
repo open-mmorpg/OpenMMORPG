@@ -66,10 +66,11 @@ namespace OpenMMORPG.Tests
         }
 
         /// <summary>Sends a register request made with <paramref name="secret"/> and returns the answer's code.</summary>
-        private AckResponseCode Register(long connectionId, CentralServerPeerInfo peer, string secret, long? time = null)
+        private AckResponseCode Register(long connectionId, CentralServerPeerInfo peer, string secret, long? time = null, string nonce = null)
         {
             long madeAt = time ?? ServerSecret.Now;
-            string hash = new RequestAppServerRegisterMessage() { peerInfo = peer }.ComputeHash(secret, madeAt);
+            nonce = nonce ?? ServerSecret.NewNonce();
+            string hash = new RequestAppServerRegisterMessage() { peerInfo = peer }.ComputeHash(secret, madeAt, nonce);
             NetDataWriter writer = new NetDataWriter();
             writer.PutPackedUShort(MMOMessageTypes.Request);
             writer.PutPackedUShort(MMORequestTypes.AppServerRegister);
@@ -77,6 +78,7 @@ namespace OpenMMORPG.Tests
             peer.Serialize(writer);
             writer.PutPackedLong(madeAt);
             writer.Put(hash);
+            writer.Put(nonce);
             int before = _transport.ResponsesTo(connectionId, MMOMessageTypes.Response).Count;
             _cluster.OnServerReceive(TestTransport.Data(connectionId, writer));
             List<AckResponseCode> responses = _transport.ResponsesTo(connectionId, MMOMessageTypes.Response);
@@ -156,6 +158,24 @@ namespace OpenMMORPG.Tests
             Assert.That(Register(Stranger, Peer(CentralServerPeerType.MapServer, "Town", 8000), Secret, captured), Is.EqualTo(AckResponseCode.Error));
 
             Assert.That(_cluster.MapServerPeers, Is.Empty);
+            Assert.That(_cluster.Gate.IsAuthorized(Stranger), Is.False);
+        }
+
+        [Test]
+        public void ARegistrationWhichWasAcceptedAlreadyIsRefusedWhenItIsSentAgain()
+        {
+            // What the server logs about each refusal, in order. An error nobody expected fails the test
+            LogAssert.Expect(LogType.Error, new Regex("Register Server Failed.*this exact registration was accepted before"));
+            Connect(MapConnection);
+            Connect(Stranger);
+            long madeAt = ServerSecret.Now;
+            string nonce = ServerSecret.NewNonce();
+            CentralServerPeerInfo peer = Peer(CentralServerPeerType.MapServer, "Town", 8000);
+
+            Assert.That(Register(MapConnection, peer, Secret, madeAt, nonce), Is.EqualTo(AckResponseCode.Success));
+            // A copy which someone captured on the network
+            Assert.That(Register(Stranger, peer, Secret, madeAt, nonce), Is.EqualTo(AckResponseCode.Error));
+
             Assert.That(_cluster.Gate.IsAuthorized(Stranger), Is.False);
         }
 

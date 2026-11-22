@@ -44,9 +44,13 @@ namespace MultiplayerARPG.MMO
         private string webSocketCertPath = string.Empty;
         [SerializeField]
         private string webSocketCertPassword = string.Empty;
+#if UNITY_EDITOR
+        // Editor only, so it is not in a build: a field in a build ships inside every client. A server outside the editor
+        // needs `serverSecret` in Config/serverConfig.json, in the `serverSecret` environment variable or with -serverSecret
         [SerializeField]
-        [Tooltip("The secret which every server of one deployment shares, without it the cluster and database ports accept servers on this machine only. This field is for testing: it is saved in the project and ships inside every client build. For a real deployment set `serverSecret` in Config/serverConfig.json, in the `serverSecret` environment variable or with -serverSecret.")]
-        private string serverSecret = string.Empty;
+        [Tooltip("The secret which every server of one deployment shares, without it the cluster and database ports accept servers on this machine only. This field is for testing in the editor and is not in builds. It is saved in the project, so do not put a real deployment's secret here. For a real deployment set `serverSecret` in Config/serverConfig.json, in the `serverSecret` environment variable or with -serverSecret.")]
+        private string serverSecret = "editor-testing-secret-not-for-production";
+#endif
 
 
         public LoginNetworkManager LoginNetworkManager
@@ -124,13 +128,27 @@ namespace MultiplayerARPG.MMO
             get => webSocketCertPassword;
             set => webSocketCertPassword = value;
         }
+#if UNITY_EDITOR
         /// <summary>
-        /// The inspector's server secret, which is for testing only. What the servers use is `ServerSecret.Value`
+        /// The inspector's server secret, which is for testing in the editor only. What the servers use is `ServerSecret.Value`
         /// </summary>
         public string ServerSecretForTesting
         {
             get => serverSecret;
             set => serverSecret = value;
+        }
+#endif
+
+        private string InspectorServerSecret
+        {
+            get
+            {
+#if UNITY_EDITOR
+                return serverSecret;
+#else
+                return string.Empty;
+#endif
+            }
         }
 
         private LogGUI _cacheLogGUI;
@@ -315,7 +333,7 @@ namespace MultiplayerARPG.MMO
 
                 // The secret which the servers of this deployment share: command line, environment, config file, then the inspector.
                 // It is not written to a new config file, only its key is, so that it can be found there
-                ServerSecret.Apply(args, currentServerConfig.serverSecret, serverSecret);
+                ServerSecret.Apply(args, currentServerConfig.serverSecret, InspectorServerSecret);
                 if (currentServerConfig.serverSecret == null)
                     currentServerConfig.serverSecret = string.Empty;
 
@@ -793,7 +811,7 @@ namespace MultiplayerARPG.MMO
             }
             else
             {
-                ServerSecret.Set(serverSecret, ServerSecretSource.Inspector);
+                ServerSecret.Set(InspectorServerSecret, ServerSecretSource.Inspector);
 
                 if (!useCustomDatabaseClient)
                     databaseNetworkManager.SetDatabaseByOptionIndex(databaseOptionIndex);
@@ -886,11 +904,18 @@ namespace MultiplayerARPG.MMO
             DatabaseNetworkManager.GuildMemberRoles = GameInstance.Singleton.SocialSystemSetting.GuildMemberRoles;
             DatabaseNetworkManager.GuildExpTree = GameInstance.Singleton.SocialSystemSetting.GuildExpTable.expTree;
 
-            // Say what was left at the kit's defaults. Not in the editor, where the servers are for testing
+            // Every server needs the deployment's secret, and a short one can be guessed. Not in the editor, where the servers are for testing
             bool startingAnyServer = _startingDatabaseServer || _startingCentralServer || _startingLoginServer || _startingMapSpawnServer || _startingMapServer;
             if (startingAnyServer && !Application.isEditor)
             {
-                ServerSecurityWarnings.Log(nameof(MMOServerInstance), ServerSecurityWarnings.ForServerSecret(ServerSecret.Value, ServerSecret.Source));
+                string serverSecretProblem = ServerSecret.Problem(ServerSecret.Value);
+                if (serverSecretProblem != null)
+                {
+                    Logging.LogError(nameof(MMOServerInstance), "Not starting: " + serverSecretProblem);
+                    Application.Quit(1);
+                    return;
+                }
+                // Say what was left at the kit's defaults
                 RestDatabaseClient restDatabaseClient = _customDatabaseClient as RestDatabaseClient;
                 if (useCustomDatabaseClient && restDatabaseClient != null)
                     ServerSecurityWarnings.Log(nameof(MMOServerInstance), ServerSecurityWarnings.ForDatabaseApiKey(restDatabaseClient.secretKey));

@@ -51,8 +51,12 @@ dotnet build OpenMMORPG.Hosts.sln
 The host reads `./Config/` from the folder it runs in, so from `Hosts~` it uses `Hosts~/Config/`:
 
 ```
+export serverSecret=$(openssl rand -hex 32)
 dotnet run --project MMO.NET -- -startDatabaseServer -startCentralServer -startLoginServer -startMapSpawnServer
 ```
+
+A host does not start without a `serverSecret` (see "Several machines" below), so set one first:
+an environment variable as above, `serverSecret` in `Config/serverConfig.json`, or `-serverSecret`.
 
 | Flag | Starts |
 | --- | --- |
@@ -162,13 +166,13 @@ The game client only connects to the login server and to map servers, so players
 the login port (7500) and the map servers' ports (8000 and up). Keep everything else private to your
 servers: central (7000), cluster (6010), database (6100), map spawn (6001) and the web API (5757).
 
-As soon as servers run on more than one machine, set the same `serverSecret` on all of them: in
-each `Config/serverConfig.json`, in an environment variable named `serverSecret`, or with
-`-serverSecret <value>`. Without it the cluster and database ports accept servers on the same
-machine only, and the map machines above are refused. With it they serve only peers that have the
-secret. Map servers get it from the spawner that starts them. Use a long random value
-(`openssl rand -hex 32`), restart every server to change it, and keep the machines' clocks within a
-minute of each other. It is the second line of defence after a firewall, and it does not encrypt
+Every host needs the same `serverSecret`, on one machine or several: in each
+`Config/serverConfig.json`, in an environment variable named `serverSecret`, or with
+`-serverSecret <value>`. A host without one, or with one shorter than 16 characters, does not start
+and says why in its log. The cluster and database ports then serve only peers that have the secret,
+and each proof is accepted once, so a captured copy is refused. Map servers get it from the spawner
+that starts them. Use a long random value (`openssl rand -hex 32`), restart every server to change
+it, and keep the machines' clocks within a minute of each other. It is the second line of defence after a firewall, and it does not encrypt
 anything: see "Deploying servers" in the kit README.
 
 ## Smoke test
@@ -194,8 +198,9 @@ dotnet run --project SmokeClient -- connections 127.0.0.1 7500 4 2
 `Tools~/hosts_smoke.py` does the whole round on its own: it starts the built hosts on a fresh
 database, runs the smoke client, stops the hosts and checks they stopped cleanly, once with the
 LiteNetLib database server, once with the web API, and once for the connection limit. A fourth
-round sets a `serverSecret` and checks that another process with the same secret is served, and
-that ones with another secret or none are refused by the cluster and database ports. The
+round checks that another process with the same secret is served, that one with another secret
+is refused by the cluster and database ports, and that ones with no secret or a short one do not
+start. Every round gives its hosts a `serverSecret`. The
 repository's checks workflow builds the hosts and runs it on every push.
 
 ```
