@@ -182,10 +182,21 @@ refused, and a newcomer gets in once one of the two has left:
 dotnet run --project SmokeClient -- connections 127.0.0.1 7500 4 2
 ```
 
+A third mode sends a server packets it cannot read: empty ones, ones cut off part way through,
+and random bytes. It passes only if the server still lets a client in after each of them. It works
+against any server's port, so against a test deployment you can try the ports players cannot
+reach too (the cluster server's connect key is `CLUSTER`, given as a last argument):
+
+```
+dotnet run --project SmokeClient -- malformed 127.0.0.1 7500
+dotnet run --project SmokeClient -- malformed 127.0.0.1 6010 CLUSTER
+```
+
 `Tools~/hosts_smoke.py` does the whole round on its own: it starts the built hosts on a fresh
 database, runs the smoke client, stops the hosts and checks they stopped cleanly, once with the
-LiteNetLib database server, once with the web API, and once for the connection limit. The
-repository's checks workflow builds the hosts and runs it on every push.
+LiteNetLib database server, once with the web API, once for the connection limit, and once with
+the unreadable packets sent to every port first. The repository's checks workflow builds the
+hosts and runs it on every push.
 
 ```
 dotnet build OpenMMORPG.Hosts.sln -c Release
@@ -220,6 +231,9 @@ The hosts are adapted from SURIYUN's `UnityMultiplayerARPG_MMO.NET` and
 - The login server's character creation check follows the Unity one: a game without factions
   creates characters with faction 0. Upstream's check refuses every character in such a game.
 - The shipped `Config/` data is the demo's, not upstream's sample game.
+- `MMO.NET` logs and drops a packet it cannot read or handle (`MMO.NET/ServerLoop.cs`). Upstream
+  lets the exception out of its main loop, so one cut-off packet sent to any of the ports ended
+  the process and every server in it.
 
 ## Third-party code
 

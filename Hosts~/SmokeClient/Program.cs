@@ -16,6 +16,23 @@ using Newtonsoft.Json;
 // Exit code 0 only if exactly <expected> of them are let in and, when some were refused, a
 // newcomer gets in once one of the connected clients has left. For a login server started with
 // -loginMaxConnections <expected>.
+//
+// Usage: OpenMMORPG.SmokeClient malformed <host> <port> [connectKey]
+// Sends a server packets no real client or server would send: empty ones, ones cut off part way
+// through what the server reads first, and random bytes. After each one a new connection must
+// still be let in, which only happens while the server's loop is running. Exit code 0 only if
+// the server takes every packet and stays up. Any server's port will do: the login and database
+// servers take the default connect key, the cluster server takes CLUSTER.
+if (args.Length > 0 && args[0] == "malformed")
+{
+    if (args.Length < 3)
+    {
+        Console.WriteLine("FAIL usage: malformed <host> <port> [connectKey]");
+        return 1;
+    }
+    return await MalformedPackets(args[1], int.Parse(args[2]), args.Length > 3 ? args[3] : "SampleConnectKey");
+}
+
 if (args.Length > 0 && args[0] == "connections")
 {
     if (args.Length < 5)
@@ -188,6 +205,114 @@ async Task<int> ConnectionLimit(string limitHost, int limitPort, int clients, in
         connection.Manager.StopClient();
     Console.WriteLine(failed == 0 ? "PASS all steps" : $"FAIL {failed} step(s)");
     return failed == 0 ? 0 : 1;
+}
+
+async Task<int> MalformedPackets(string targetHost, int targetPort, string connectKey)
+{
+    // Every packet starts with a message type. After type 1 (a request) the server reads the
+    // request's type and id, after type 2 (a response) the id and a result code, and anything
+    // else goes to that message's handler, if there is one. Numbers are packed: below 241 a
+    // number is one byte, and 250 says three more bytes follow.
+    var packets = new List<(string name, byte[][] data)>
+    {
+        ("an empty packet", new[] { new byte[0] }),
+        ("a message type cut off part way", new[] { new byte[] { 250 } }),
+        ("a request with nothing after the message type", new[] { new byte[] { 1 } }),
+        ("a request with no request id", new[] { new byte[] { 1, (byte)MMORequestTypes.Channels } }),
+        ("a request with half a request id", new[] { new byte[] { 1, (byte)MMORequestTypes.Channels, 250, 1 } }),
+        ("a request of a type nobody handles", new[] { new byte[] { 1, 240, 7 } }),
+        ("a login request with nothing in it", new[] { new byte[] { 1, (byte)MMORequestTypes.UserLogin, 7 } }),
+        ("a login request whose name is cut off", new[] { new byte[] { 1, (byte)MMORequestTypes.UserLogin, 7, 255, 255, (byte)'a' } }),
+        ("a response with nothing after the message type", new[] { new byte[] { 2 } }),
+        ("a response with no result code", new[] { new byte[] { 2, 1 } }),
+        ("a response to a request nobody made", new[] { new byte[] { 2, 240, 0 } }),
+        // Request and database request types are numbered from 0, so these reach real handlers
+        ("every request type with nothing in it", Enumerable.Range(0, 120).Select(type => new byte[] { 1, (byte)type, 9 }).ToArray()),
+        ("every message type with nothing after it", Enumerable.Range(0, 32).Select(type => new byte[] { (byte)type }).ToArray()),
+        ("every message type followed by 0xFF bytes", Enumerable.Range(3, 29).Select(type => new[] { (byte)type }.Concat(Enumerable.Repeat((byte)255, 64)).ToArray()).ToArray()),
+    };
+    // The same bytes every run, so a failure can be repeated
+    var random = new Random(20261122);
+    packets.Add(("300 packets of random bytes", Enumerable.Range(0, 300).Select(_ =>
+    {
+        byte[] bytes = new byte[random.Next(1, 200)];
+        random.NextBytes(bytes);
+        return bytes;
+    }).ToArray()));
+    packets.Add(("300 requests and responses of random bytes", Enumerable.Range(0, 300).Select(i =>
+    {
+        byte[] bytes = new byte[random.Next(1, 200)];
+        random.NextBytes(bytes);
+        bytes[0] = (byte)(1 + i % 2);
+        return bytes;
+    }).ToArray()));
+    // More in one frame than a server could be allowed to stop and report one by one
+    packets.Add(("5000 cut-off requests at once", Enumerable.Repeat(new byte[] { 1 }, 5000).ToArray()));
+
+    // Connects, sends the packets if there are any, and leaves. False if it was not let in.
+    async Task<bool> Visit(byte[][] data)
+    {
+        var listener = new LiteNetLib.EventBasedNetListener();
+        var manager = new LiteNetLib.NetManager(listener);
+        LiteNetLib.NetPeer connectedPeer = null;
+        bool closed = false;
+        listener.PeerConnectedEvent += peer => connectedPeer = peer;
+        listener.PeerDisconnectedEvent += (peer, info) => closed = true;
+        try
+        {
+            if (!manager.Start() || manager.Connect(targetHost, targetPort, connectKey) == null)
+                return false;
+            // An unanswered connect gives up by itself after a few seconds
+            DateTime deadline = DateTime.UtcNow.AddSeconds(15);
+            while (connectedPeer == null && !closed && DateTime.UtcNow < deadline)
+            {
+                manager.PollEvents();
+                await Task.Delay(16);
+            }
+            if (connectedPeer == null)
+                return false;
+            foreach (byte[] bytes in data)
+                connectedPeer.Send(bytes, LiteNetLib.DeliveryMethod.ReliableOrdered);
+            // Until the server has them all, then a moment for it to read them
+            deadline = DateTime.UtcNow.AddSeconds(30);
+            DateTime? arrivedAt = null;
+            while (!closed && DateTime.UtcNow < deadline)
+            {
+                manager.PollEvents();
+                if (arrivedAt == null && connectedPeer.GetPacketsCountInReliableQueue(0, true) == 0)
+                    arrivedAt = DateTime.UtcNow;
+                if (arrivedAt != null && DateTime.UtcNow > arrivedAt.Value.AddSeconds(data.Length == 0 ? 0.1 : 0.3))
+                    break;
+                await Task.Delay(16);
+            }
+            return true;
+        }
+        finally
+        {
+            manager.Stop(true);
+        }
+    }
+
+    if (!await Visit(new byte[0][]))
+    {
+        Console.WriteLine($"FAIL no server lets a client in at {targetHost}:{targetPort} with the connect key {connectKey}");
+        return 1;
+    }
+    Console.WriteLine($"ok   connected to {targetHost}:{targetPort}");
+    foreach ((string name, byte[][] data) in packets)
+    {
+        bool sent = await Visit(data);
+        // The server lets nobody in once its loop has stopped
+        bool up = sent && await Visit(new byte[0][]);
+        Console.WriteLine($"{(up ? "ok  " : "FAIL")} {name}: {(up ? "the server is still up" : "the server no longer lets a client in")}");
+        if (!up)
+        {
+            Console.WriteLine("FAIL the server went down");
+            return 1;
+        }
+    }
+    Console.WriteLine("PASS all steps");
+    return 0;
 }
 
 async Task<(AckResponseCode code, T resp)> Ask<T>(Func<ResponseDelegate<T>, bool> send, string what)

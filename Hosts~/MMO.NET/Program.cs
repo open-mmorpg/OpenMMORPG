@@ -554,17 +554,19 @@ foreach (PosixSignal signal in new[] { PosixSignal.SIGINT, PosixSignal.SIGTERM, 
 AppDomain.CurrentDomain.ProcessExit += CurrentDomain_ProcessExit;
 while (!shutdown.IsCancellationRequested)
 {
+    // ServerLoop reads each server's packets so that one it cannot read is dropped, not thrown
+    // out of this loop
     if (databaseNetworkManager != null && databaseNetworkManager.IsServer)
-        databaseNetworkManager.ProcessUpdate();
+        ServerLoop.Update(databaseNetworkManager);
 
     if (centralNetworkManager != null && centralNetworkManager.IsServer)
-        centralNetworkManager.ProcessUpdate();
+        ServerLoop.Update(centralNetworkManager, centralNetworkManager.ClusterServer);
 
     if (loginNetworkManager != null && loginNetworkManager.IsServer)
-        loginNetworkManager.ProcessUpdate();
+        ServerLoop.Update(loginNetworkManager);
 
     if (mapSpawnNetworkManager != null && mapSpawnNetworkManager.IsServer)
-        mapSpawnNetworkManager.ProcessUpdate();
+        ServerLoop.Update(mapSpawnNetworkManager);
 
     // wait for next frame
     await Task.Delay(delay);
@@ -598,7 +600,7 @@ async Task StopServers(TimeSpan flushTimeout)
             Task flush = databaseNetworkManager.FlushCharacterSavesAsync().AsTask();
             while (!flush.IsCompleted && DateTime.UtcNow < deadline)
             {
-                databaseNetworkManager.ProcessUpdate();
+                ServerLoop.Update(databaseNetworkManager);
                 await Task.Delay(delay);
             }
             if (flush.IsFaulted)
