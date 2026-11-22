@@ -4,17 +4,24 @@
     dotnet build "Hosts~/OpenMMORPG.Hosts.sln" -c Release
     python "Tools~/hosts_smoke.py" .
 
-Three passes, each on a fresh database:
+Four passes, each on a fresh database:
 
   litenetlib        the database, central and login servers in one process
   rest              the database web API, with central and login reaching it through RestDatabaseClient
   connection-limit  the login server started with -loginMaxConnections
+  secret            as litenetlib, then other processes try to join
 
-In the first two the smoke client registers, logs in and creates a character. In the third it
-opens more connections than the login server was told to take, and checks that the extra ones are
-refused and that a place frees when a client leaves. Then the host is asked to stop (SIGTERM, or
-Ctrl+Break on Windows). A pass fails unless the smoke client passes, the host exits with 0, and
-(first pass) it reports that the character saves it held were written.
+Every host gets a serverSecret, as a server outside the editor will not start without one.
+In the first two and the last the smoke client registers, logs in and creates a character. In the
+third it opens more connections than the login server was told to take, and checks that the extra
+ones are refused and that a place frees when a client leaves. Then the host is asked to stop
+(SIGTERM, or Ctrl+Break on Windows). A pass fails unless the smoke client passes, the host exits
+with 0, and (every pass that runs the database server) it reports that the character saves it held
+were written.
+
+The secret pass also starts servers in other processes against the first one's cluster and
+database ports: one with the same secret, which must be accepted, one with another secret, which
+must be refused, and ones with none or a short one, which must not start.
 
 Needs no Unity. The checks workflow runs it on every push.
 """
@@ -32,6 +39,11 @@ WINDOWS = os.name == "nt"
 READY_LINE = "App Registered successfully"      # the login server has joined the cluster
 CONNECTION_LIMIT = 2                            # -loginMaxConnections in the connection-limit pass
 STOPPED_LINE = "All character saves are written."
+SECRET = "hosts-smoke-secret-5f2c9a1e77"
+DATABASE_ACCEPTED_LINE = "The database server accepted this server"
+DATABASE_REFUSED_LINE = "The database server did not accept this server"
+CLUSTER_REFUSED_LINE = "The cluster server refused this server"
+NOT_STARTING_LINE = "Not starting: "
 
 
 def built(repo, project, assembly, configuration):
@@ -95,6 +107,47 @@ def listening(port):
         return False
 
 
+def outsider(what, servers, work, args, settings, expected, unexpected=None):
+    """Starts another server process against the running one and waits for a line in its log."""
+    log_path = os.path.join(work, "secret", what.replace(" ", "-") + ".log")
+    process = start(servers, "OpenMMORPG.MMO.NET", args, log_path, settings)
+    ok = wait_for(what, lambda: expected in read(log_path), process, timeout=30)
+    stop(process)
+    log = read(log_path)
+    if ok and unexpected and unexpected in log:
+        print(f"FAIL {what}: its log has \"{unexpected}\"")
+        ok = False
+    if ok:
+        print(f"ok   {what}")
+    else:
+        print(f"-- {log_path}\n{log}")
+    return ok
+
+
+def run_outsiders(servers, work, offset):
+    """Other processes try the secret pass's cluster and database ports."""
+    # A central server of its own, using the first process's database server
+    database_client = ["-startCentralServer", "-centralPort", str(7100 + offset),
+                       "-clusterPort", str(6110 + offset), "-databaseManagerPort", str(6100 + offset)]
+    # A map spawn server joining the first process's cluster. It is only ever refused here:
+    # an accepted one would start map servers
+    spawner = ["-startMapSpawnServer", "-mapSpawnPort", str(6101 + offset), "-clusterPort", str(6010 + offset)]
+    other = {"serverSecret": "not-" + SECRET}
+    results = [
+        outsider("a server with the secret uses the database", servers, work, database_client,
+                 {"serverSecret": SECRET}, DATABASE_ACCEPTED_LINE, DATABASE_REFUSED_LINE),
+        outsider("a server with another secret is refused by the database", servers, work, database_client,
+                 other, DATABASE_REFUSED_LINE, DATABASE_ACCEPTED_LINE),
+        outsider("a server with no secret does not start", servers, work, database_client,
+                 {}, NOT_STARTING_LINE + "No `serverSecret` is set", DATABASE_ACCEPTED_LINE),
+        outsider("a server with a short secret does not start", servers, work, database_client,
+                 {"serverSecret": "hunter2"}, NOT_STARTING_LINE + "`serverSecret` is only 7 characters", DATABASE_ACCEPTED_LINE),
+        outsider("a server with another secret is refused by the cluster", servers, work, spawner,
+                 other, CLUSTER_REFUSED_LINE, READY_LINE),
+    ]
+    return all(results)
+
+
 def run_pass(name, repo, configuration, work, offset):
     print(f"== {name}")
     ok = True
@@ -124,6 +177,7 @@ def run_pass(name, repo, configuration, work, offset):
         settings["dbApiUrl"] = f"http://localhost:{api_port}/api/"
     else:
         args += ["-startDatabaseServer"]
+    settings["serverSecret"] = SECRET
 
     host = start(servers, "OpenMMORPG.MMO.NET", args, os.path.join(work, name, "servers.log"), settings)
     ok = ok and wait_for("servers", lambda: READY_LINE in read(host.log_path), host)
@@ -135,13 +189,15 @@ def run_pass(name, repo, configuration, work, offset):
         if result.returncode != 0:
             print(f"FAIL smoke client exited with {result.returncode}\n{result.stdout}\n{result.stderr}")
             ok = False
+    if ok and name == "secret":
+        ok = run_outsiders(servers, work, offset)
 
     code = stop(host)
     log = read(host.log_path)
     if code != 0:
         print(f"FAIL servers did not stop cleanly (exit code {code})")
         ok = False
-    elif name == "litenetlib" and STOPPED_LINE not in log:
+    elif name != "rest" and STOPPED_LINE not in log:
         print("FAIL the database server did not report its character saves written")
         ok = False
     else:
@@ -161,12 +217,12 @@ def main():
     parser.add_argument("--configuration", default="Release")
     parser.add_argument("--port-offset", type=int, default=0,
                         help="added to every default port, when the defaults are in use on this machine")
-    parser.add_argument("--only", choices=["litenetlib", "rest", "connection-limit"], help="run one pass")
+    parser.add_argument("--only", choices=["litenetlib", "rest", "connection-limit", "secret"], help="run one pass")
     options = parser.parse_args()
 
     work = tempfile.mkdtemp(prefix="hosts-smoke-")
     try:
-        passes = [options.only] if options.only else ["litenetlib", "rest", "connection-limit"]
+        passes = [options.only] if options.only else ["litenetlib", "rest", "connection-limit", "secret"]
         results = [run_pass(name, options.repo, options.configuration, work, options.port_offset) for name in passes]
     finally:
         shutil.rmtree(work, ignore_errors=True)

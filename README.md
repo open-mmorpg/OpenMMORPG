@@ -98,6 +98,36 @@ Only map servers need a Unity build. The database, central, login and map spawn 
 
 The hosts live in [`Hosts~`](Hosts~/README.md), which Unity ignores. The Asset Store package and the release `.unitypackage` leave that folder out, so take it from this repository, at the release that matches your kit. [Running Servers Without Unity](https://open-mmorpg.github.io/documentation/mmo/servers-without-unity/) in the documentation walks through setting them up.
 
+## Deploying servers
+
+A game runs as several server processes. Players connect to two kinds of them. The others talk only to each other, and nothing outside your own servers should be able to reach them. The ports below are the demo's defaults; yours are whatever your `MMOServerInstance` prefab, `Config/serverConfig.json` or command line set.
+
+| Server | Default port | Open it to players? |
+|---|---|---|
+| Login | 7500 | Yes |
+| Map servers | 8000 and up, one port per running map | Yes |
+| Central | 7000 | No |
+| Central's cluster port, where the other servers register | 6010 | **Never** |
+| Database | 6100 | **Never** |
+| Map spawn | 6001 | No |
+| Database web API (.NET host) | 5757 | **Never** |
+
+Whoever can use the cluster port can kick players and start map servers, and whoever can use the database port or the web API can read and change every account. Two things keep them closed:
+
+1. **A firewall, first.** Allow the login and map ports from the internet and nothing else. Traffic between your server machines is not encrypted, so keep it on a private network or a VPN.
+2. **The server secret, second.** Give every server process of your deployment the same `serverSecret`: in `Config/serverConfig.json`, in an environment variable named `serverSecret`, or with `-serverSecret <value>` (a command line can be read by other users of the machine, so prefer the first two). The central and database servers then serve only peers that prove they have it. Use a long random value of at least 16 characters, for example the output of `openssl rand -hex 32`. Map servers that a map spawn server starts get it from the spawner.
+
+A server outside the editor **does not start** without a `serverSecret`, or with one shorter than 16 characters, and says why in its log. A secret is needed even when every server runs on one machine: an address cannot show that a peer is one of yours (a forwarder on the machine makes every outside peer look local), and a short secret could be guessed from one captured proof. Every server must be restarted to set or change it. Servers on different machines must keep their clocks within a minute of each other, which any synchronised clock does.
+
+A proof can be used once: a server refuses a copy of one it already accepted, so a captured proof is no use to someone listening on the network. That does not stop someone who also blocks the original, and it does not encrypt anything, so keep traffic between server machines on a private network.
+
+In the editor there is nothing to set up. Each time you press Play the editor makes a random secret for that session and gives it to the map servers it spawns, so only they can join its servers. `MMOServerInstance` has a **Server Secret** field for the case where a server you start yourself (another build, another editor, the .NET host) has to join the editor's servers: set the same value on both. The field is not in builds. It is saved in the project, so do not put a real deployment's secret in it.
+
+Two more defaults to change before going public. A server says so in its log at start while they are unchanged:
+
+- **`connectKey`** on your network managers' transport factory is `SampleConnectKey` in every copy of the kit. It ships inside your client build, so it is not a secret. It only turns away clients that were not built from your project. Change it in your project so that your server and client builds get the same one.
+- **The database web API's `ApiSecretKey`** (and `dbSecretKey` on the servers that use it) is `secret`. Change it, and put the API behind TLS.
+
 ## Updating Open MMORPG
 
 Tools → Open MMORPG → Update → **Check for Updates** updates the kit in place. It downloads only the files that changed since the release you installed, and it never overwrites a kit file you have edited without asking: those are listed with an **Overwrite** box, unticked, and the summary afterwards lists what was kept and links to the upstream changes. Files you deleted stay deleted, nothing is added inside a kit folder you deleted, and files you moved are updated where you put them. Everything the update changes is backed up to `OpenMMORPGBackups` beside `Assets` first, and if the result does not compile it offers to restore the backup; the window can restore the last update at any time. A project switched to the HDRP content counts that content as the kit's own: its HDRP files are not listed as your edits, and they are updated to the new release's HDRP versions, never to its URP ones.

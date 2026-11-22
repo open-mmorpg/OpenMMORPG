@@ -44,6 +44,13 @@ namespace MultiplayerARPG.MMO
         private string webSocketCertPath = string.Empty;
         [SerializeField]
         private string webSocketCertPassword = string.Empty;
+#if UNITY_EDITOR
+        // Editor only, so it is not in a build: a field in a build ships inside every client. A server outside the editor
+        // needs `serverSecret` in Config/serverConfig.json, in the `serverSecret` environment variable or with -serverSecret
+        [SerializeField]
+        [Tooltip("The secret which the editor's servers share. Leave it empty: the editor then makes a random one for each Play session and gives it to the map servers it spawns. Set it only when a server which you start yourself (another build, another editor, the .NET host) has to join the editor's servers, and give that server the same one. This field is for testing in the editor and is not in builds. It is saved in the project, so do not put a real deployment's secret here. For a real deployment set `serverSecret` in Config/serverConfig.json, in the `serverSecret` environment variable or with -serverSecret.")]
+        private string serverSecret = string.Empty;
+#endif
 
 
         public LoginNetworkManager LoginNetworkManager
@@ -120,6 +127,28 @@ namespace MultiplayerARPG.MMO
         {
             get => webSocketCertPassword;
             set => webSocketCertPassword = value;
+        }
+#if UNITY_EDITOR
+        /// <summary>
+        /// The inspector's server secret, which is for testing in the editor only. What the servers use is `ServerSecret.Value`
+        /// </summary>
+        public string ServerSecretForTesting
+        {
+            get => serverSecret;
+            set => serverSecret = value;
+        }
+#endif
+
+        private string InspectorServerSecret
+        {
+            get
+            {
+#if UNITY_EDITOR
+                return serverSecret;
+#else
+                return string.Empty;
+#endif
+            }
         }
 
         private LogGUI _cacheLogGUI;
@@ -301,6 +330,12 @@ namespace MultiplayerARPG.MMO
                     this.webSocketCertPassword = webSocketCertPassword = currentServerConfig.webSocketCertPassword;
                 }
                 currentServerConfig.webSocketCertPassword = webSocketCertPassword;
+
+                // The secret which the servers of this deployment share: command line, environment, config file, then the inspector.
+                // It is not written to a new config file, only its key is, so that it can be found there
+                ServerSecret.Apply(args, currentServerConfig.serverSecret, InspectorServerSecret);
+                if (currentServerConfig.serverSecret == null)
+                    currentServerConfig.serverSecret = string.Empty;
 
                 // Central network address
                 string centralAddress;
@@ -776,6 +811,9 @@ namespace MultiplayerARPG.MMO
             }
             else
             {
+                // Never a secret which everyone knows: without one in the inspector, a random one for this Play session
+                ServerSecret.SetForEditor(InspectorServerSecret);
+
                 if (!useCustomDatabaseClient)
                     databaseNetworkManager.SetDatabaseByOptionIndex(databaseOptionIndex);
 
@@ -866,6 +904,23 @@ namespace MultiplayerARPG.MMO
             databaseNetworkManager.DatabaseCache = currentDatabaseCache;
             DatabaseNetworkManager.GuildMemberRoles = GameInstance.Singleton.SocialSystemSetting.GuildMemberRoles;
             DatabaseNetworkManager.GuildExpTree = GameInstance.Singleton.SocialSystemSetting.GuildExpTable.expTree;
+
+            // Every server needs the deployment's secret, and a short one can be guessed. Not in the editor, where the servers are for testing
+            bool startingAnyServer = _startingDatabaseServer || _startingCentralServer || _startingLoginServer || _startingMapSpawnServer || _startingMapServer;
+            if (startingAnyServer && !Application.isEditor)
+            {
+                string serverSecretProblem = ServerSecret.Problem(ServerSecret.Value);
+                if (serverSecretProblem != null)
+                {
+                    Logging.LogError(nameof(MMOServerInstance), "Not starting: " + serverSecretProblem);
+                    Application.Quit(1);
+                    return;
+                }
+                // Say what was left at the kit's defaults
+                RestDatabaseClient restDatabaseClient = _customDatabaseClient as RestDatabaseClient;
+                if (useCustomDatabaseClient && restDatabaseClient != null)
+                    ServerSecurityWarnings.Log(nameof(MMOServerInstance), ServerSecurityWarnings.ForDatabaseApiKey(restDatabaseClient.secretKey));
+            }
 
             if (_startingDatabaseServer)
             {
@@ -967,6 +1022,8 @@ namespace MultiplayerARPG.MMO
             loginNetworkManager.webSocketCertificateFilePath = WebSocketCertificateFilePath;
             loginNetworkManager.webSocketCertificatePassword = WebSocketCertificatePassword;
             loginNetworkManager.StartServer();
+            if (!Application.isEditor)
+                ServerSecurityWarnings.Log(nameof(MMOServerInstance), ServerSecurityWarnings.ForConnectKey("login", loginNetworkManager.ServerTransport));
         }
         public void StartCentralServer()
         {
@@ -993,6 +1050,8 @@ namespace MultiplayerARPG.MMO
             MapNetworkManager.ChannelId = startingChannelId;
 #endif
             MapNetworkManager.StartServer();
+            if (!Application.isEditor)
+                ServerSecurityWarnings.Log(nameof(MMOServerInstance), ServerSecurityWarnings.ForConnectKey("map", MapNetworkManager.ServerTransport));
         }
 
         public void StartDatabaseManagerServer()

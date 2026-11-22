@@ -12,6 +12,15 @@ namespace MultiplayerARPG.MMO
             where TReq : struct, INetSerializable
             where TResp : struct, INetSerializable
         {
+#if NET || NETCOREAPP || ((UNITY_EDITOR || UNITY_SERVER || !EXCLUDE_SERVER_CODES) && UNITY_STANDALONE)
+            if (!await WaitForServerAuthentication(functionName))
+            {
+                return new DatabaseApiResult<TResp>()
+                {
+                    IsError = true,
+                };
+            }
+#endif
             var resp = await Client.SendRequestAsync<DbRequestMessage<TReq>, TResp>(requestType, new DbRequestMessage<TReq>()
             {
                 RequestTimeUtc = System.DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
@@ -35,6 +44,15 @@ namespace MultiplayerARPG.MMO
         private async UniTask<DatabaseApiResult> SendRequest<TReq>(TReq request, ushort requestType, string functionName)
             where TReq : struct, INetSerializable
         {
+#if NET || NETCOREAPP || ((UNITY_EDITOR || UNITY_SERVER || !EXCLUDE_SERVER_CODES) && UNITY_STANDALONE)
+            if (!await WaitForServerAuthentication(functionName))
+            {
+                return new DatabaseApiResult()
+                {
+                    IsError = true,
+                };
+            }
+#endif
             var resp = await Client.SendRequestAsync<DbRequestMessage<TReq>, EmptyMessage>(requestType, new DbRequestMessage<TReq>()
             {
                 RequestTimeUtc = System.DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
