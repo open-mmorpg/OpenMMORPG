@@ -8,8 +8,8 @@ namespace OpenMMORPG.Tests
     /// The default password hashing every database uses for logins. The right password must
     /// verify and any other must not, or players are locked out or let into other accounts; the
     /// configured salt must change the stored hash, so a leaked hash list from one server does
-    /// not match another's. (It is MD5, which the class itself flags as weak; that is not
-    /// asserted here.) New user ids must never repeat, or two accounts would share one id.
+    /// not match another's. Hashes are PBKDF2 with a random per-user salt; legacy MD5 hashes must still
+    /// verify and be flagged for rehash so old accounts are not locked out. New user ids must never repeat, or two accounts would share one id.
     /// </summary>
     [Category(TestCategories.Logic)]
     public class UserLoginHashingTests : KitTestFixture
@@ -48,6 +48,30 @@ namespace OpenMMORPG.Tests
             Assert.That(Login("other").VerifyPassword("secret", prefixed), Is.False);
             Assert.That(Login().VerifyPassword("secret", prefixed), Is.False);
             Assert.That(Login("pepper").VerifyPassword("secret", prefixed), Is.True, "the same salt verifies");
+        }
+
+        [Test]
+        public void SamePasswordGetsADifferentHashEachTimeAndFitsTheMySqlColumn()
+        {
+            DefaultDatabaseUserLogin login = Login();
+            string a = login.GetHashedPassword("secret");
+            string b = login.GetHashedPassword("secret");
+
+            Assert.That(a, Is.Not.EqualTo(b));
+            Assert.That(a.Length, Is.LessThanOrEqualTo(72));
+            Assert.That(login.NeedsRehash(a), Is.False);
+        }
+
+        [Test]
+        public void LegacyMd5HashesStillVerifyAndAreFlaggedForRehash()
+        {
+            const string md5OfSecret = "5ebe2294ecd0e0f08eab7690d2a6ee69";
+            DefaultDatabaseUserLogin login = Login();
+
+            Assert.That(login.VerifyPassword("secret", md5OfSecret), Is.True);
+            Assert.That(login.VerifyPassword("other", md5OfSecret), Is.False);
+            Assert.That(login.NeedsRehash(md5OfSecret), Is.True);
+            Assert.That(login.VerifyPassword("secret", "p1$garbage"), Is.False);
         }
 
         [Test]
