@@ -742,7 +742,8 @@ namespace MultiplayerARPG.MMO
             int changedGuildGold = await Database.ChangeGuildGold(request.GuildId, request.ChangeAmount);
             // Cache the data, it will be used later
             DatabaseCacheResult<GuildData> getGuildResult = await DatabaseCache.GetGuild(request.GuildId);
-            if (getGuildResult.HasValue)
+            // Negative means the change was rejected (e.g. overdraw), keep the cached gold as is
+            if (changedGuildGold >= 0 && getGuildResult.HasValue)
             {
                 GuildData guildData = getGuildResult.Value;
                 guildData.gold = changedGuildGold;
