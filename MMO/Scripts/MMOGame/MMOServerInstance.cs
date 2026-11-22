@@ -48,8 +48,8 @@ namespace MultiplayerARPG.MMO
         // Editor only, so it is not in a build: a field in a build ships inside every client. A server outside the editor
         // needs `serverSecret` in Config/serverConfig.json, in the `serverSecret` environment variable or with -serverSecret
         [SerializeField]
-        [Tooltip("The secret which every server of one deployment shares, without it the cluster and database ports accept servers on this machine only. This field is for testing in the editor and is not in builds. It is saved in the project, so do not put a real deployment's secret here. For a real deployment set `serverSecret` in Config/serverConfig.json, in the `serverSecret` environment variable or with -serverSecret.")]
-        private string serverSecret = "editor-testing-secret-not-for-production";
+        [Tooltip("The secret which the editor's servers share. Leave it empty: the editor then makes a random one for each Play session and gives it to the map servers it spawns. Set it only when a server which you start yourself (another build, another editor, the .NET host) has to join the editor's servers, and give that server the same one. This field is for testing in the editor and is not in builds. It is saved in the project, so do not put a real deployment's secret here. For a real deployment set `serverSecret` in Config/serverConfig.json, in the `serverSecret` environment variable or with -serverSecret.")]
+        private string serverSecret = string.Empty;
 #endif
 
 
@@ -811,7 +811,8 @@ namespace MultiplayerARPG.MMO
             }
             else
             {
-                ServerSecret.Set(InspectorServerSecret, ServerSecretSource.Inspector);
+                // Never a secret which everyone knows: without one in the inspector, a random one for this Play session
+                ServerSecret.SetForEditor(InspectorServerSecret);
 
                 if (!useCustomDatabaseClient)
                     databaseNetworkManager.SetDatabaseByOptionIndex(databaseOptionIndex);

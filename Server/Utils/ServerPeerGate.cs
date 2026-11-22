@@ -11,7 +11,8 @@ namespace MultiplayerARPG.MMO
     /// Decides which connections a server-to-server port (cluster, database) serves.
     /// With a <see cref="ServerSecret"/>: a connection is served after it proved that it has the secret,
     /// until then only the one request which carries the proof is read, and it is dropped if the proof does not come.
-    /// Without a secret (only in the editor, servers outside it refuse to start, see <see cref="ServerSecret.Problem"/>):
+    /// Without a secret (which servers started by MMOServerInstance or the .NET host never are: outside the editor they refuse to start,
+    /// see <see cref="ServerSecret.Problem"/>, and the editor makes one for the session, see <see cref="ServerSecret.SetForEditor"/>):
     /// only a connection from this machine (loopback) is served, any other is dropped as it connects.
     /// </summary>
     public sealed class ServerPeerGate

@@ -235,6 +235,38 @@ namespace OpenMMORPG.Tests
         }
 
         [Test]
+        public void TheEditorMakesARandomSecretForTheSessionUnlessTheInspectorHasOne()
+        {
+            ServerSecret.SetForEditor(string.Empty);
+            string first = ServerSecret.Value;
+            Assert.That(ServerSecret.Source, Is.EqualTo(ServerSecretSource.EditorSession));
+            Assert.That(ServerSecret.Problem(first), Is.Null, "a spawned map server, which gets it, starts with it");
+            Assert.That(first, Has.Length.EqualTo(64));
+
+            ServerSecret.SetForEditor(null);
+            Assert.That(ServerSecret.Value, Is.Not.EqualTo(first), "another session, another secret");
+
+            ServerSecret.SetForEditor(Secret);
+            Assert.That(ServerSecret.Value, Is.EqualTo(Secret));
+            Assert.That(ServerSecret.Source, Is.EqualTo(ServerSecretSource.Inspector));
+        }
+
+        [Test]
+        public void TheKitShipsNoSecretInTheInspector()
+        {
+            // A value here would be the same in every copy of the kit, which is no secret
+            UnityEngine.GameObject holder = new UnityEngine.GameObject(nameof(ServerSecretTests));
+            try
+            {
+                Assert.That(holder.AddComponent<MMOServerInstance>().ServerSecretForTesting, Is.Empty);
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(holder);
+            }
+        }
+
+        [Test]
         public void TheSecretIsReadFromTheCommandLineThenTheEnvironmentThenTheConfigFileThenTheInspector()
         {
             string[] args = new[] { "-startMapServer", ProcessArguments.ARG_SERVER_SECRET, "from-args" };

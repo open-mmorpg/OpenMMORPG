@@ -121,7 +121,7 @@ A server outside the editor **does not start** without a `serverSecret`, or with
 
 A proof can be used once: a server refuses a copy of one it already accepted, so a captured proof is no use to someone listening on the network. That does not stop someone who also blocks the original, and it does not encrypt anything, so keep traffic between server machines on a private network.
 
-In the editor, `MMOServerInstance` has a **Server Secret** field for testing, and without a secret the two ports serve the editor's own machine only. The field is not in builds. It is saved in the project, so do not put a real deployment's secret in it.
+In the editor there is nothing to set up. Each time you press Play the editor makes a random secret for that session and gives it to the map servers it spawns, so only they can join its servers. `MMOServerInstance` has a **Server Secret** field for the case where a server you start yourself (another build, another editor, the .NET host) has to join the editor's servers: set the same value on both. The field is not in builds. It is saved in the project, so do not put a real deployment's secret in it.
 
 Two more defaults to change before going public. A server says so in its log at start while they are unchanged:
 

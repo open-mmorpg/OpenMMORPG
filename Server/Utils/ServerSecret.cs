@@ -25,6 +25,8 @@ namespace MultiplayerARPG.MMO
         Environment,
         ConfigFile,
         Inspector,
+        /// <summary>Made by the editor for one Play session, see <see cref="ServerSecret.SetForEditor"/></summary>
+        EditorSession,
     }
 
     /// <summary>
@@ -75,6 +77,19 @@ namespace MultiplayerARPG.MMO
             if (secret.Length < MinimumLength)
                 return $"`{key}` is only {secret.Length} characters long, the least is {MinimumLength}. Use a long random value, for example the output of `openssl rand -hex 32`.";
             return null;
+        }
+
+        /// <summary>
+        /// The editor's secret: the inspector's, or when that is empty a random one which lasts for this Play session.
+        /// The editor's servers and the map servers they spawn (which get it in their environment) share it, nobody else can know it,
+        /// so nothing has to be set up to press Play and no secret which everyone knows ships with the kit.
+        /// </summary>
+        public static void SetForEditor(string fromInspector)
+        {
+            if (!string.IsNullOrWhiteSpace(fromInspector))
+                Set(fromInspector, ServerSecretSource.Inspector);
+            else
+                Set(NewNonce() + NewNonce(), ServerSecretSource.EditorSession);
         }
 
         /// <summary>
