@@ -11,6 +11,7 @@ namespace MultiplayerARPG
         public void LogExitGame(string characterId, string userId) { }
 
         public void LogEnterChat(ChatMessage chatMessage) { }
+        public void LogGMCommand(ChatMessage chatMessage, string command, int userLevel, bool allowed) { }
 
         public void LogAttackStart(IPlayerCharacterData playerCharacter, int simulateSeed, float[] triggerDurations, byte fireSpread, bool isLeftHand, CharacterItem weapon) { }
         public void LogAttackTrigger(IPlayerCharacterData playerCharacter, int simulateSeed, byte triggerIndex) { }

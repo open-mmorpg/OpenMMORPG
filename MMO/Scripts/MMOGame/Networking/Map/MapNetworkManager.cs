@@ -928,10 +928,15 @@ namespace MultiplayerARPG.MMO
                     return;
                 }
             }
+            // Audit every GM command attempt, including the ones the user is not allowed to use
+            bool isGmCommand = CurrentGameInstance.GMCommands.IsGMCommand(message.message, out string gmCommand);
+            BasePlayerCharacterEntity playerCharacterEntity = playerCharacter as BasePlayerCharacterEntity;
+            bool canUseGmCommand = isGmCommand && playerCharacterEntity != null &&
+                CurrentGameInstance.GMCommands.CanUseGMCommand(playerCharacterEntity.UserLevel, gmCommand);
+            if (isGmCommand)
+                ServerLogHandlers.LogGMCommand(message, gmCommand, playerCharacterEntity != null ? playerCharacterEntity.UserLevel : 0, message.sendByServer || canUseGmCommand);
             // Send GM command
-            if (message.sendByServer || (playerCharacter is BasePlayerCharacterEntity playerCharacterEntity &&
-                CurrentGameInstance.GMCommands.IsGMCommand(message.message, out string gmCommand) &&
-                CurrentGameInstance.GMCommands.CanUseGMCommand(playerCharacterEntity.UserLevel, gmCommand)))
+            if (message.sendByServer || canUseGmCommand)
             {
                 // If it's GM command and senderName's user level > 0, handle gm commands
                 // Send GM command to cluster server to broadcast to other servers later
