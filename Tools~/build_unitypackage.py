@@ -27,6 +27,10 @@ import gzip, hashlib, io, json, os, re, sys, tarfile, time
 
 KIT_MANIFEST = "Tools/Install/KitManifest.json"
 
+# Repository tooling that has to sit at the kit root, where Unity imports it (so it has a .meta),
+# but must never ship: the Makefile calls scripts in Tools~, which buyers do not get.
+TOOLING_FILES = {"Makefile"}
+
 # Licence files stay in the repository, which is open source, but never ship: the Asset Store
 # EULA covers the package, and review rejects a package that carries a licence of its own. The
 # licences of the components the kit bundles are reproduced in "Third-Party Notices.txt".
@@ -161,6 +165,8 @@ def build_kit(src, prefix, out, deps_json=None, version=None, manifest_out=None)
                 relp = fn if rel_root == "." else f"{rel_root}/{fn}"
                 if relp == KIT_MANIFEST:
                     continue  # an imported release's copy; this build writes its own
+                if relp in TOOLING_FILES:
+                    continue
                 if not os.path.isfile(meta):
                     skipped.append(relp); continue
                 g = guid_of(meta)
