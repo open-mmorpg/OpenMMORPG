@@ -25,7 +25,9 @@ namespace MultiplayerARPG.MMO
         public void Serialize(NetDataWriter writer)
         {
             time = ServerSecret.Now;
-            nonce = ServerSecret.NewNonce();
+            // A new message has none yet. One which was received keeps its own, so that sending it on writes the same registration
+            if (string.IsNullOrEmpty(nonce))
+                nonce = ServerSecret.NewNonce();
             hash = ComputeHash(ServerSecret.Value, time, nonce);
             peerInfo.Serialize(writer);
             writer.PutPackedLong(time);

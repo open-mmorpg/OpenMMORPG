@@ -76,6 +76,7 @@ namespace OpenMMORPG.Tests
                 peer.Serialize(writer);
                 writer.PutPackedLong(System.DateTimeOffset.UtcNow.ToUnixTimeSeconds());
                 writer.Put("forged");
+                writer.Put(ServerSecret.NewNonce());
             }
             RequestAppServerRegisterMessage request = new RequestAppServerRegisterMessage();
             request.Deserialize(new NetDataReader(writer.CopyData()));

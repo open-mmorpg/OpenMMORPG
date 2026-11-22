@@ -211,6 +211,30 @@ namespace OpenMMORPG.Tests
         }
 
         [Test]
+        public void EveryRegistrationHasItsOwnNonceAndOneSentOnKeepsIts()
+        {
+            ServerSecret.Set(Secret, ServerSecretSource.ConfigFile);
+            RequestAppServerRegisterMessage first = SentAndReceived(new RequestAppServerRegisterMessage() { peerInfo = MapServer() });
+            RequestAppServerRegisterMessage second = SentAndReceived(new RequestAppServerRegisterMessage() { peerInfo = MapServer() });
+
+            Assert.That(first.nonce, Has.Length.EqualTo(32));
+            Assert.That(second.nonce, Is.Not.EqualTo(first.nonce), "two registrations of the same server");
+            Assert.That(second.hash, Is.Not.EqualTo(first.hash));
+
+            // The same registration passed on, not a new one
+            Assert.That(SentAndReceived(first).nonce, Is.EqualTo(first.nonce));
+        }
+
+        private static RequestAppServerRegisterMessage SentAndReceived(RequestAppServerRegisterMessage message)
+        {
+            NetDataWriter writer = new NetDataWriter();
+            message.Serialize(writer);
+            RequestAppServerRegisterMessage received = new RequestAppServerRegisterMessage();
+            received.Deserialize(new NetDataReader(writer.CopyData()));
+            return received;
+        }
+
+        [Test]
         public void TheSecretIsReadFromTheCommandLineThenTheEnvironmentThenTheConfigFileThenTheInspector()
         {
             string[] args = new[] { "-startMapServer", ProcessArguments.ARG_SERVER_SECRET, "from-args" };
