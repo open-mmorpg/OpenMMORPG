@@ -87,5 +87,7 @@
         public const ushort ChangeUserUnlockContentProgression = 91;
         public const ushort UpdateUserUnlockContent = 92;
         public const ushort GetUserUnlockContent = 93;
+        // Open MMORPG: far from the numbers above, which follow upstream and grow with it
+        public const ushort ServerAuthenticate = 60000;
     }
 }

@@ -104,6 +104,11 @@ builder.Services.AddSwaggerGen(o =>
 
 var app = builder.Build();
 
+// Said at every start until the key the kit ships with is changed: with it, anyone who can reach
+// this API can read and change every account
+if (apiSecretKey == "secret")
+    app.Logger.LogWarning("ApiSecretKey is still `secret`, the key every copy of the kit ships with. Change it in appsettings.json, and `dbSecretKey` on the servers which use this API, before anything but this machine can reach it.");
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {

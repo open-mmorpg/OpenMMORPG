@@ -198,6 +198,15 @@ if (!ConfigReader.ReadArgs(args, ProcessArguments.ARG_WEB_SOCKET_CERT_PASSWORD, 
 }
 serverConfig[ProcessArguments.CONFIG_WEB_SOCKET_CERT_PASSWORD] = webSocketCertPassword;
 
+// The secret which the servers of this deployment share: command line, environment, then the config file.
+// Every server needs it: without one, or with a short one, the host does not start.
+// It is not written to a new config file, only its key is, so that it can be found there
+string serverSecretFromConfigFile = null;
+if (serverConfig.TryGetValue(ProcessArguments.CONFIG_SERVER_SECRET, out object serverSecretInConfigFile))
+    serverSecretFromConfigFile = serverSecretInConfigFile as string;
+ServerSecret.Apply(args, serverSecretFromConfigFile, null);
+serverConfig[ProcessArguments.CONFIG_SERVER_SECRET] = serverSecretFromConfigFile ?? string.Empty;
+
 // Central network address
 string centralNetworkAddress;
 if (ConfigReader.ReadArgs(args, ProcessArguments.ARG_CENTRAL_ADDRESS, out centralNetworkAddress, mapSpawnNetworkManager.clusterServerAddress) ||
@@ -473,6 +482,17 @@ if (startingLoginServer && !startingCentralServer)
     startingLoginServer = false;
 }
 
+// Every server needs the deployment's secret, and a short one can be guessed
+if (startingDatabaseServer || startingCentralServer || startingLoginServer || startingMapSpawnServer)
+{
+    string serverSecretProblem = ServerSecret.Problem(ServerSecret.Value);
+    if (serverSecretProblem != null)
+    {
+        Logging.LogError("Security", "Not starting: " + serverSecretProblem);
+        System.Environment.Exit(1);
+    }
+}
+
 // Start database server
 if (useCustomDatabaseClient)
     startingDatabaseServer = false;
@@ -492,6 +512,7 @@ if (startingCentralServer || startingLoginServer)
         ConfigReader.ReadConfigs(serverConfig, "dbApiUrl", out restDatabaseClient.apiUrl, restDatabaseClient.apiUrl);
         ConfigReader.ReadConfigs(serverConfig, "dbSecretKey", out restDatabaseClient.secretKey, restDatabaseClient.secretKey);
         Logging.Log("Using the database manager web API at " + restDatabaseClient.apiUrl);
+        ServerSecurityWarnings.Log("Security", ServerSecurityWarnings.ForDatabaseApiKey(restDatabaseClient.secretKey));
         databaseClient = restDatabaseClient;
     }
     else
@@ -524,6 +545,7 @@ if (startingLoginServer)
     loginNetworkManager.DatabaseClient = databaseClient;
     loginNetworkManager.CentralNetworkManager = centralNetworkManager;
     loginNetworkManager.StartServer();
+    ServerSecurityWarnings.Log("Security", ServerSecurityWarnings.ForConnectKey("login", loginNetworkManager.ServerTransport));
 }
 
 // Start map spawn server
@@ -555,8 +577,10 @@ AppDomain.CurrentDomain.ProcessExit += CurrentDomain_ProcessExit;
 while (!shutdown.IsCancellationRequested)
 {
     // ServerLoop reads each server's packets so that one it cannot read is dropped, not thrown
-    // out of this loop
-    if (databaseNetworkManager != null && databaseNetworkManager.IsServer)
+    // out of this loop.
+    // The database manager also when it is only the client of a database server in another
+    // process: its answers are read here
+    if (databaseNetworkManager != null && (databaseNetworkManager.IsServer || databaseNetworkManager.IsClient))
         ServerLoop.Update(databaseNetworkManager);
 
     if (centralNetworkManager != null && centralNetworkManager.IsServer)

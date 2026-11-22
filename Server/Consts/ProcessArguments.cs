@@ -71,6 +71,9 @@ namespace MultiplayerARPG.MMO
         public const string ARG_WEB_SOCKET_CERT_PATH = "-" + CONFIG_WEB_SOCKET_CERT_PATH;
         public const string CONFIG_WEB_SOCKET_CERT_PASSWORD = "webSocketCertPassword";
         public const string ARG_WEB_SOCKET_CERT_PASSWORD = "-" + CONFIG_WEB_SOCKET_CERT_PASSWORD;
+        // The secret which every server of one deployment shares, see `ServerSecret`
+        public const string CONFIG_SERVER_SECRET = "serverSecret";
+        public const string ARG_SERVER_SECRET = "-" + CONFIG_SERVER_SECRET;
         // Cluster server
         public const string CONFIG_CLUSTER_PORT = "clusterPort";
         public const string ARG_CLUSTER_PORT = "-" + CONFIG_CLUSTER_PORT;

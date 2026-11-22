@@ -58,7 +58,7 @@ namespace MultiplayerARPG.MMO
                 case ENetworkEvent.DisconnectEvent:
                     Logging.Log(LogTag, "OnClientDisconnected peer. disconnectInfo.Reason: " + eventData.disconnectInfo.Reason);
                     StopClient();
-                    OnDisconnectedFromClusterServer().Forget();
+                    OnDisconnectedFromClusterServer(eventData.disconnectInfo.Reason).Forget();
                     break;
                 case ENetworkEvent.ErrorEvent:
                     Logging.LogError(LogTag, "OnClientNetworkError endPoint: " + eventData.endPoint + " socketErrorCode " + eventData.socketError + " errorMessage " + eventData.errorMessage);
@@ -116,9 +116,11 @@ namespace MultiplayerARPG.MMO
 #endif
 
 #if NET || NETCOREAPP || ((UNITY_EDITOR || UNITY_SERVER || !EXCLUDE_SERVER_CODES) && UNITY_STANDALONE)
-        private async UniTaskVoid OnDisconnectedFromClusterServer()
+        private async UniTaskVoid OnDisconnectedFromClusterServer(LiteNetLib.DisconnectReason reason)
         {
             Logging.Log(LogTag, "Disconnected from Central Server");
+            if (!IsAppRegistered && reason == LiteNetLib.DisconnectReason.RemoteConnectionClose)
+                Logging.LogError(LogTag, $"The cluster server closed the connection before this server was registered. The central server's log has the reason. If it runs on another machine, both need the same `{ProcessArguments.CONFIG_SERVER_SECRET}`.");
             IsAppRegistered = false;
             Logging.Log(LogTag, "Reconnect to central in 5 seconds...");
             await DelayOneSec();
@@ -163,6 +165,14 @@ namespace MultiplayerARPG.MMO
             {
                 Logging.Log(LogTag, "App Registered successfully");
                 IsAppRegistered = true;
+            }
+            else if (response.message == UITextKeys.UI_ERROR_INVALID_SERVER_HASH)
+            {
+                Logging.LogError(LogTag, $"The cluster server refused this server ({response.message}). Give this server the same `{ProcessArguments.CONFIG_SERVER_SECRET}` as the central server, and keep both machines' clocks within {ServerSecret.MaxClockDifferenceSeconds} seconds. The central server's log has the reason.");
+            }
+            else
+            {
+                Logging.LogError(LogTag, $"App Register failed: {responseCode} {response.message}");
             }
             if (onResponseAppServerRegister != null)
                 onResponseAppServerRegister.Invoke(responseCode);
