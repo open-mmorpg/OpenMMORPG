@@ -210,7 +210,7 @@ namespace MultiplayerARPG
         }
 
 #if !UNITY_SERVER
-        private void PlayMeleeImpactEffect(BaseCharacterEntity attacker, string tag, Vector3 damagePosition, DamageableHitBox hitBox)
+        protected void PlayMeleeImpactEffect(BaseCharacterEntity attacker, string tag, Vector3 damagePosition, DamageableHitBox hitBox)
         {
             if (impactEffects == null)
                 return;
@@ -225,7 +225,7 @@ namespace MultiplayerARPG
 #endif
 
 #if !UNITY_SERVER
-        private void PlayMeleeImpactEffect(BaseCharacterEntity attacker, string tag, Vector3 damagePosition, Vector3 hitPoint)
+        protected void PlayMeleeImpactEffect(BaseCharacterEntity attacker, string tag, Vector3 damagePosition, Vector3 hitPoint)
         {
             if (impactEffects == null)
                 return;
