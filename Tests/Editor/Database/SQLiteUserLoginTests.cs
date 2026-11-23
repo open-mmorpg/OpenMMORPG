@@ -62,6 +62,7 @@ namespace OpenMMORPG.Tests
 
             Assert.That(TestAsync.Wait(_db.Database.ChangeGold(_userId, 50)), Is.EqualTo(50));
             Assert.That(TestAsync.Wait(_db.Database.ChangeGold(_userId, -20)), Is.EqualTo(30));
+            Assert.That(TestAsync.Wait(_db.Database.ChangeGold(_userId, -31)), Is.EqualTo(-1), "floor: rejected, not negative");
             Assert.That(TestAsync.Wait(_db.Database.ChangeCash(_userId, 7)), Is.EqualTo(7));
             Assert.That(TestAsync.Wait(_db.Database.ChangeCash(_userId, -2)), Is.EqualTo(5));
 

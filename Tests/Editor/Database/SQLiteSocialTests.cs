@@ -107,6 +107,7 @@ namespace OpenMMORPG.Tests
 
             Assert.That(TestAsync.Wait(_db.Database.ChangeGuildGold(id, 500)), Is.EqualTo(500));
             Assert.That(TestAsync.Wait(_db.Database.ChangeGuildGold(id, -120)), Is.EqualTo(380));
+            Assert.That(TestAsync.Wait(_db.Database.ChangeGuildGold(id, -381)), Is.EqualTo(-1), "floor: rejected, not negative");
             Assert.That(TestAsync.Wait(_db.Database.GetGuildGold(id)), Is.EqualTo(380));
             Assert.That(Guild(id).gold, Is.EqualTo(380));
         }
