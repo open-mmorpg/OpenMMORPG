@@ -94,7 +94,7 @@ namespace MultiplayerARPG
             Sp("LogRewardItem", "item", null, null, "given:RewardGivenType", "amount", "level");
             Sp("LogRewardGold", null, null, null, "given:RewardGivenType", "gold");
             Sp("LogRewardExp", null, null, null, "given:RewardGivenType", "exp", null, null, null, null, null, "levelUp");
-            Sp("LogRewardCurrency", "currency", null, null, "given:RewardGivenType", "amount");
+            Sp("LogRewardCurrency", "currency", null, null, "given:RewardGivenType", "amount", "currencyId");
             Sp("LogAddAttribute", "attribute", null, null, "added", "total"); Sp("LogResetAttributes");
             Sp("LogAddSkill", "skill", null, null, "added", "level"); Sp("LogResetSkills");
             Sp("LogQuestAccept", "quest"); Sp("LogQuestAbandon", "quest"); Sp("LogQuestComplete", "quest", null, null, "rewardIndex");
@@ -195,7 +195,8 @@ namespace MultiplayerARPG
         private readonly string[] _fileByBit; // bit index of ServerLogCategories -> file name, null = fallback
         private readonly Dictionary<string, StringBuilder> _sbs = new Dictionary<string, StringBuilder>();
         private readonly Dictionary<string, StreamWriter> _writers = new Dictionary<string, StreamWriter>();
-        private string _currentDate;
+        private string _currentSrc;
+        private string _writerDate;
 
         public FileServerLogSink(Func<string> prefixProvider, string[] fileByBit)
         {
@@ -216,24 +217,25 @@ namespace MultiplayerARPG
             foreach (var sb in _sbs.Values)
                 sb.Clear();
             string src = _prefixProvider();
+            if (src != _currentSrc)
+            {
+                CloseWriters(); // prefix changed: release the old files
+                _currentSrc = src;
+            }
             for (int i = 0; i < count; ++i)
             {
-                string file = FileOf(events[i].Category);
-                if (!_sbs.TryGetValue(file, out var sb))
-                    _sbs[file] = sb = new StringBuilder(16 * 1024);
+                // File date comes from the event's own UTC timestamp, same clock as the line
+                string key = FileOf(events[i].Category) + "|" + new DateTime(events[i].Ticks, DateTimeKind.Utc).ToString("yyyy-MM-dd");
+                if (!_sbs.TryGetValue(key, out var sb))
+                    _sbs[key] = sb = new StringBuilder(16 * 1024);
                 events[i].AppendTo(sb);
-            }
-            string date = DateTime.Now.ToString("yyyy-MM-dd");
-            if (date != _currentDate)
-            {
-                CloseWriters();
-                _currentDate = date;
             }
             foreach (var kv in _sbs)
             {
                 if (kv.Value.Length == 0)
                     continue;
-                var writer = GetWriter(kv.Key, src, date);
+                int sep = kv.Key.IndexOf('|');
+                var writer = GetWriter(kv.Key.Substring(0, sep), src, kv.Key.Substring(sep + 1));
                 writer.Write(kv.Value);
                 writer.Flush(); // once per group per batch, not per line
             }
@@ -244,6 +246,12 @@ namespace MultiplayerARPG
             string path = $"Logs/{file}_{src}_{date}.audit.log"; // keyed by path: src can change once the server instance is set up
             if (_writers.TryGetValue(path, out var writer))
                 return writer;
+            // Drop writers of other dates (day rollover) so old files are not kept open
+            if (_writerDate != date)
+            {
+                CloseWriters();
+                _writerDate = date;
+            }
             string dir = Path.GetDirectoryName(path);
             if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
                 Directory.CreateDirectory(dir);
@@ -297,6 +305,9 @@ namespace MultiplayerARPG
         private readonly ManualResetEventSlim _wake = new ManualResetEventSlim(false);
         private volatile bool _stop;
         private ServerLogSink _sink;
+        private const int MaxCapacity = 1 << 24;
+        private int _lostEvents;
+        private bool _failureReported;
 
         public ServerLogCategories EnabledCategories { get { return enabledCategories; } set { enabledCategories = value; } }
 
@@ -321,10 +332,18 @@ namespace MultiplayerARPG
             return string.IsNullOrEmpty(name) ? "Server" : name;
         }
 
-        protected virtual void Awake()
+        protected virtual void OnValidate()
+        {
+            capacity = Mathf.Clamp(capacity, 2, MaxCapacity);
+            flushIntervalMs = Mathf.Max(1, flushIntervalMs);
+        }
+
+        // Ring and thread are created on the first log call, so client builds that never log pay nothing
+        private void EnsureStarted()
         {
             int size = 1;
-            while (size < capacity) size <<= 1;
+            int cap = Mathf.Clamp(capacity, 2, MaxCapacity);
+            while (size < cap) size <<= 1;
             _ring = new ServerLogEvent[size];
             _mask = size - 1;
             _sink = CreateSink();
@@ -348,12 +367,18 @@ namespace MultiplayerARPG
                 return;
             _stop = true;
             _wake.Set();
+            // The writer thread disposes the sink itself on exit, so a Join timeout cannot race with a write
             _thread.Join(3000);
             _thread = null;
-            _sink.Dispose();
         }
 
         private void WriterLoop()
+        {
+            try { WriterLoopInner(); }
+            finally { _sink.Dispose(); }
+        }
+
+        private void WriterLoopInner()
         {
             var batch = new ServerLogEvent[1024];
             while (true)
@@ -364,17 +389,30 @@ namespace MultiplayerARPG
                 while ((n = Drain(batch)) > 0)
                 {
                     try { _sink.Write(batch, n); }
-                    catch { /* never kill the writer; lost batch is acceptable for logs */ }
+                    catch (Exception ex) { OnWriteFailed(ex, n); }
                 }
+                dropped += _lostEvents;
+                _lostEvents = 0;
                 if (dropped > 0)
                 {
                     batch[0] = new ServerLogEvent { Ticks = DateTime.UtcNow.Ticks, Name = "LogDropped", I1 = dropped };
-                    try { _sink.Write(batch, 1); } catch { }
+                    try { _sink.Write(batch, 1); }
+                    catch (Exception ex) { _lostEvents += dropped; OnWriteFailed(ex, 0); }
                 }
                 if (stopping)
                     return;
-                _wake.Wait(flushIntervalMs);
+                _wake.Wait(Math.Max(1, flushIntervalMs));
             }
+        }
+
+        // Writer thread. Never kill the writer; count lost events (reported as LogDropped) and report only the first failure
+        private void OnWriteFailed(Exception ex, int lost)
+        {
+            _lostEvents += lost;
+            if (_failureReported)
+                return;
+            _failureReported = true;
+            Debug.LogError("[ServerLog] Sink write failed, events are being lost: " + ex);
         }
 
         private int Drain(ServerLogEvent[] batch)
@@ -400,6 +438,8 @@ namespace MultiplayerARPG
         {
             if ((enabledCategories & cat) == 0)
                 return;
+            if (_ring == null)
+                EnsureStarted();
             int head = _head;
             if (head - Volatile.Read(ref _tail) >= _ring.Length)
             {
@@ -422,6 +462,7 @@ namespace MultiplayerARPG
             Volatile.Write(ref _head, head + 1);
         }
 
+        private bool On(ServerLogCategories cat) { return (enabledCategories & cat) != 0; }
         private static string IdOf(BaseGameData data) { return data ? data.Id : null; }
         private static string ItemKey(CharacterItem item) { var it = item.GetItem(); return it ? it.Id : null; }
 
@@ -442,14 +483,14 @@ namespace MultiplayerARPG
         }
 
         // Attack
-        public void LogAttackStart(IPlayerCharacterData c, int seed, float[] triggerDurations, byte fireSpread, bool isLeftHand, CharacterItem weapon) { Add(ServerLogCategories.Attack, nameof(LogAttackStart), c, ItemKey(weapon), null, null, seed, fireSpread, 0, 0, 0, 0f, 0f, isLeftHand); }
+        public void LogAttackStart(IPlayerCharacterData c, int seed, float[] triggerDurations, byte fireSpread, bool isLeftHand, CharacterItem weapon) { if (!On(ServerLogCategories.Attack)) return; Add(ServerLogCategories.Attack, nameof(LogAttackStart), c, ItemKey(weapon), null, null, seed, fireSpread, 0, 0, 0, 0f, 0f, isLeftHand); }
         public void LogAttackTrigger(IPlayerCharacterData c, int seed, byte triggerIndex) { Add(ServerLogCategories.Attack, nameof(LogAttackTrigger), c, i1: seed, i2: triggerIndex); }
         public void LogAttackTriggerFail(IPlayerCharacterData c, int seed, byte triggerIndex, ActionTriggerFailReasons reason) { Add(ServerLogCategories.Attack, nameof(LogAttackTriggerFail), c, i1: seed, i2: triggerIndex, i3: (int)reason); }
         public void LogAttackInterrupt(IPlayerCharacterData c, int seed) { Add(ServerLogCategories.Attack, nameof(LogAttackInterrupt), c, i1: seed); }
         public void LogAttackEnd(IPlayerCharacterData c, int seed) { Add(ServerLogCategories.Attack, nameof(LogAttackEnd), c, i1: seed); }
 
         // Skill
-        public void LogUseSkillStart(IPlayerCharacterData c, int seed, float[] triggerDurations, byte fireSpread, bool isLeftHand, CharacterItem weapon, BaseSkill skill, int skillLevel) { Add(ServerLogCategories.Skill, nameof(LogUseSkillStart), c, IdOf(skill), ItemKey(weapon), null, seed, skillLevel, fireSpread, 0, 0, 0f, 0f, isLeftHand); }
+        public void LogUseSkillStart(IPlayerCharacterData c, int seed, float[] triggerDurations, byte fireSpread, bool isLeftHand, CharacterItem weapon, BaseSkill skill, int skillLevel) { if (!On(ServerLogCategories.Skill)) return; Add(ServerLogCategories.Skill, nameof(LogUseSkillStart), c, IdOf(skill), ItemKey(weapon), null, seed, skillLevel, fireSpread, 0, 0, 0f, 0f, isLeftHand); }
         public void LogUseSkillTrigger(IPlayerCharacterData c, int seed, byte triggerIndex) { Add(ServerLogCategories.Skill, nameof(LogUseSkillTrigger), c, i1: seed, i2: triggerIndex); }
         public void LogUseSkillTriggerFail(IPlayerCharacterData c, int seed, byte triggerIndex, ActionTriggerFailReasons reason) { Add(ServerLogCategories.Skill, nameof(LogUseSkillTriggerFail), c, i1: seed, i2: triggerIndex, i3: (int)reason); }
         public void LogUseSkillInterrupt(IPlayerCharacterData c, int seed) { Add(ServerLogCategories.Skill, nameof(LogUseSkillInterrupt), c, i1: seed); }
@@ -473,12 +514,12 @@ namespace MultiplayerARPG
         // Damage
         public void LogDamageReceived(IPlayerCharacterData c, HitBoxPosition position, Vector3 fromPosition, EntityInfo instigator, DamageElementMinMaxFloatAmounts damageAmounts, CombatAmountType combatAmountType, int totalDamage, CharacterItem weapon, BaseSkill skill, int skillLevel, CharacterBuff buff, bool isDamageOverTime)
         {
-            Add(ServerLogCategories.Damage, nameof(LogDamageReceived), c, instigator?.Id, IdOf(skill), ItemKey(weapon), totalDamage, skillLevel, (int)position, (int)combatAmountType, 0, 0f, 0f, isDamageOverTime);
+            if (!On(ServerLogCategories.Damage)) return; Add(ServerLogCategories.Damage, nameof(LogDamageReceived), c, instigator?.Id, IdOf(skill), ItemKey(weapon), totalDamage, skillLevel, (int)position, (int)combatAmountType, 0, 0f, 0f, isDamageOverTime);
         }
         public void LogKilled(IPlayerCharacterData c, EntityInfo lastAttacker) { Add(ServerLogCategories.Kill, nameof(LogKilled), c, lastAttacker?.Id); }
 
         // Craft / item
-        public void LogCraftItem(IPlayerCharacterData c, ItemCraft itemCraft) { Add(ServerLogCategories.Craft, nameof(LogCraftItem), c, IdOf(itemCraft.CraftingItem), null, null, itemCraft.Amount, itemCraft.RequireGold); }
+        public void LogCraftItem(IPlayerCharacterData c, ItemCraft itemCraft) { if (!On(ServerLogCategories.Craft)) return; Add(ServerLogCategories.Craft, nameof(LogCraftItem), c, IdOf(itemCraft.CraftingItem), null, null, itemCraft.Amount, itemCraft.RequireGold); }
         public void LogDismantleItems(IPlayerCharacterData c, IList<ItemAmount> dismantleItems)
         {
             if ((enabledCategories & ServerLogCategories.Craft) == 0) return;
@@ -488,16 +529,16 @@ namespace MultiplayerARPG
         }
         public void LogRefine(IPlayerCharacterData c, CharacterItem refinedItem, IList<BaseItem> enhancerItems, float increaseSuccessRate, float decreaseRequireGoldRate, float chanceToNotDecreaseLevels, float chanceToNotDestroyItem, bool isSuccess, bool isDestroy, ItemRefineLevel itemRefineLevel, bool isReturning, ItemRefineFailReturning itemRefineFailReturning)
         {
-            Add(ServerLogCategories.Item, nameof(LogRefine), c, ItemKey(refinedItem), null, null, refinedItem.level, enhancerItems != null ? enhancerItems.Count : 0, (isSuccess ? 1 : 0) | (isDestroy ? 2 : 0), 0, 0, increaseSuccessRate, 0f, isReturning);
+            if (!On(ServerLogCategories.Item)) return; Add(ServerLogCategories.Item, nameof(LogRefine), c, ItemKey(refinedItem), null, null, refinedItem.level, enhancerItems != null ? enhancerItems.Count : 0, (isSuccess ? 1 : 0) | (isDestroy ? 2 : 0), 0, 0, increaseSuccessRate, 0f, isReturning);
         }
-        public void LogRepair(IPlayerCharacterData c, CharacterItem repairedItem, ItemRepairPrice price) { Add(ServerLogCategories.Item, nameof(LogRepair), c, ItemKey(repairedItem), null, null, repairedItem.level); }
-        public void LogEnhanceSocketItem(IPlayerCharacterData c, CharacterItem enhancedItem, BaseItem enhancerItem) { Add(ServerLogCategories.Item, nameof(LogEnhanceSocketItem), c, ItemKey(enhancedItem), IdOf(enhancerItem)); }
-        public void LogRemoveEnhancerFromItem(IPlayerCharacterData c, CharacterItem enhancedItem, BaseItem returnEnhancerItem) { Add(ServerLogCategories.Item, nameof(LogRemoveEnhancerFromItem), c, ItemKey(enhancedItem), IdOf(returnEnhancerItem)); }
-        public void LogItemDurabilityChanged(IPlayerCharacterData c, CharacterItem item, float oldDurability, float newDurability, bool destroyed) { if (!destroyed) return; Add(ServerLogCategories.Item, nameof(LogItemDurabilityChanged), c, ItemKey(item), null, null, 0, 0, 0, 0, 0, newDurability, oldDurability, destroyed); }
+        public void LogRepair(IPlayerCharacterData c, CharacterItem repairedItem, ItemRepairPrice price) { if (!On(ServerLogCategories.Item)) return; Add(ServerLogCategories.Item, nameof(LogRepair), c, ItemKey(repairedItem), null, null, repairedItem.level); }
+        public void LogEnhanceSocketItem(IPlayerCharacterData c, CharacterItem enhancedItem, BaseItem enhancerItem) { if (!On(ServerLogCategories.Item)) return; Add(ServerLogCategories.Item, nameof(LogEnhanceSocketItem), c, ItemKey(enhancedItem), IdOf(enhancerItem)); }
+        public void LogRemoveEnhancerFromItem(IPlayerCharacterData c, CharacterItem enhancedItem, BaseItem returnEnhancerItem) { if (!On(ServerLogCategories.Item)) return; Add(ServerLogCategories.Item, nameof(LogRemoveEnhancerFromItem), c, ItemKey(enhancedItem), IdOf(returnEnhancerItem)); }
+        public void LogItemDurabilityChanged(IPlayerCharacterData c, CharacterItem item, float oldDurability, float newDurability, bool destroyed) { if (!destroyed) return; if (!On(ServerLogCategories.Item)) return; Add(ServerLogCategories.Item, nameof(LogItemDurabilityChanged), c, ItemKey(item), null, null, 0, 0, 0, 0, 0, newDurability, oldDurability, destroyed); }
 
         // Trade
-        public void LogBuyVendingItem(IPlayerCharacterData c, IPlayerCharacterData seller, CharacterItem buyItem, int price) { Add(ServerLogCategories.Trade, nameof(LogBuyVendingItem), c, ItemKey(buyItem), seller?.Id, seller?.CharacterName, buyItem.amount, price); }
-        public void LogSellVendingItem(IPlayerCharacterData c, IPlayerCharacterData buyer, CharacterItem buyItem, int price) { Add(ServerLogCategories.Trade, nameof(LogSellVendingItem), c, ItemKey(buyItem), buyer?.Id, buyer?.CharacterName, buyItem.amount, price); }
+        public void LogBuyVendingItem(IPlayerCharacterData c, IPlayerCharacterData seller, CharacterItem buyItem, int price) { if (!On(ServerLogCategories.Trade)) return; Add(ServerLogCategories.Trade, nameof(LogBuyVendingItem), c, ItemKey(buyItem), seller?.Id, seller?.CharacterName, buyItem.amount, price); }
+        public void LogSellVendingItem(IPlayerCharacterData c, IPlayerCharacterData buyer, CharacterItem buyItem, int price) { if (!On(ServerLogCategories.Trade)) return; Add(ServerLogCategories.Trade, nameof(LogSellVendingItem), c, ItemKey(buyItem), buyer?.Id, buyer?.CharacterName, buyItem.amount, price); }
         public void LogExchangeDealingItemsAndGold(IPlayerCharacterData c, IPlayerCharacterData dealing, int dealingGold, IList<CharacterItem> dealingItems)
         {
             if ((enabledCategories & ServerLogCategories.Trade) == 0) return;
@@ -506,27 +547,27 @@ namespace MultiplayerARPG
             for (int i = 0; i < dealingItems.Count; ++i)
                 Add(ServerLogCategories.Trade, "DealingItem", c, ItemKey(dealingItems[i]), dealing?.Id, dealing?.CharacterName, dealingItems[i].amount, dealingItems[i].level);
         }
-        public void LogBuyNpcItem(IPlayerCharacterData c, NpcSellItem sellItem, int amount) { Add(ServerLogCategories.Trade, nameof(LogBuyNpcItem), c, IdOf(sellItem.item), null, null, sellItem.level, amount); }
-        public void LogSellNpcItem(IPlayerCharacterData c, CharacterItem item, int amount) { Add(ServerLogCategories.Trade, nameof(LogSellNpcItem), c, ItemKey(item), null, null, item.level, amount); }
+        public void LogBuyNpcItem(IPlayerCharacterData c, NpcSellItem sellItem, int amount) { if (!On(ServerLogCategories.Trade)) return; Add(ServerLogCategories.Trade, nameof(LogBuyNpcItem), c, IdOf(sellItem.item), null, null, sellItem.level, amount); }
+        public void LogSellNpcItem(IPlayerCharacterData c, CharacterItem item, int amount) { if (!On(ServerLogCategories.Trade)) return; Add(ServerLogCategories.Trade, nameof(LogSellNpcItem), c, ItemKey(item), null, null, item.level, amount); }
 
         // Reward
-        public void LogRewardItem(IPlayerCharacterData c, RewardGivenType t, BaseItem item, int amount) { Add(ServerLogCategories.Reward, nameof(LogRewardItem), c, IdOf(item), null, null, (int)t, amount); }
-        public void LogRewardItem(IPlayerCharacterData c, RewardGivenType t, CharacterItem item) { Add(ServerLogCategories.Reward, nameof(LogRewardItem), c, ItemKey(item), null, null, (int)t, item.amount, item.level); }
+        public void LogRewardItem(IPlayerCharacterData c, RewardGivenType t, BaseItem item, int amount) { if (!On(ServerLogCategories.Reward)) return; Add(ServerLogCategories.Reward, nameof(LogRewardItem), c, IdOf(item), null, null, (int)t, amount); }
+        public void LogRewardItem(IPlayerCharacterData c, RewardGivenType t, CharacterItem item) { if (!On(ServerLogCategories.Reward)) return; Add(ServerLogCategories.Reward, nameof(LogRewardItem), c, ItemKey(item), null, null, (int)t, item.amount, item.level); }
         public void LogRewardGold(IPlayerCharacterData c, RewardGivenType t, int gold) { Add(ServerLogCategories.Reward, nameof(LogRewardGold), c, i1: (int)t, i2: gold); }
         public void LogRewardExp(IPlayerCharacterData c, RewardGivenType t, int exp, bool isLevelUp) { Add(ServerLogCategories.Reward, nameof(LogRewardExp), c, i1: (int)t, i2: exp, b1: isLevelUp); }
-        public void LogRewardCurrency(IPlayerCharacterData c, RewardGivenType t, Currency currency, int amount) { Add(ServerLogCategories.Reward, nameof(LogRewardCurrency), c, IdOf(currency), null, null, (int)t, amount); }
-        public void LogRewardCurrency(IPlayerCharacterData c, RewardGivenType t, CharacterCurrency currency) { Add(ServerLogCategories.Reward, nameof(LogRewardCurrency), c, null, null, null, (int)t, currency.amount); }
+        public void LogRewardCurrency(IPlayerCharacterData c, RewardGivenType t, Currency currency, int amount) { if (!On(ServerLogCategories.Reward)) return; Add(ServerLogCategories.Reward, nameof(LogRewardCurrency), c, IdOf(currency), null, null, (int)t, amount, currency ? currency.DataId : 0); }
+        public void LogRewardCurrency(IPlayerCharacterData c, RewardGivenType t, CharacterCurrency currency) { Add(ServerLogCategories.Reward, nameof(LogRewardCurrency), c, null, null, null, (int)t, currency.amount, currency.dataId); }
 
         // Progress
-        public void LogAddAttribute(IPlayerCharacterData c, Attribute which, int howMuch, CharacterAttribute result) { Add(ServerLogCategories.Progress, nameof(LogAddAttribute), c, IdOf(which), null, null, howMuch, result.amount); }
+        public void LogAddAttribute(IPlayerCharacterData c, Attribute which, int howMuch, CharacterAttribute result) { if (!On(ServerLogCategories.Progress)) return; Add(ServerLogCategories.Progress, nameof(LogAddAttribute), c, IdOf(which), null, null, howMuch, result.amount); }
         public void LogResetAttributes(IPlayerCharacterData c) { Add(ServerLogCategories.Progress, nameof(LogResetAttributes), c); }
-        public void LogAddSkill(IPlayerCharacterData c, BaseSkill which, int howMuch, CharacterSkill result) { Add(ServerLogCategories.Progress, nameof(LogAddSkill), c, IdOf(which), null, null, howMuch, result.level); }
+        public void LogAddSkill(IPlayerCharacterData c, BaseSkill which, int howMuch, CharacterSkill result) { if (!On(ServerLogCategories.Progress)) return; Add(ServerLogCategories.Progress, nameof(LogAddSkill), c, IdOf(which), null, null, howMuch, result.level); }
         public void LogResetSkills(IPlayerCharacterData c) { Add(ServerLogCategories.Progress, nameof(LogResetSkills), c); }
 
         // Quest
-        public void LogQuestAccept(IPlayerCharacterData c, Quest quest) { Add(ServerLogCategories.Quest, nameof(LogQuestAccept), c, IdOf(quest)); }
-        public void LogQuestAbandon(IPlayerCharacterData c, Quest quest) { Add(ServerLogCategories.Quest, nameof(LogQuestAbandon), c, IdOf(quest)); }
-        public void LogQuestComplete(IPlayerCharacterData c, Quest quest, byte selectedRewardIndex) { Add(ServerLogCategories.Quest, nameof(LogQuestComplete), c, IdOf(quest), null, null, selectedRewardIndex); }
+        public void LogQuestAccept(IPlayerCharacterData c, Quest quest) { if (!On(ServerLogCategories.Quest)) return; Add(ServerLogCategories.Quest, nameof(LogQuestAccept), c, IdOf(quest)); }
+        public void LogQuestAbandon(IPlayerCharacterData c, Quest quest) { if (!On(ServerLogCategories.Quest)) return; Add(ServerLogCategories.Quest, nameof(LogQuestAbandon), c, IdOf(quest)); }
+        public void LogQuestComplete(IPlayerCharacterData c, Quest quest, byte selectedRewardIndex) { if (!On(ServerLogCategories.Quest)) return; Add(ServerLogCategories.Quest, nameof(LogQuestComplete), c, IdOf(quest), null, null, selectedRewardIndex); }
 
         // Storage
         public void LogMoveItemFromStorage(IPlayerCharacterData c, StorageId storageId, bool storageIsLimitWeight, float storageWeightLimit, bool storageIsLimitSlot, int storageSlotLimit, IList<CharacterItem> storageItems, int storageItemIndex, int storageItemAmount, InventoryType inventoryType, int inventoryItemIndex, byte equipSlotIndexOrWeaponSet, bool success, UITextKeys gameMessage)
