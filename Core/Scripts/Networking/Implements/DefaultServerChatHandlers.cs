@@ -52,6 +52,12 @@ namespace MultiplayerARPG
                     if (message.sendByServer || playerCharacter != null)
                     {
                         BasePlayerCharacterEntity playerCharacterEntity = playerCharacter == null ? null : playerCharacter as BasePlayerCharacterEntity;
+                        // Audit every GM command attempt, including the ones the user is not allowed to use
+                        if (GameInstance.ServerLogHandlers != null && GameInstance.Singleton.GMCommands.IsGMCommand(message.message, out string auditCommand))
+                        {
+                            int auditLevel = playerCharacterEntity != null ? playerCharacterEntity.UserLevel : 0;
+                            GameInstance.ServerLogHandlers.LogGMCommand(message, auditCommand, auditLevel, message.sendByServer || (playerCharacterEntity != null && GameInstance.Singleton.GMCommands.CanUseGMCommand(auditLevel, auditCommand)));
+                        }
                         if (message.sendByServer || (playerCharacterEntity != null &&
                             GameInstance.Singleton.GMCommands.IsGMCommand(message.message, out string gmCommand) &&
                             GameInstance.Singleton.GMCommands.CanUseGMCommand(playerCharacterEntity.UserLevel, gmCommand)))

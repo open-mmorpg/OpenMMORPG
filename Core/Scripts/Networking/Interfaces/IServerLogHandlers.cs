@@ -9,6 +9,7 @@ namespace MultiplayerARPG
         void LogExitGame(string characterId, string userId);
 
         void LogEnterChat(ChatMessage chatMessage);
+        void LogGMCommand(ChatMessage chatMessage, string command, int userLevel, bool allowed);
 
         void LogAttackStart(IPlayerCharacterData playerCharacter, int simulateSeed, float[] triggerDurations, byte fireSpread, bool isLeftHand, CharacterItem weapon);
         void LogAttackTrigger(IPlayerCharacterData playerCharacter, int simulateSeed, byte triggerIndex);
