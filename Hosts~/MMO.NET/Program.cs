@@ -142,24 +142,23 @@ serverConfig[ProcessArguments.CONFIG_DISABLE_DATABASE_CACHING] = disableDatabase
 
 // Which cache?
 int dbCacheOptionIndex;
-if (ConfigReader.ReadArgs(args, ProcessArguments.ARG_DATABASE_CACHE_OPTION_INDEX, out dbCacheOptionIndex, 0) ||
-    ConfigReader.ReadConfigs(serverConfig, ProcessArguments.CONFIG_DATABASE_CACHE_OPTION_INDEX, out dbCacheOptionIndex, 0))
+// Result ignored on purpose: a missing key means default 0, and the cache must never stay null.
+if (!ConfigReader.ReadArgs(args, ProcessArguments.ARG_DATABASE_CACHE_OPTION_INDEX, out dbCacheOptionIndex, 0))
+    ConfigReader.ReadConfigs(serverConfig, ProcessArguments.CONFIG_DATABASE_CACHE_OPTION_INDEX, out dbCacheOptionIndex, 0);
+if (disableDatabaseCaching)
 {
-    if (!disableDatabaseCaching)
+    databaseNetworkManager.DatabaseCache = new DisabledDatabaseCache();
+}
+else
+{
+    switch (dbCacheOptionIndex)
     {
-        switch (dbCacheOptionIndex)
-        {
-            case 0:
-                databaseNetworkManager.DatabaseCache = new LocalDatabaseCache();
-                break;
-            case 1:
-                databaseNetworkManager.DatabaseCache = new RedisDatabaseCache(loggerFactory.CreateLogger<RedisDatabaseCache>());
-                break;
-        }
-    }
-    else
-    {
-        databaseNetworkManager.DatabaseCache = new DisabledDatabaseCache();
+        case 1:
+            databaseNetworkManager.DatabaseCache = new RedisDatabaseCache(loggerFactory.CreateLogger<RedisDatabaseCache>());
+            break;
+        default:
+            databaseNetworkManager.DatabaseCache = new LocalDatabaseCache();
+            break;
     }
 }
 serverConfig[ProcessArguments.CONFIG_DATABASE_CACHE_OPTION_INDEX] = dbCacheOptionIndex;
@@ -474,12 +473,6 @@ bool startingLoginServer = false;
 if (ConfigReader.IsArgsProvided(args, ProcessArguments.ARG_START_LOGIN_SERVER))
 {
     startingLoginServer = true;
-}
-if (startingLoginServer && !startingCentralServer)
-{
-    // The login server reads the central server's channels and cluster server directly
-    Logging.LogError("The login server needs the central server in the same process, add " + ProcessArguments.ARG_START_CENTRAL_SERVER);
-    startingLoginServer = false;
 }
 
 // Every server needs the deployment's secret, and a short one can be guessed
