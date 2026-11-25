@@ -86,6 +86,8 @@ namespace MultiplayerARPG.MMO
             JArray objResults = (JArray)config[configName];
             foreach (var objResult in objResults)
             {
+                if (objResult.Type == JTokenType.Comment)
+                    continue;
                 result.Add(objResult.Value<string>());
             }
             return true;
@@ -102,6 +104,8 @@ namespace MultiplayerARPG.MMO
             JArray objResults = (JArray)config[configName];
             foreach (var objResult in objResults)
             {
+                if (objResult.Type == JTokenType.Comment)
+                    continue;
                 result.Add(JsonConvert.DeserializeObject<T>(objResult.ToString()));
             }
             return true;
