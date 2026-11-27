@@ -7,9 +7,10 @@ using Newtonsoft.Json;
 //        (defaults: 127.0.0.1 7500, and the copy of MMO.NET's Config/characterCreationData.json
 //        built beside this program)
 // Against a running login server: registers a fresh user, checks a wrong password is refused,
-// logs in, validates the token, lists channels, creates a character and lists characters again.
-// Exit code 0 only if every step behaves. The character it creates is the first one in the
-// creation data, so it follows whatever game data the host was given.
+// logs in, validates the token, lists channels, creates a character and lists characters again,
+// then creates a second one and checks that both wear their starting equipment.
+// Exit code 0 only if every step behaves. The characters it creates are the first one in the
+// creation data, so they follow whatever game data the host was given.
 //
 // Usage: OpenMMORPG.SmokeClient connections <host> <loginPort> <clients> <expected>
 // Opens that many connections to the login server, one after another, and holds them open.
@@ -117,6 +118,22 @@ Check(after.code == AckResponseCode.Success && (after.resp.characters?.Count ?? 
 Check(made != null && made.DataId == dataId && made.EntityId == entityId && made.CurrentMapName == template.CurrentMapName,
     "character matches the creation data", $"dataId={made?.DataId} entityId={made?.EntityId} map={made?.CurrentMapName} (expected {dataId} {entityId} {template.CurrentMapName})");
 
+// A second one of the same kind must get items of its own: the database keys an item by its id
+var secondCharacter = new PlayerCharacterData
+{
+    CharacterName = newCharacter.CharacterName + "b",
+    DataId = dataId,
+    EntityId = entityId,
+    FactionId = factionId,
+};
+var createSecond = await Ask<ResponseCreateCharacterMessage>(cb => client.RequestCreateCharacter(secondCharacter, cb), "create second character");
+Check(createSecond.code == AckResponseCode.Success, $"create character {secondCharacter.CharacterName}", $"{createSecond.code} {createSecond.resp.message}");
+
+var both = await Ask<ResponseCharactersMessage>(cb => client.RequestCharacters(cb), "characters");
+var characters = both.resp.characters ?? new();
+Check(both.code == AckResponseCode.Success && characters.Count == 2 && characters.All(c => Worn(c) == Worn(template)),
+    "both characters wear their starting equipment", $"{both.code} [{string.Join(", ", characters.Select(c => $"{c.CharacterName} {Worn(c)}"))}] (expected {Worn(template)} each)");
+
 client.StopClient();
 Console.WriteLine(failures == 0 ? "PASS all steps" : $"FAIL {failures} step(s)");
 return failures == 0 ? 0 : 1;
@@ -125,6 +142,13 @@ void Check(bool ok, string step, string detail)
 {
     if (!ok) failures++;
     Console.WriteLine($"{(ok ? "ok  " : "FAIL")} {step}: {detail}");
+}
+
+// Armour and weapons: the items the character list comes with
+int Worn(PlayerCharacterData character)
+{
+    return character.EquipItems.Count(item => item.dataId != 0)
+        + character.SelectableWeaponSets.Sum(set => (set.rightHand.dataId != 0 ? 1 : 0) + (set.leftHand.dataId != 0 ? 1 : 0));
 }
 
 async Task Pump(Func<bool> done, string what)
