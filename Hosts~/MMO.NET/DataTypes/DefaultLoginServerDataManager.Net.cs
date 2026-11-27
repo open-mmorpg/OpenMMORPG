@@ -42,6 +42,12 @@ namespace MultiplayerARPG.MMO
         public void SetNewPlayerCharacterData(PlayerCharacterData playerCharacterData, string characterName, int dataId, int entityId, int factionId, IList<CharacterDataBoolean> publicBools, IList<CharacterDataInt32> publicInts, IList<CharacterDataFloat32> publicFloats)
         {
             DataManager.CharacterCreationData.SetCreateCharacterData(playerCharacterData, playerCharacterData.Id, playerCharacterData.UserId, characterName, dataId, entityId, factionId, publicBools, publicInts, publicFloats);
+            // The copies carry the ids they were exported with, and the database keys items and
+            // buffs by id. The Unity half makes each one anew, so these get ids of their own.
+            playerCharacterData.SelectableWeaponSets = playerCharacterData.SelectableWeaponSets.Clone(true);
+            playerCharacterData.EquipItems = playerCharacterData.EquipItems.Clone(true);
+            playerCharacterData.NonEquipItems = playerCharacterData.NonEquipItems.Clone(true);
+            playerCharacterData.Buffs = playerCharacterData.Buffs.Clone(true);
         }
     }
 }
