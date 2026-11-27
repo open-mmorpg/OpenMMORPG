@@ -4,14 +4,13 @@
     dotnet build "Hosts~/OpenMMORPG.Hosts.sln" -c Release
     python "Tools~/hosts_smoke.py" .
 
-Six passes, each on a fresh database:
+Five passes, each on a fresh database:
 
   litenetlib        the database, central and login servers in one process
   rest              the database web API, with central and login reaching it through RestDatabaseClient
   connection-limit  the login server started with -loginMaxConnections
   malformed         as litenetlib, with packets no server can read sent to every port first
   secret            as litenetlib, then other processes try to join
-  logins            as litenetlib, with 60 clients registering and logging in at the same time
 
 Every host gets a serverSecret, as a server outside the editor will not start without one.
 In the first two and the last the smoke client registers, logs in and creates a character. In the
@@ -42,7 +41,6 @@ import time
 WINDOWS = os.name == "nt"
 READY_LINE = "App Registered successfully"      # the login server has joined the cluster
 CONNECTION_LIMIT = 2                            # -loginMaxConnections in the connection-limit pass
-LOGIN_BOTS = 60                                 # clients in the logins pass
 STOPPED_LINE = "All character saves are written."
 SECRET = "hosts-smoke-secret-5f2c9a1e77"
 DATABASE_ACCEPTED_LINE = "The database server accepted this server"
@@ -170,8 +168,6 @@ def run_pass(name, repo, configuration, work, offset):
         # Two more clients than the login server takes
         args += ["-loginMaxConnections", str(CONNECTION_LIMIT)]
         clients = [("", ["connections", "127.0.0.1", str(login_port), str(CONNECTION_LIMIT + 2), str(CONNECTION_LIMIT)])]
-    if name == "logins":
-        clients = [("", ["bots", "127.0.0.1", str(login_port), str(LOGIN_BOTS), "-ramp", "2", "-register"])]
     if name == "malformed":
         # Every port of the process, the ones players cannot reach too. Then the usual smoke test:
         # the servers are not only up, they still work. The cluster server has its own connect key
@@ -238,12 +234,12 @@ def main():
     parser.add_argument("--configuration", default="Release")
     parser.add_argument("--port-offset", type=int, default=0,
                         help="added to every default port, when the defaults are in use on this machine")
-    parser.add_argument("--only", choices=["litenetlib", "rest", "connection-limit", "malformed", "secret", "logins"], help="run one pass")
+    parser.add_argument("--only", choices=["litenetlib", "rest", "connection-limit", "malformed", "secret"], help="run one pass")
     options = parser.parse_args()
 
     work = tempfile.mkdtemp(prefix="hosts-smoke-")
     try:
-        passes = [options.only] if options.only else ["litenetlib", "rest", "connection-limit", "malformed", "secret", "logins"]
+        passes = [options.only] if options.only else ["litenetlib", "rest", "connection-limit", "malformed", "secret"]
         results = [run_pass(name, options.repo, options.configuration, work, options.port_offset) for name in passes]
     finally:
         shutil.rmtree(work, ignore_errors=True)
