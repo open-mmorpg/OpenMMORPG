@@ -5,6 +5,5 @@
     {
         public string PasswordSaltPrefix { get; set; }
         public string PasswordSaltPostfix { get; set; }
-        public int PasswordHashIterations { get; set; }
     }
 }

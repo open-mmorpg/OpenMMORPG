@@ -79,10 +79,6 @@ the same keys and arguments as a Unity server's; `0` turns a limit off. One key 
 takes from the Game Instance's **Max Character Saves**. `loginMaxConnections` is how many clients
 can be on the login and character screens at once.
 
-`passwordHashIterations` (1000) is how many rounds the password hash runs, the same key and
-argument as a Unity server's. Each hash stores its own rounds, so changing the setting keeps every
-account working; an account's hash is replaced the next time it logs in.
-
 Unlike the Unity spawner, the .NET map spawner cannot fall back to every map in `GameInstance`,
 because it has no game data: list the map ids in `spawnMaps`.
 
@@ -209,22 +205,12 @@ dotnet run --project SmokeClient -- malformed 127.0.0.1 7500
 dotnet run --project SmokeClient -- malformed 127.0.0.1 6010 CLUSTER
 ```
 
-A fourth mode is a load test: 150 clients connect and log in at once, and a report gives the
-counts and times. `-register` makes each bot create its account first, `-ramp <seconds>` spreads
-their starts. The login server's flood limits apply to the bots, so run them on the server's
-machine against `127.0.0.1`, or set the limits to `0` on the test server:
-
-```
-dotnet run -c Release --project SmokeClient -- bots 127.0.0.1 7500 150 -register
-```
-
 `Tools~/hosts_smoke.py` does the whole round on its own: it starts the built hosts on a fresh
 database, runs the smoke client, stops the hosts and checks they stopped cleanly, once with the
 LiteNetLib database server, once with the web API, once for the connection limit, and once with
 the unreadable packets sent to every port first. A fifth round checks that another process with
 the same secret is served, that one with another secret is refused by the cluster and database
-ports, and that ones with no secret or a short one do not start. A sixth has 60 bots register and
-log in at once. Every round gives its hosts a
+ports, and that ones with no secret or a short one do not start. Every round gives its hosts a
 `serverSecret`. The repository's checks workflow builds the hosts and runs it on every push.
 
 ```

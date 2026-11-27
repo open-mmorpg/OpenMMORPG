@@ -73,9 +73,6 @@ namespace MultiplayerARPG.MMO
 #endif
         private float characterSaveRetryDelaySeconds = 5f;
 
-        // Rounds of the password hash, see `DefaultDatabaseUserLogin`
-        public int passwordHashIterations = DefaultDatabaseUserLogin.DefaultIterations;
-
         private DatabaseCharacterSaveScheduler _characterSaveScheduler;
         private readonly ConcurrentDictionary<string, List<PlayerCharacterData>> _charactersByUserIdCache = new ConcurrentDictionary<string, List<PlayerCharacterData>>();
 
@@ -159,7 +156,6 @@ namespace MultiplayerARPG.MMO
             Database.Initialize();
 #endif
 #if NET || NETCOREAPP || ((UNITY_EDITOR || UNITY_SERVER || !EXCLUDE_SERVER_CODES) && UNITY_STANDALONE)
-            ApplyPasswordHashIterations();
             await Database.DoMigration();
 
             if (useDeferredCharacterSaveScheduler)
@@ -180,12 +176,6 @@ namespace MultiplayerARPG.MMO
         }
 
 #if NET || NETCOREAPP || ((UNITY_EDITOR || UNITY_SERVER || !EXCLUDE_SERVER_CODES) && UNITY_STANDALONE)
-        protected void ApplyPasswordHashIterations()
-        {
-            if (passwordHashIterations > 0 && Database.UserLoginManager is DefaultDatabaseUserLogin userLogin)
-                userLogin.Iterations = passwordHashIterations;
-        }
-
         public void EnqueueCharacterSave(UpdateCharacterReq request, bool forceImmediate = false)
         {
             if (_characterSaveScheduler == null)

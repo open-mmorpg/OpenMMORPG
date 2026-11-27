@@ -750,9 +750,6 @@ namespace MultiplayerARPG.MMO
                         databaseNetworkManager.networkPort = databaseManagerPort = currentServerConfig.databaseManagerPort.Value;
                     }
                     currentServerConfig.databaseManagerPort = databaseManagerPort;
-
-                    // Rounds of the password hash
-                    ReadLoginSetting(args, ProcessArguments.ARG_PASSWORD_HASH_ITERATIONS, ref currentServerConfig.passwordHashIterations, ref databaseNetworkManager.passwordHashIterations);
                 }
 
                 LogFileName = "Log";

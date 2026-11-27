@@ -14,64 +14,13 @@ namespace OpenMMORPG.Tests
     [Category(TestCategories.Logic)]
     public class UserLoginHashingTests : KitTestFixture
     {
-        private static DefaultDatabaseUserLogin Login(string prefix = "", string postfix = "", int iterations = 0)
+        private static DefaultDatabaseUserLogin Login(string prefix = "", string postfix = "")
         {
             return new DefaultDatabaseUserLogin(new DefaultDatabaseUserLoginConfig()
             {
                 PasswordSaltPrefix = prefix,
                 PasswordSaltPostfix = postfix,
-                PasswordHashIterations = iterations,
             });
-        }
-
-        // "secret" with the salt 00 01 .. 0f, made outside the kit
-        private const string SevenRoundsOfSecret = "p3$7$AAECAwQFBgcICQoLDA0ODw$P02XRSU+mYpB6TLVMUsSiacmB7qdM03Z";
-        // As stored before the rounds were a setting: 210,000 of them
-        private const string FixedRoundsOfSecret = "p2$AAECAwQFBgcICQoLDA0ODw$bh1CyNbqO8E74L/vu45as7NSq2mTLFzVbvIO6tmSSMM";
-
-        [Test]
-        public void AThousandRoundsUnlessSetAndTheHashStoresItsRounds()
-        {
-            Assert.That(Login().Iterations, Is.EqualTo(1000));
-            Assert.That(Login(iterations: -3).Iterations, Is.EqualTo(1000));
-            Assert.That(Login().GetHashedPassword("secret"), Does.StartWith("p3$1000$"));
-            Assert.That(Login(iterations: 250).GetHashedPassword("secret"), Does.StartWith("p3$250$"));
-        }
-
-        [Test]
-        public void AHashWithOtherRoundsStillVerifiesAndIsFlaggedForRehash()
-        {
-            DefaultDatabaseUserLogin login = Login(iterations: 40);
-
-            Assert.That(login.VerifyPassword("secret", SevenRoundsOfSecret), Is.True);
-            Assert.That(login.VerifyPassword("Secret", SevenRoundsOfSecret), Is.False);
-            Assert.That(login.NeedsRehash(SevenRoundsOfSecret), Is.True);
-            Assert.That(Login(iterations: 7).NeedsRehash(SevenRoundsOfSecret), Is.False);
-            Assert.That(login.VerifyPassword("secret", Login(iterations: 90).GetHashedPassword("secret")), Is.True);
-        }
-
-        [Test]
-        public void AHashFromBeforeTheSettingStillVerifiesAndIsFlaggedForRehash()
-        {
-            DefaultDatabaseUserLogin login = Login();
-
-            Assert.That(login.VerifyPassword("secret", FixedRoundsOfSecret), Is.True);
-            Assert.That(login.NeedsRehash(FixedRoundsOfSecret), Is.True);
-        }
-
-        [Test]
-        public void AMalformedHashIsRefused()
-        {
-            DefaultDatabaseUserLogin login = Login();
-            string salt = "AAECAwQFBgcICQoLDA0ODw";
-            string hash = "P02XRSU+mYpB6TLVMUsSiacmB7qdM03Z";
-
-            Assert.That(login.VerifyPassword("secret", $"p3$0${salt}${hash}"), Is.False);
-            Assert.That(login.VerifyPassword("secret", $"p3$seven${salt}${hash}"), Is.False);
-            Assert.That(login.VerifyPassword("secret", $"p3$7${salt}"), Is.False);
-            Assert.That(login.VerifyPassword("secret", $"p3$7${salt}$"), Is.False);
-            Assert.That(login.VerifyPassword("secret", $"p3$7${salt}$not base64!"), Is.False);
-            Assert.That(login.NeedsRehash($"p3$seven${salt}${hash}"), Is.True);
         }
 
         [Test]
