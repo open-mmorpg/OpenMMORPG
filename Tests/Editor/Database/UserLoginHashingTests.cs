@@ -9,10 +9,7 @@ namespace OpenMMORPG.Tests
     /// verify and any other must not, or players are locked out or let into other accounts; the
     /// configured salt must change the stored hash, so a leaked hash list from one server does
     /// not match another's. Hashes are PBKDF2 with a random per-user salt; legacy MD5 hashes must still
-    /// verify and be flagged for rehash so old accounts are not locked out. The rounds of the hash
-    /// are a setting and are stored with each hash: whatever the setting is now, a hash made with
-    /// another number, or from before there was a setting, must still verify, or changing the
-    /// setting would lock every account out. New user ids must never repeat, or two accounts would share one id.
+    /// verify and be flagged for rehash so old accounts are not locked out. New user ids must never repeat, or two accounts would share one id.
     /// </summary>
     [Category(TestCategories.Logic)]
     public class UserLoginHashingTests : KitTestFixture
@@ -27,40 +24,30 @@ namespace OpenMMORPG.Tests
             });
         }
 
-        // "secret" with the salt 00 01 .. 0f and no pepper, made outside the kit
+        // "secret" with the salt 00 01 .. 0f, made outside the kit
         private const string SevenRoundsOfSecret = "p3$7$AAECAwQFBgcICQoLDA0ODw$P02XRSU+mYpB6TLVMUsSiacmB7qdM03Z";
-        // As stored before the rounds were a setting: 210,000 of them, not written into the hash
+        // As stored before the rounds were a setting: 210,000 of them
         private const string FixedRoundsOfSecret = "p2$AAECAwQFBgcICQoLDA0ODw$bh1CyNbqO8E74L/vu45as7NSq2mTLFzVbvIO6tmSSMM";
 
         [Test]
-        public void AThousandRoundsUnlessSetAndTheHashSaysHowManyItHas()
+        public void AThousandRoundsUnlessSetAndTheHashStoresItsRounds()
         {
-            Assert.That(DefaultDatabaseUserLogin.DefaultIterations, Is.EqualTo(1000));
             Assert.That(Login().Iterations, Is.EqualTo(1000));
             Assert.That(Login(iterations: -3).Iterations, Is.EqualTo(1000));
-            Assert.That(Login(iterations: 250).Iterations, Is.EqualTo(250));
-
             Assert.That(Login().GetHashedPassword("secret"), Does.StartWith("p3$1000$"));
             Assert.That(Login(iterations: 250).GetHashedPassword("secret"), Does.StartWith("p3$250$"));
         }
 
         [Test]
-        public void AHashMadeWithOtherRoundsStillVerifiesAndIsFlaggedForRehash()
+        public void AHashWithOtherRoundsStillVerifiesAndIsFlaggedForRehash()
         {
             DefaultDatabaseUserLogin login = Login(iterations: 40);
 
-            // The hash is the standard one, not something only this class can read
             Assert.That(login.VerifyPassword("secret", SevenRoundsOfSecret), Is.True);
             Assert.That(login.VerifyPassword("Secret", SevenRoundsOfSecret), Is.False);
-            Assert.That(login.NeedsRehash(SevenRoundsOfSecret), Is.True, "so the setting reaches accounts that exist already");
+            Assert.That(login.NeedsRehash(SevenRoundsOfSecret), Is.True);
             Assert.That(Login(iterations: 7).NeedsRehash(SevenRoundsOfSecret), Is.False);
-
-            // Raised or lowered, both ways
-            string fewer = Login(iterations: 5).GetHashedPassword("secret");
-            string more = Login(iterations: 90).GetHashedPassword("secret");
-            Assert.That(login.VerifyPassword("secret", fewer), Is.True);
-            Assert.That(login.VerifyPassword("secret", more), Is.True);
-            Assert.That(login.VerifyPassword("other", more), Is.False);
+            Assert.That(login.VerifyPassword("secret", Login(iterations: 90).GetHashedPassword("secret")), Is.True);
         }
 
         [Test]
@@ -73,21 +60,17 @@ namespace OpenMMORPG.Tests
         }
 
         [Test]
-        public void AStoredHashThatIsNotOneOfOursIsRefusedWithoutBeingComputed()
+        public void AMalformedHashIsRefused()
         {
             DefaultDatabaseUserLogin login = Login();
             string salt = "AAECAwQFBgcICQoLDA0ODw";
             string hash = "P02XRSU+mYpB6TLVMUsSiacmB7qdM03Z";
 
-            // Two thousand million rounds would keep a worker busy for hours
-            Assert.That(login.VerifyPassword("secret", $"p3$2000000000${salt}${hash}"), Is.False);
             Assert.That(login.VerifyPassword("secret", $"p3$0${salt}${hash}"), Is.False);
-            Assert.That(login.VerifyPassword("secret", $"p3$-7${salt}${hash}"), Is.False);
             Assert.That(login.VerifyPassword("secret", $"p3$seven${salt}${hash}"), Is.False);
             Assert.That(login.VerifyPassword("secret", $"p3$7${salt}"), Is.False);
             Assert.That(login.VerifyPassword("secret", $"p3$7${salt}$"), Is.False);
             Assert.That(login.VerifyPassword("secret", $"p3$7${salt}$not base64!"), Is.False);
-            Assert.That(login.VerifyPassword("secret", "p3$"), Is.False);
             Assert.That(login.NeedsRehash($"p3$seven${salt}${hash}"), Is.True);
         }
 

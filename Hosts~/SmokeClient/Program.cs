@@ -24,10 +24,8 @@ using Newtonsoft.Json;
 // the server takes every packet and stays up. Any server's port will do: the login and database
 // servers take the default connect key, the cluster server takes CLUSTER.
 //
-// Usage: OpenMMORPG.SmokeClient bots <host> <loginPort> <bots> [-ramp seconds] [-register] [-characters] [-hold]
-// A load test: that many clients connect and log in at once, or spread over the ramp, and a
-// report says how many got through and how long it took them. Exit code 0 only if all did.
-// See LoginBots.cs.
+// Usage: OpenMMORPG.SmokeClient bots <host> <loginPort> <bots> [-ramp seconds] [-register]
+// A load test: that many clients connect and log in at once. See LoginBots.cs.
 if (args.Length > 0 && args[0] == "bots")
     return LoginBots.Run(args);
 

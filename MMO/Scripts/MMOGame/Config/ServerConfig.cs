@@ -77,7 +77,6 @@ namespace MultiplayerARPG.MMO
 
         public string databaseManagerAddress;
         public int? databaseManagerPort;
-        // Rounds of the password hash (1000 unless set)
         public int? passwordHashIterations;
     }
 }

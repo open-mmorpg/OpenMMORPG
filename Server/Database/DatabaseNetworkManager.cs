@@ -73,22 +73,11 @@ namespace MultiplayerARPG.MMO
 #endif
         private float characterSaveRetryDelaySeconds = 5f;
 
-#if (UNITY_EDITOR || UNITY_SERVER || !EXCLUDE_SERVER_CODES) && UNITY_STANDALONE
-        [Tooltip("Rounds of the password hash. Every login and every new account costs the server one hash, and the cost grows with the rounds: 1,000 take about 18 ms on a Unity server. More rounds make a leaked database slower to guess passwords from. Changing it keeps existing accounts working. Also `passwordHashIterations` in serverConfig.json and `-passwordHashIterations`.")]
-#endif
+        // Rounds of the password hash, see `DefaultDatabaseUserLogin`
         public int passwordHashIterations = DefaultDatabaseUserLogin.DefaultIterations;
 
         private DatabaseCharacterSaveScheduler _characterSaveScheduler;
         private readonly ConcurrentDictionary<string, List<PlayerCharacterData>> _charactersByUserIdCache = new ConcurrentDictionary<string, List<PlayerCharacterData>>();
-
-#if NET || NETCOREAPP || ((UNITY_EDITOR || UNITY_SERVER || !EXCLUDE_SERVER_CODES) && UNITY_STANDALONE)
-        /// <summary>
-        /// Password hashing runs here, beside the loop, and `Update` hands the results back on it.
-        /// A login or a new account costs one slow hash; done inline it stopped this server, and
-        /// every server that shares its loop, from accepting connections or answering anything else.
-        /// </summary>
-        public OffLoopWorkQueue BackgroundWork { get; } = new OffLoopWorkQueue();
-#endif
 
 
         public bool UseDeferredCharacterSaveScheduler => useDeferredCharacterSaveScheduler;
@@ -170,7 +159,7 @@ namespace MultiplayerARPG.MMO
             Database.Initialize();
 #endif
 #if NET || NETCOREAPP || ((UNITY_EDITOR || UNITY_SERVER || !EXCLUDE_SERVER_CODES) && UNITY_STANDALONE)
-            PrepareDatabase();
+            ApplyPasswordHashIterations();
             await Database.DoMigration();
 
             if (useDeferredCharacterSaveScheduler)
@@ -191,23 +180,10 @@ namespace MultiplayerARPG.MMO
         }
 
 #if NET || NETCOREAPP || ((UNITY_EDITOR || UNITY_SERVER || !EXCLUDE_SERVER_CODES) && UNITY_STANDALONE)
-        /// <summary>Gives the database what it takes from its server, before the first request.</summary>
-        protected void PrepareDatabase()
+        protected void ApplyPasswordHashIterations()
         {
-            Database.BackgroundWork = BackgroundWork;
-            // A user login manager of your own decides what its hashes cost
-            if (Database.UserLoginManager is DefaultDatabaseUserLogin userLogin)
-            {
+            if (passwordHashIterations > 0 && Database.UserLoginManager is DefaultDatabaseUserLogin userLogin)
                 userLogin.Iterations = passwordHashIterations;
-                Logging.Log(nameof(DatabaseNetworkManager), $"Passwords are hashed with {userLogin.Iterations} rounds.");
-            }
-        }
-
-        protected override void Update()
-        {
-            base.Update();
-            // The requests that waited for a password hash carry on here, on the loop
-            BackgroundWork.Update();
         }
 
         public void EnqueueCharacterSave(UpdateCharacterReq request, bool forceImmediate = false)

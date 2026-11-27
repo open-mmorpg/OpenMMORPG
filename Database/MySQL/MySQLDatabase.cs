@@ -421,30 +421,26 @@ namespace MultiplayerARPG.MMO
         public override async UniTask<string> ValidateUserLogin(string username, string password)
         {
             string id = string.Empty;
-            string hashedPassword = null;
+            bool rehash = false;
             await ExecuteReader((reader) =>
             {
                 if (reader.Read())
                 {
                     id = reader.GetString(0);
-                    hashedPassword = reader.GetString(1);
+                    string hashedPassword = reader.GetString(1);
+                    if (!UserLoginManager.VerifyPassword(password, hashedPassword))
+                        id = string.Empty;
+                    else
+                        rehash = UserLoginManager.NeedsRehash(hashedPassword);
                 }
             }, "SELECT id, password FROM userlogin WHERE username=@username AND authType=@authType LIMIT 1",
                 new MySqlParameter("@username", username),
                 new MySqlParameter("@authType", AUTH_TYPE_NORMAL));
 
-            if (hashedPassword == null)
-                return string.Empty;
-
-            // The reader is closed by now: the hash is slow and runs beside the server's loop
-            PasswordCheck check = await CheckPassword(password, hashedPassword);
-            if (!check.isValid)
-                return string.Empty;
-
-            if (check.newHash != null)
+            if (rehash)
                 await ExecuteNonQuery("UPDATE userlogin SET password=@password WHERE id=@id",
                     new MySqlParameter("@id", id),
-                    new MySqlParameter("@password", check.newHash));
+                    new MySqlParameter("@password", UserLoginManager.GetHashedPassword(password)));
 
             return id;
         }
@@ -520,11 +516,10 @@ namespace MultiplayerARPG.MMO
 
         public override async UniTask CreateUserLogin(string username, string password, string email)
         {
-            string hashedPassword = await HashPassword(password);
             await ExecuteNonQuery("INSERT INTO userlogin (id, username, password, email, authType) VALUES (@id, @username, @password, @email, @authType)",
                 new MySqlParameter("@id", UserLoginManager.GenerateNewId()),
                 new MySqlParameter("@username", username),
-                new MySqlParameter("@password", hashedPassword),
+                new MySqlParameter("@password", UserLoginManager.GetHashedPassword(password)),
                 new MySqlParameter("@email", email),
                 new MySqlParameter("@authType", AUTH_TYPE_NORMAL));
         }

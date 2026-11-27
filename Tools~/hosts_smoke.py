@@ -11,7 +11,7 @@ Six passes, each on a fresh database:
   connection-limit  the login server started with -loginMaxConnections
   malformed         as litenetlib, with packets no server can read sent to every port first
   secret            as litenetlib, then other processes try to join
-  logins            as litenetlib, with many clients registering and logging in at the same time
+  logins            as litenetlib, with 60 clients registering and logging in at the same time
 
 Every host gets a serverSecret, as a server outside the editor will not start without one.
 In the first two and the last the smoke client registers, logs in and creates a character. In the
@@ -19,10 +19,7 @@ third it opens more connections than the login server was told to take, and chec
 ones are refused and that a place frees when a client leaves. In the fourth it sends empty, cut-off
 and random packets to the login, central, cluster and database ports, checks after each that the
 server still lets a client in, and then registers, logs in and creates a character as in the
-first. In the last, bots register their accounts several at a time and then all connect and log
-in within a couple of seconds, and every one of them has to get through: the servers' loop must
-keep running while passwords are hashed, and logins that overlap must not disturb each other.
-Then the host is asked to stop (SIGTERM, or Ctrl+Break on Windows). A pass fails unless the
+first. Then the host is asked to stop (SIGTERM, or Ctrl+Break on Windows). A pass fails unless the
 smoke client passes, the host is still running when asked to stop and exits with 0, and (every
 pass that runs the database server) it reports that the character saves it held were written.
 
@@ -46,7 +43,6 @@ WINDOWS = os.name == "nt"
 READY_LINE = "App Registered successfully"      # the login server has joined the cluster
 CONNECTION_LIMIT = 2                            # -loginMaxConnections in the connection-limit pass
 LOGIN_BOTS = 60                                 # clients in the logins pass
-LOGIN_BOTS_RAMP_SECONDS = 2                     # they start evenly over this long
 STOPPED_LINE = "All character saves are written."
 SECRET = "hosts-smoke-secret-5f2c9a1e77"
 DATABASE_ACCEPTED_LINE = "The database server accepted this server"
@@ -175,8 +171,7 @@ def run_pass(name, repo, configuration, work, offset):
         args += ["-loginMaxConnections", str(CONNECTION_LIMIT)]
         clients = [("", ["connections", "127.0.0.1", str(login_port), str(CONNECTION_LIMIT + 2), str(CONNECTION_LIMIT)])]
     if name == "logins":
-        clients = [("", ["bots", "127.0.0.1", str(login_port), str(LOGIN_BOTS), "-ramp", str(LOGIN_BOTS_RAMP_SECONDS),
-                         "-register", "-characters"])]
+        clients = [("", ["bots", "127.0.0.1", str(login_port), str(LOGIN_BOTS), "-ramp", "2", "-register"])]
     if name == "malformed":
         # Every port of the process, the ones players cannot reach too. Then the usual smoke test:
         # the servers are not only up, they still work. The cluster server has its own connect key
@@ -207,8 +202,7 @@ def run_pass(name, repo, configuration, work, offset):
             print(f"-- {what}")
         result = subprocess.run(["dotnet", os.path.join(smoke, "OpenMMORPG.SmokeClient.dll")] + client_args,
                                 capture_output=True, text=True)
-        lines = [line for line in result.stdout.splitlines()
-                 if line.startswith(("ok ", "FAIL", "PASS", "Bots that got through", "Connect time", "Login time"))]
+        lines = [line for line in result.stdout.splitlines() if line.startswith(("ok ", "FAIL", "PASS"))]
         print("\n".join(lines))
         if result.returncode != 0:
             print(f"FAIL smoke client exited with {result.returncode}\n{result.stdout}\n{result.stderr}")

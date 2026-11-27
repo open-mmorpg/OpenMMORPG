@@ -18,7 +18,7 @@ page is the step-by-step version of this README.
 | --- | --- |
 | `MMO.NET/` | Console server: database, central, login and map-spawn servers, any mix of them, in one process |
 | `DatabaseManager/` | ASP.NET Core web API over the database. Servers reach it through `RestDatabaseClient` |
-| `SmokeClient/` | Registers, logs in and creates a character against a running login server, then reports each step. Its `bots` mode is a load test: many clients log in at once (see "Load-test the login server") |
+| `SmokeClient/` | Registers, logs in and creates a character against a running login server, then reports each step |
 | `ThirdParty/` | The Unity-free code the hosts need that the kit does not ship (git subtrees, see below) |
 
 ## Add it to your project
@@ -80,12 +80,8 @@ takes from the Game Instance's **Max Character Saves**. `loginMaxConnections` is
 can be on the login and character screens at once.
 
 `passwordHashIterations` (1000) is how many rounds the password hash runs, the same key and
-argument as a Unity server's. Every login and every new account costs the database server one
-hash, and the cost grows with the rounds; so does the work of guessing passwords from a leaked
-database. Each hash stores its own rounds, so changing the setting keeps every account working,
-and an account's hash is replaced the next time it logs in. Accounts made while the rounds were
-fixed at 210,000 pay that once more, at their next login. The web API reads the same number from
-`UserLoginManagerConfig:PasswordHashIterations` in `appsettings.json`.
+argument as a Unity server's. Each hash stores its own rounds, so changing the setting keeps every
+account working; an account's hash is replaced the next time it logs in.
 
 Unlike the Unity spawner, the .NET map spawner cannot fall back to every map in `GameInstance`,
 because it has no game data: list the map ids in `spawnMaps`.
@@ -213,61 +209,31 @@ dotnet run --project SmokeClient -- malformed 127.0.0.1 7500
 dotnet run --project SmokeClient -- malformed 127.0.0.1 6010 CLUSTER
 ```
 
+A fourth mode is a load test: 150 clients connect and log in at once, and a report gives the
+counts and times. `-register` makes each bot create its account first, `-ramp <seconds>` spreads
+their starts. The login server's flood limits apply to the bots, so run them on the server's
+machine against `127.0.0.1`, or set the limits to `0` on the test server:
+
+```
+dotnet run -c Release --project SmokeClient -- bots 127.0.0.1 7500 150 -register
+```
+
 `Tools~/hosts_smoke.py` does the whole round on its own: it starts the built hosts on a fresh
 database, runs the smoke client, stops the hosts and checks they stopped cleanly, once with the
 LiteNetLib database server, once with the web API, once for the connection limit, and once with
 the unreadable packets sent to every port first. A fifth round checks that another process with
 the same secret is served, that one with another secret is refused by the cluster and database
 ports, and that ones with no secret or a short one do not start. A sixth has 60 bots register and
-log in within a couple of seconds, and passes only if all of them get through. Every round gives
-its hosts a `serverSecret`. The repository's checks workflow builds the hosts and runs it on every
-push.
+log in at once. Every round gives its hosts a
+`serverSecret`. The repository's checks workflow builds the hosts and runs it on every push.
 
 ```
 dotnet build OpenMMORPG.Hosts.sln -c Release
 python ../Tools~/hosts_smoke.py ..
 ```
 
-## Load-test the login server
-
-The smoke client's `bots` mode connects many clients to a running login server and logs them all
-in, then reports how many got through and how long they took. It works against a Unity login
-server as well as these hosts:
-
-```
-dotnet run -c Release --project SmokeClient -- bots 127.0.0.1 7500 150 -register
-```
-
-| Option | What it does |
-| --- | --- |
-| `-register` | Creates the bots' accounts first (`loadbot0001`, `loadbot0002`, ...). Needed the first time against a database; accounts that exist are left alone. It is not part of the timed run |
-| `-ramp <seconds>` | Starts the bots evenly over this long. Without it they all start at once |
-| `-characters` | After logging in, each bot also asks for its character list |
-| `-hold` | Bots stay connected until the run ends. Without it each one leaves when it is done, as a client does when it moves on to a map server |
-| `-prefix <name>` | The start of the account names, when `loadbot` will not do |
-| `-registrars <n>` | How many connections register accounts at the same time (8) |
-
-The report counts the bots that connected and the ones that logged in, gives the median, the 95%
-mark and the slowest of each step, and lists why any bot failed. The exit code is 0 only if every
-bot connected and logged in.
-
-The login server's flood limits apply to bots like to anyone else. Run them on the server's own
-machine against `127.0.0.1`: with `loginExemptLoopback` on, which is the default, connections from
-the machine itself are not held to the per-address limits. To test from another machine, set the
-limits to `0` in the test server's `serverConfig.json`, and make sure `loginMaxConnections` is at
-least the number of bots.
-
-A login costs one password hash, which is slow on purpose. The database server runs the hashes on
-worker threads, half the machine's cores at a time, so how many logins a second a server takes
-depends on its cores. Each bot is a real client with a socket of its own; a few hundred on one
-machine is a sensible size.
-
 ## Known gaps
 
-- A request one server awaits from another (the login server asking the database or the cluster)
-  takes about a tenth of a second longer here than under Unity: the LiteNetLibManager these hosts
-  compile checks for the answer every 100 ms. A login is four such requests, so it takes around
-  0.7 seconds even on an idle server. It does not limit how many logins run at once.
 - Map servers call five "user unlock content" database operations that nothing implements, neither
   the LiteNetLib database server nor the web API. This is inherited from upstream and affects the
   Unity servers too.

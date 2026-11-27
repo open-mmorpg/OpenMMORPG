@@ -121,39 +121,31 @@ namespace MultiplayerARPG.MMO
         public const string CACHE_KEY_REHASH_PASSWORD = "REHASH_PASSWORD";
         public override async UniTask<string> ValidateUserLogin(string username, string password)
         {
+            using var connection = await _dataSource.OpenConnectionAsync();
+            using var reader = await PostgreSQLHelpers.ExecuteSelect(
+                CACHE_KEY_VALIDATE_USER_LOGIN,
+                connection,
+                "users", "id, password", "LIMIT 1",
+                PostgreSQLHelpers.WhereEqualTo("username", username));
             string id = string.Empty;
-            string hashedPassword = null;
-            // The connection goes back to the pool before the hash: the hash is slow, and under
-            // load it waits its turn first
-            using (var connection = await _dataSource.OpenConnectionAsync())
+            bool rehash = false;
+            if (reader.Read())
             {
-                using var reader = await PostgreSQLHelpers.ExecuteSelect(
-                    CACHE_KEY_VALIDATE_USER_LOGIN,
-                    connection,
-                    "users", "id, password", "LIMIT 1",
-                    PostgreSQLHelpers.WhereEqualTo("username", username));
-                if (reader.Read())
-                {
-                    id = reader.GetString(0);
-                    hashedPassword = reader.GetString(1);
-                }
-                await reader.CloseAsync();
+                id = reader.GetString(0);
+                string hashedPassword = reader.GetString(1);
+                if (!UserLoginManager.VerifyPassword(password, hashedPassword))
+                    id = string.Empty;
+                else
+                    rehash = UserLoginManager.NeedsRehash(hashedPassword);
             }
-            if (hashedPassword == null)
-                return string.Empty;
-
-            PasswordCheck check = await CheckPassword(password, hashedPassword);
-            if (!check.isValid)
-                return string.Empty;
-
-            if (check.newHash != null)
+            await reader.CloseAsync();
+            if (rehash)
             {
-                using var connection = await _dataSource.OpenConnectionAsync();
                 await PostgreSQLHelpers.ExecuteUpdate(
                     CACHE_KEY_REHASH_PASSWORD,
                     connection, null,
                     "users",
-                    new[] { new PostgreSQLHelpers.ColumnInfo("password", check.newHash) },
+                    new[] { new PostgreSQLHelpers.ColumnInfo("password", UserLoginManager.GetHashedPassword(password)) },
                     PostgreSQLHelpers.WhereEqualTo("id", id));
             }
             return id;
@@ -293,8 +285,6 @@ namespace MultiplayerARPG.MMO
         public override async UniTask CreateUserLogin(string username, string password, string email)
         {
             var id = UserLoginManager.GenerateNewId();
-            // Before a connection is taken from the pool: the hash is slow
-            string hashedPassword = await HashPassword(password);
             using var connection = await _dataSource.OpenConnectionAsync();
             using var transaction = await connection.BeginTransactionAsync();
             try
@@ -305,7 +295,7 @@ namespace MultiplayerARPG.MMO
                     "users",
                     new PostgreSQLHelpers.ColumnInfo("id", id),
                     new PostgreSQLHelpers.ColumnInfo("username", username),
-                    new PostgreSQLHelpers.ColumnInfo("password", hashedPassword),
+                    new PostgreSQLHelpers.ColumnInfo("password", UserLoginManager.GetHashedPassword(password)),
                     new PostgreSQLHelpers.ColumnInfo("email", string.IsNullOrWhiteSpace(email) ? null : email));
 
                 await PostgreSQLHelpers.ExecuteInsert(
