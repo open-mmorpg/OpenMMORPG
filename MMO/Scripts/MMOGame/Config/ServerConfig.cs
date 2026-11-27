@@ -77,5 +77,6 @@ namespace MultiplayerARPG.MMO
 
         public string databaseManagerAddress;
         public int? databaseManagerPort;
+        public int? passwordHashIterations;
     }
 }

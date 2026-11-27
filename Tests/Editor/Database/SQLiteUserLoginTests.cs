@@ -39,6 +39,32 @@ namespace OpenMMORPG.Tests
         }
 
         [Test]
+        public void AHashWithOtherRoundsIsReplacedAtLogin()
+        {
+            // "secret" at 7 rounds
+            _db.Database.ExecuteNonQuery("UPDATE userlogin SET password=@password WHERE id=@id",
+                new SqliteParameter("@password", "p3$7$AAECAwQFBgcICQoLDA0ODw$P02XRSU+mYpB6TLVMUsSiacmB7qdM03Z"), new SqliteParameter("@id", _userId));
+
+            Assert.That(TestAsync.Wait(_db.Database.ValidateUserLogin("tester", "secret")), Is.EqualTo(_userId));
+            object stored = _db.Database.ExecuteScalar("SELECT password FROM userlogin WHERE id=@id", new SqliteParameter("@id", _userId));
+            Assert.That(stored, Does.StartWith("p3$1000$"));
+            Assert.That(TestAsync.Wait(_db.Database.ValidateUserLogin("tester", "secret")), Is.EqualTo(_userId));
+        }
+
+        [Test]
+        public void TheDatabaseServerSetsTheRoundsOfNewHashes()
+        {
+            TestDatabaseServer server = TestDatabaseServer.Create(Objects);
+            server.Manager.passwordHashIterations = 7;
+            // What OnStartServer does
+            TestReflection.Invoke(server.Manager, "ApplyPasswordHashIterations");
+
+            string userId = server.Db.CreateUser("seven", "secret");
+            object stored = server.Db.Database.ExecuteScalar("SELECT password FROM userlogin WHERE id=@id", new SqliteParameter("@id", userId));
+            Assert.That(stored, Does.StartWith("p3$7$"));
+        }
+
+        [Test]
         public void ThePasswordIsNotStoredInPlainText()
         {
             object stored = _db.Database.ExecuteScalar("SELECT password FROM userlogin WHERE id=@id", new SqliteParameter("@id", _userId));
