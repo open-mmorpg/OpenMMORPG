@@ -421,26 +421,29 @@ namespace MultiplayerARPG.MMO
         public override async UniTask<string> ValidateUserLogin(string username, string password)
         {
             string id = string.Empty;
-            bool rehash = false;
+            string hashedPassword = null;
             await ExecuteReader((reader) =>
             {
                 if (reader.Read())
                 {
                     id = reader.GetString(0);
-                    string hashedPassword = reader.GetString(1);
-                    if (!UserLoginManager.VerifyPassword(password, hashedPassword))
-                        id = string.Empty;
-                    else
-                        rehash = UserLoginManager.NeedsRehash(hashedPassword);
+                    hashedPassword = reader.GetString(1);
                 }
             }, "SELECT id, password FROM userlogin WHERE username=@username AND authType=@authType LIMIT 1",
                 new MySqlParameter("@username", username),
                 new MySqlParameter("@authType", AUTH_TYPE_NORMAL));
 
-            if (rehash)
+            if (hashedPassword == null)
+                return string.Empty;
+
+            PasswordCheck check = await CheckPassword(password, hashedPassword);
+            if (!check.isValid)
+                return string.Empty;
+
+            if (check.newHash != null)
                 await ExecuteNonQuery("UPDATE userlogin SET password=@password WHERE id=@id",
                     new MySqlParameter("@id", id),
-                    new MySqlParameter("@password", UserLoginManager.GetHashedPassword(password)));
+                    new MySqlParameter("@password", check.newHash));
 
             return id;
         }
@@ -516,10 +519,11 @@ namespace MultiplayerARPG.MMO
 
         public override async UniTask CreateUserLogin(string username, string password, string email)
         {
+            string hashedPassword = await HashPassword(password);
             await ExecuteNonQuery("INSERT INTO userlogin (id, username, password, email, authType) VALUES (@id, @username, @password, @email, @authType)",
                 new MySqlParameter("@id", UserLoginManager.GenerateNewId()),
                 new MySqlParameter("@username", username),
-                new MySqlParameter("@password", UserLoginManager.GetHashedPassword(password)),
+                new MySqlParameter("@password", hashedPassword),
                 new MySqlParameter("@email", email),
                 new MySqlParameter("@authType", AUTH_TYPE_NORMAL));
         }

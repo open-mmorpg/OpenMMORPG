@@ -1,5 +1,6 @@
 ﻿namespace MultiplayerARPG.MMO
 {
+    /// <summary>A database server calls these from worker threads, several at once.</summary>
     public interface IDatabaseUserLogin
     {
         string GetHashedPassword(string password);

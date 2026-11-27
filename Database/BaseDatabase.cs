@@ -1,4 +1,5 @@
 ﻿#if NET || NETCOREAPP || ((UNITY_EDITOR || UNITY_SERVER || !EXCLUDE_SERVER_CODES) && UNITY_STANDALONE)
+using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 #endif
@@ -10,6 +11,47 @@ namespace MultiplayerARPG.MMO
 #if NET || NETCOREAPP || ((UNITY_EDITOR || UNITY_SERVER || !EXCLUDE_SERVER_CODES) && UNITY_STANDALONE)
         public const byte AUTH_TYPE_NORMAL = 1;
         public IDatabaseUserLogin UserLoginManager { get; set; }
+
+        /// <summary>
+        /// Where password hashing runs: set by the database server, so a slow hash does not hold
+        /// up its loop. Null (the web API, tests) hashes inline.
+        /// </summary>
+        public OffLoopWorkQueue BackgroundWork { get; set; }
+
+        protected struct PasswordCheck
+        {
+            public bool isValid;
+            // Set when the password is right and its stored hash is outdated
+            public string newHash;
+        }
+
+        /// <summary>Close the reader or connection the hash was read with before calling this.</summary>
+        protected UniTask<PasswordCheck> CheckPassword(string password, string hashedPassword)
+        {
+            IDatabaseUserLogin userLogin = UserLoginManager;
+            return RunSlowWork(() =>
+            {
+                PasswordCheck check = default;
+                check.isValid = userLogin.VerifyPassword(password, hashedPassword);
+                if (check.isValid && userLogin.NeedsRehash(hashedPassword))
+                    check.newHash = userLogin.GetHashedPassword(password);
+                return check;
+            });
+        }
+
+        protected UniTask<string> HashPassword(string password)
+        {
+            IDatabaseUserLogin userLogin = UserLoginManager;
+            return RunSlowWork(() => userLogin.GetHashedPassword(password));
+        }
+
+        private UniTask<T> RunSlowWork<T>(Func<T> work)
+        {
+            OffLoopWorkQueue backgroundWork = BackgroundWork;
+            if (backgroundWork == null)
+                return UniTask.FromResult(work());
+            return backgroundWork.Run(work);
+        }
         protected delegate UniTask MigrationAction();
         protected MigrationAction _doMigrationAction;
 

@@ -73,6 +73,11 @@ namespace MultiplayerARPG.MMO
 #endif
         private float characterSaveRetryDelaySeconds = 5f;
 
+#if NET || NETCOREAPP || ((UNITY_EDITOR || UNITY_SERVER || !EXCLUDE_SERVER_CODES) && UNITY_STANDALONE)
+        // Password hashing runs here, beside the loop; `Update` hands the results back on it
+        public OffLoopWorkQueue BackgroundWork { get; } = new OffLoopWorkQueue();
+#endif
+
         // Rounds of the password hash, see `DefaultDatabaseUserLogin`
         public int passwordHashIterations = DefaultDatabaseUserLogin.DefaultIterations;
 
@@ -159,7 +164,7 @@ namespace MultiplayerARPG.MMO
             Database.Initialize();
 #endif
 #if NET || NETCOREAPP || ((UNITY_EDITOR || UNITY_SERVER || !EXCLUDE_SERVER_CODES) && UNITY_STANDALONE)
-            ApplyPasswordHashIterations();
+            PrepareDatabase();
             await Database.DoMigration();
 
             if (useDeferredCharacterSaveScheduler)
@@ -180,6 +185,18 @@ namespace MultiplayerARPG.MMO
         }
 
 #if NET || NETCOREAPP || ((UNITY_EDITOR || UNITY_SERVER || !EXCLUDE_SERVER_CODES) && UNITY_STANDALONE)
+        protected void PrepareDatabase()
+        {
+            Database.BackgroundWork = BackgroundWork;
+            ApplyPasswordHashIterations();
+        }
+
+        protected override void Update()
+        {
+            base.Update();
+            BackgroundWork.Update();
+        }
+
         protected void ApplyPasswordHashIterations()
         {
             if (passwordHashIterations > 0 && Database.UserLoginManager is DefaultDatabaseUserLogin userLogin)
