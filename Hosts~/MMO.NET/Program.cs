@@ -77,6 +77,11 @@ else
     Logging.Log($"Can't find config file: {configFilePath}");
 }
 
+// Everything the servers await carries on in the loop at the end of this file, on this thread,
+// as it would on Unity's main thread: see LoopSynchronizationContext
+LoopSynchronizationContext loop = new LoopSynchronizationContext();
+SynchronizationContext.SetSynchronizationContext(loop);
+
 // Prepare server instances
 DatabaseNetworkManager databaseNetworkManager = new DatabaseNetworkManager();
 CentralNetworkManager centralNetworkManager = new CentralNetworkManager();
@@ -441,6 +446,9 @@ if (!useCustomDatabaseClient)
         databaseNetworkManager.networkPort = databaseNetworkPort;
     }
     serverConfig[ProcessArguments.CONFIG_DATABASE_PORT] = databaseNetworkPort;
+
+    // Rounds of the password hash, see DefaultDatabaseUserLogin
+    ReadLoginSetting(ProcessArguments.CONFIG_PASSWORD_HASH_ITERATIONS, ref databaseNetworkManager.passwordHashIterations);
 }
 
 if (!configFileFound)
@@ -569,6 +577,9 @@ foreach (PosixSignal signal in new[] { PosixSignal.SIGINT, PosixSignal.SIGTERM, 
 AppDomain.CurrentDomain.ProcessExit += CurrentDomain_ProcessExit;
 while (!shutdown.IsCancellationRequested)
 {
+    // What the servers awaited and is ready carries on here
+    loop.Run();
+
     // ServerLoop reads each server's packets so that one it cannot read is dropped, not thrown
     // out of this loop.
     // The database manager also when it is only the client of a database server in another
@@ -585,12 +596,19 @@ while (!shutdown.IsCancellationRequested)
     if (mapSpawnNetworkManager != null && mapSpawnNetworkManager.IsServer)
         ServerLoop.Update(mapSpawnNetworkManager);
 
-    // wait for next frame
-    await Task.Delay(delay);
+    // wait for next frame. Not an await: the loop stays on the thread it started on
+    Thread.Sleep(delay);
 }
 
 Logging.Log("Stopping the servers");
-await StopServers(TimeSpan.FromSeconds(30));
+// Stopping awaits too, so the loop keeps running what is queued until it is done
+Task stopping = StopServers(TimeSpan.FromSeconds(30));
+while (!stopping.IsCompleted)
+{
+    loop.Run();
+    Thread.Sleep(delay);
+}
+stopping.GetAwaiter().GetResult();
 foreach (PosixSignalRegistration registration in signalRegistrations)
     registration.Dispose();
 return;

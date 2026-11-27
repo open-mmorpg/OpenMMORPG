@@ -73,5 +73,6 @@
   "databaseOptionIndex": 0,
   "disableDatabaseCaching": false,
   "databaseManagerAddress": "127.0.0.1",
-  "databaseManagerPort": 6100
+  "databaseManagerPort": 6100,
+  "passwordHashIterations": 1000
 }

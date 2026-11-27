@@ -20,6 +20,7 @@ namespace MultiplayerARPG.MMO
         public static int[] GuildExpTree { get; set; } = new int[0];
         protected readonly ConcurrentHashSet<string> _insertingCharacterNames = new ConcurrentHashSet<string>();
         protected readonly ConcurrentHashSet<string> _insertingGuildNames = new ConcurrentHashSet<string>();
+        protected readonly ConcurrentHashSet<string> _insertingUsernames = new ConcurrentHashSet<string>();
 
         protected async UniTaskVoid ValidateUserLogin(RequestHandlerData requestHandler, DbRequestMessage<ValidateUserLoginReq> request, RequestProceedResultDelegate<ValidateUserLoginResp> result)
         {
@@ -107,8 +108,23 @@ namespace MultiplayerARPG.MMO
         protected async UniTaskVoid CreateUserLogin(RequestHandlerData requestHandler, DbRequestMessage<CreateUserLoginReq> request, RequestProceedResultDelegate<EmptyMessage> result)
         {
 #if NET || NETCOREAPP || ((UNITY_EDITOR || UNITY_SERVER || !EXCLUDE_SERVER_CODES) && UNITY_STANDALONE)
-            // Insert new user login to database
-            await Database.CreateUserLogin(request.Data.Username, request.Data.Password, request.Data.Email);
+            // Hashing the password takes a while and the loop runs on meanwhile, so a second
+            // request for the same name can arrive before the first has written its row
+            string insertingUsername = (request.Data.Username ?? string.Empty).ToLowerInvariant();
+            if (!_insertingUsernames.Add(insertingUsername))
+            {
+                result.InvokeError(EmptyMessage.Value);
+                return;
+            }
+            try
+            {
+                // Insert new user login to database
+                await Database.CreateUserLogin(request.Data.Username, request.Data.Password, request.Data.Email);
+            }
+            finally
+            {
+                _insertingUsernames.TryRemove(insertingUsername);
+            }
             result.InvokeSuccess(EmptyMessage.Value);
 #endif
         }

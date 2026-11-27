@@ -150,6 +150,9 @@ namespace MultiplayerARPG.MMO
         public const string ARG_DATABASE_ADDRESS = "-" + CONFIG_DATABASE_ADDRESS;
         public const string CONFIG_DATABASE_PORT = "databaseManagerPort";
         public const string ARG_DATABASE_PORT = "-" + CONFIG_DATABASE_PORT;
+        // Rounds of the password hash, see `DefaultDatabaseUserLogin`
+        public const string CONFIG_PASSWORD_HASH_ITERATIONS = "passwordHashIterations";
+        public const string ARG_PASSWORD_HASH_ITERATIONS = "-" + CONFIG_PASSWORD_HASH_ITERATIONS;
         // Start servers
         public const string CONFIG_START_LOGIN_SERVER = "startLoginServer";
         public const string ARG_START_LOGIN_SERVER = "-" + CONFIG_START_LOGIN_SERVER;

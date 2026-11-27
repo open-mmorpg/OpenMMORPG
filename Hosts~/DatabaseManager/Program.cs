@@ -21,6 +21,9 @@ switch (userLoginManager)
 {
     default:
         DefaultDatabaseUserLoginConfig defaultUserLoginConfig = builder.Configuration.GetValue<DefaultDatabaseUserLoginConfig>("UserLoginManagerConfig");
+        // Rounds of the password hash, read by its own name
+        if (int.TryParse(builder.Configuration["UserLoginManagerConfig:PasswordHashIterations"], out int passwordHashIterations))
+            defaultUserLoginConfig.PasswordHashIterations = passwordHashIterations;
         builder.Services.AddSingleton<IDatabaseUserLogin>(provider => new DefaultDatabaseUserLogin(defaultUserLoginConfig));
         break;
 }

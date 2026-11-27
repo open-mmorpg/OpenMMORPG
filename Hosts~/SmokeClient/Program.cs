@@ -23,6 +23,14 @@ using Newtonsoft.Json;
 // still be let in, which only happens while the server's loop is running. Exit code 0 only if
 // the server takes every packet and stays up. Any server's port will do: the login and database
 // servers take the default connect key, the cluster server takes CLUSTER.
+//
+// Usage: OpenMMORPG.SmokeClient bots <host> <loginPort> <bots> [-ramp seconds] [-register] [-characters] [-hold]
+// A load test: that many clients connect and log in at once, or spread over the ramp, and a
+// report says how many got through and how long it took them. Exit code 0 only if all did.
+// See LoginBots.cs.
+if (args.Length > 0 && args[0] == "bots")
+    return LoginBots.Run(args);
+
 if (args.Length > 0 && args[0] == "malformed")
 {
     if (args.Length < 3)
