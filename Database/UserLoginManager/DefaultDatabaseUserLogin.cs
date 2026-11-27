@@ -28,7 +28,7 @@ namespace MultiplayerARPG.MMO
             return System.Guid.NewGuid().ToString("N");
         }
 
-        // 210k rounds (OWASP) take close to 4 seconds on Unity's Mono, which computes SHA-512 in C#
+        // 210k rounds (OWASP) cost a Unity server about 0.6 seconds a login: Mono computes SHA-512 in C#
         public const int DefaultIterations = 1000;
         private const string Version = "p3$";
         private const string FixedVersion = "p2$";
