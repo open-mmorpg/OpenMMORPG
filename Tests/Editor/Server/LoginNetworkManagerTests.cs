@@ -1,5 +1,6 @@
 #if (UNITY_EDITOR || UNITY_SERVER || !EXCLUDE_SERVER_CODES) && UNITY_STANDALONE
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Linq;
 using System.Net.Sockets;
 using LiteNetLib;
@@ -60,8 +61,8 @@ namespace OpenMMORPG.Tests
             TestReflection.SetProperty(_login, nameof(LoginNetworkManager.ClusterClient), new ClusterClient(_login));
         }
 
-        private Dictionary<long, CentralUserPeerInfo> PeersByConnection => TestReflection.GetField<Dictionary<long, CentralUserPeerInfo>>(_login, "_userPeers");
-        private Dictionary<string, CentralUserPeerInfo> PeersByUser => TestReflection.GetField<Dictionary<string, CentralUserPeerInfo>>(_login, "_userPeersByUserId");
+        private ConcurrentDictionary<long, CentralUserPeerInfo> PeersByConnection => TestReflection.GetField<ConcurrentDictionary<long, CentralUserPeerInfo>>(_login, "_userPeers");
+        private ConcurrentDictionary<string, CentralUserPeerInfo> PeersByUser => TestReflection.GetField<ConcurrentDictionary<string, CentralUserPeerInfo>>(_login, "_userPeersByUserId");
 
         private struct Reply<T>
         {

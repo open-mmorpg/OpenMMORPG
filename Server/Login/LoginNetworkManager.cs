@@ -95,8 +95,8 @@ namespace MultiplayerARPG.MMO
 
 #if NET || NETCOREAPP || ((UNITY_EDITOR || UNITY_SERVER || !EXCLUDE_SERVER_CODES) && UNITY_STANDALONE)
         // User peers (Login / Register / Manager characters)
-        protected readonly Dictionary<long, CentralUserPeerInfo> _userPeers = new Dictionary<long, CentralUserPeerInfo>();
-        protected readonly Dictionary<string, CentralUserPeerInfo> _userPeersByUserId = new Dictionary<string, CentralUserPeerInfo>();
+        protected readonly ConcurrentDictionary<long, CentralUserPeerInfo> _userPeers = new ConcurrentDictionary<long, CentralUserPeerInfo>();
+        protected readonly ConcurrentDictionary<string, CentralUserPeerInfo> _userPeersByUserId = new ConcurrentDictionary<string, CentralUserPeerInfo>();
         private readonly ConcurrentDictionary<string, CentralServerPeerInfo> _mapServerConnectionIdsBySceneName = new ConcurrentDictionary<string, CentralServerPeerInfo>();
         private readonly ConcurrentDictionary<string, CentralServerPeerInfo> _instanceMapServerConnectionIdsByInstanceId = new ConcurrentDictionary<string, CentralServerPeerInfo>();
 #endif
@@ -427,9 +427,9 @@ namespace MultiplayerARPG.MMO
         {
             base.OnPeerConnected(connectionId);
 #if NET || NETCOREAPP || ((UNITY_EDITOR || UNITY_SERVER || !EXCLUDE_SERVER_CODES) && UNITY_STANDALONE)
-            // Its address already has its share of connections: drop it
+            // Its address already has its share of connections: tell it why, then drop it
             if (!FloodGuard.ConnectionOpened(connectionId, GetRemoteAddress(connectionId)))
-                ServerTransport.ServerDisconnect(connectionId);
+                KickClient(connectionId, UITextKeys.UI_ERROR_TOO_MANY_REQUESTS);
 #endif
         }
 
@@ -455,8 +455,8 @@ namespace MultiplayerARPG.MMO
 #if NET || NETCOREAPP || ((UNITY_EDITOR || UNITY_SERVER || !EXCLUDE_SERVER_CODES) && UNITY_STANDALONE)
             if (_userPeers.TryGetValue(connectionId, out userPeerInfo))
             {
-                _userPeersByUserId.Remove(userPeerInfo.userId);
-                _userPeers.Remove(connectionId);
+                _userPeersByUserId.TryRemove(userPeerInfo.userId, out _);
+                _userPeers.TryRemove(connectionId, out _);
                 return true;
             }
             return false;
@@ -471,8 +471,8 @@ namespace MultiplayerARPG.MMO
 #if NET || NETCOREAPP || ((UNITY_EDITOR || UNITY_SERVER || !EXCLUDE_SERVER_CODES) && UNITY_STANDALONE)
             if (_userPeersByUserId.TryGetValue(userId, out userPeerInfo))
             {
-                _userPeersByUserId.Remove(userPeerInfo.userId);
-                _userPeers.Remove(userPeerInfo.connectionId);
+                _userPeersByUserId.TryRemove(userPeerInfo.userId, out _);
+                _userPeers.TryRemove(userPeerInfo.connectionId, out _);
                 return true;
             }
             return false;
