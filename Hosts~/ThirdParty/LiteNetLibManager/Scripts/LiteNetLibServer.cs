@@ -96,8 +96,11 @@ namespace LiteNetLibManager
 
         public void SendPacket(long connectionId, byte dataChannel, DeliveryMethod deliveryMethod, ushort msgType, SerializerDelegate serializer)
         {
-            WritePacket(s_Writer, msgType, serializer);
-            SendMessage(connectionId, dataChannel, deliveryMethod, s_Writer);
+            lock (s_Writer)
+            {
+                WritePacket(s_Writer, msgType, serializer);
+                SendMessage(connectionId, dataChannel, deliveryMethod, s_Writer);
+            }
         }
 
         public void SendMessageToAllConnections(byte dataChannel, DeliveryMethod deliveryMethod, NetDataWriter writer)
@@ -110,16 +113,22 @@ namespace LiteNetLibManager
 
         public void SendPacketToAllConnections(byte dataChannel, DeliveryMethod deliveryMethod, ushort msgType, SerializerDelegate serializer)
         {
-            WritePacket(s_Writer, msgType, serializer);
-            SendMessageToAllConnections(dataChannel, deliveryMethod, s_Writer);
+            lock (s_Writer)
+            {
+                WritePacket(s_Writer, msgType, serializer);
+                SendMessageToAllConnections(dataChannel, deliveryMethod, s_Writer);
+            }
         }
 
         public bool SendRequest<TRequest>(long connectionId, ushort requestType, TRequest request, ResponseDelegate<INetSerializable> responseDelegate = null, int millisecondsTimeout = 30000, SerializerDelegate extraRequestSerializer = null)
             where TRequest : INetSerializable, new()
         {
-            if (!CreateAndWriteRequest(s_Writer, requestType, request, responseDelegate, millisecondsTimeout, extraRequestSerializer))
-                return false;
-            SendMessage(connectionId, 0, DeliveryMethod.ReliableUnordered, s_Writer);
+            lock (s_Writer)
+            {
+                if (!CreateAndWriteRequest(s_Writer, requestType, request, responseDelegate, millisecondsTimeout, extraRequestSerializer))
+                    return false;
+                SendMessage(connectionId, 0, DeliveryMethod.ReliableUnordered, s_Writer);
+            }
             return true;
         }
 
@@ -130,15 +139,18 @@ namespace LiteNetLibManager
             bool done = false;
             AsyncResponseData<TResponse> responseData = default;
             // Create request
-            CreateAndWriteRequest(s_Writer, requestType, request, (requestHandler, responseCode, response) =>
+            lock (s_Writer)
             {
-                if (!(response is TResponse))
-                    response = default(TResponse);
-                responseData = new AsyncResponseData<TResponse>(requestHandler, responseCode, (TResponse)response);
-                done = true;
-            }, millisecondsTimeout, extraSerializer);
-            // Send request to target client
-            SendMessage(connectionId, 0, DeliveryMethod.ReliableUnordered, s_Writer);
+                CreateAndWriteRequest(s_Writer, requestType, request, (requestHandler, responseCode, response) =>
+                {
+                    if (!(response is TResponse))
+                        response = default(TResponse);
+                    responseData = new AsyncResponseData<TResponse>(requestHandler, responseCode, (TResponse)response);
+                    done = true;
+                }, millisecondsTimeout, extraSerializer);
+                // Send request to target client
+                SendMessage(connectionId, 0, DeliveryMethod.ReliableUnordered, s_Writer);
+            }
             // Wait for response
             do { await Task.Delay(100); } while (!done);
             // Return response data
