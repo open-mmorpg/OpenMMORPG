@@ -220,15 +220,18 @@ namespace LiteNetLibManager
         private void RequestProceeded(long connectionId, uint requestId, AckResponseCode responseCode, INetSerializable response, SerializerDelegate extraResponseSerializer)
         {
             // Write response
-            s_Writer.Reset();
-            s_Writer.PutPackedUShort(ResponseMessageType);
-            s_Writer.PutPackedUInt(requestId);
-            s_Writer.PutValue(responseCode);
-            s_Writer.Put(response);
-            if (extraResponseSerializer != null)
-                extraResponseSerializer.Invoke(s_Writer);
-            // Send response
-            SendMessage(connectionId, 0, DeliveryMethod.ReliableUnordered, s_Writer);
+            lock (s_Writer)
+            {
+                s_Writer.Reset();
+                s_Writer.PutPackedUShort(ResponseMessageType);
+                s_Writer.PutPackedUInt(requestId);
+                s_Writer.PutValue(responseCode);
+                s_Writer.Put(response);
+                if (extraResponseSerializer != null)
+                    extraResponseSerializer.Invoke(s_Writer);
+                // Send response
+                SendMessage(connectionId, 0, DeliveryMethod.ReliableUnordered, s_Writer);
+            }
         }
 
         /// <summary>
